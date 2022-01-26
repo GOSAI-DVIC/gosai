@@ -1,0 +1,14 @@
+Flask==2.0.2
+Flask-Cors==3.0.10
+Flask-SocketIO==5.1.1
+numpy>=1.19
+opencv-python>=4.5
+onnxruntime==1.10.0
+mediapipe==0.8.9.1
+pyrealsense2
+pyaudio>=0.2.11
+SpeechRecognition>=3.8.1
+pyglet>=1.5.21
+gTTS>=2.2.3
+eventlet>=0.33.0
+redis>=4.1.0
