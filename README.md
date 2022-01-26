@@ -20,8 +20,3 @@ Edit the .env file to to set your dockerhub username, the repository you want to
 |Push on Docker         |`make push`  |
 |Pull from Docker       |`make pull`  |
 
-## Deployement
-
-The following is one way to deploy this project using systemctl.
-
-Create a service in
