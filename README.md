@@ -20,3 +20,16 @@ Edit the .env file to to set your dockerhub username, the repository you want to
 |Push on Docker         |`make push`  |
 |Pull from Docker       |`make pull`  |
 
+## Deployement
+
+The following method uses `systemctl` to ready GOSAI for demos.
+
+Create a service in `/home/{USER}/.config/systemd/user/` called `gosai.service`. This service
+
+## Install an exisisting project
+
+To install an existing project, simply clone the project in a directory called home. For example, use `git clone https://github.com/GOSAI-DVIC/second-self.git home` inside the gosai repository project to install the second-self project.
+
+## Create your own project
+
+Refer to [this tutorial]() to learn how to develop on gosai.
