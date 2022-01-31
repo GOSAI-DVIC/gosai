@@ -14,7 +14,7 @@ socket.on("start_application", async (data) => {
         modules[application_name].selfCanvas.show();
         modules[application_name].resume();
     } else {
-        const module = await import("/platform/apps/" + application_name  + "/display.js")
+        const module = await import("/home/apps/" + application_name  + "/display.js")
 
         const application = module[application_name]
 

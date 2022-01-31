@@ -3,7 +3,7 @@ import cv2
 import json
 
 def init(filename_bg = "background_no_warped.jpg"):
-    with open('platform/calibration/calibration_data.json', 'r') as f:
+    with open('home/calibration/calibration_data.json', 'r') as f:
         data = json.load(f)
     empty_bg = cv2.imread(f"core/hal/drivers/ball/utils/{filename_bg}")
     return data,empty_bg
@@ -33,13 +33,13 @@ def BallDetection(empty_bg,frame,camera_data):
             continue
         lX=[x for [[x, _]] in c]
         lY=[y for [[_, y]] in c]
-        
+
         x = int(M["m10"] / M["m00"])
         y = int(M["m01"] / M["m00"])
         ecartype = np.std([((x-ix)**2 + (y-iy)**2)**0.5 for ix, iy in zip(lX, lY)])
         # ça ressemble à un cercle ?
         if ecartype < 10:
-            
+
             matrix = np.array(camera_data["projection_matrix"])
             point = np.array([[x],[y],[1]])
             outpoint = matrix.dot(point)

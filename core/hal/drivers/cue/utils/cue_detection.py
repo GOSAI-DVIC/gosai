@@ -3,7 +3,7 @@ import cv2
 import json
 
 def init(filename_bg = "background_no_warped.jpg"):
-    with open('platform/hal/drivers/cue/utils/data.json', 'r') as f:
+    with open('home/hal/drivers/cue/utils/data.json', 'r') as f:
         data = json.load(f)
     empty_bg = cv2.imread(f"core/hal/drivers/cue/utils/{filename_bg}")
     return data,empty_bg
@@ -18,7 +18,7 @@ def FromTyToPoints(lefty,righty,frame):
     j=[frame.shape[1]-1,righty]
     #print(i,j)
 
-    # Calculate the coefficients. y=ax+b 
+    # Calculate the coefficients. y=ax+b
     a = (j[1] - i[1]) / (j[0] - i[0])
     b = i[1] - a * i[0]
 
@@ -29,7 +29,7 @@ def FromTyToPoints(lefty,righty,frame):
         i=[int(-b/a),0]
     if(lefty>frame.shape[1]-1):
         i=[int(-b/a),frame.shape[1]-1]
-    
+
     if(righty<0):
         j=[int(-b/a),0]
     if(righty>frame.shape[1]-1):
@@ -51,7 +51,7 @@ def CueDetection(empty_bg,frame,camera_data):
 
     #Contours detection
     contours, _ = cv2.findContours(soustraction, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    
+
     for c in contours:
         lX=[x for [[x, _]] in c]
         lY=[y for [[_, y]] in c]

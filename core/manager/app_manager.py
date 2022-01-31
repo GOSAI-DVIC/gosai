@@ -14,7 +14,7 @@ class AppManager:
         self.name = "app_manager"
         self.available_apps = [
             f.name
-            for f in os.scandir("platform/apps")
+            for f in os.scandir("home/apps")
             if f.is_dir() and f.name != "__pycache__" and f.name != "template"
         ]
         self.started_apps = {}
@@ -62,7 +62,7 @@ class AppManager:
         try:
             # Import the python app
             app = __import__(
-                f"platform.apps.{app_name}.processing", fromlist=[None]
+                f"home.apps.{app_name}.processing", fromlist=[None]
             ).Application(app_name, self.hal, self.server, self)
 
             # Start the required drivers and subscribe to the required events

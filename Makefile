@@ -1,6 +1,6 @@
 .PHONY: build
 
-include platform/.env
+include home/.env
 
 IMNAME = ${USER}/${REPO}
 TAG = ${PLATFORM}-${DEVICE}-${VERSION}
@@ -8,6 +8,9 @@ REDIS_REPO = redis
 REDIS_IMNAME = docker.io/bitnami/redis:6.2
 
 boot:
+	-docker rm $(REPO)-$(REDIS_REPO)
+	docker run -d --network="host" -e ALLOW_EMPTY_PASSWORD=yes --name=$(REPO)-$(REDIS_REPO) $(REDIS_IMNAME)
+	sleep 2
 	python3 init.py
 
 install:
