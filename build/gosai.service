@@ -1,0 +1,17 @@
+[Unit]
+Description=Manage the GOSAI execution
+After=multi-user.target
+
+[Service]
+
+Type=simple
+WorkingDirectory=/srv/gosai
+PIDFile=/var/run/m/%i.pid
+ExecStartPre=/bin/sleep 15
+ExecStart=/usr/bin/make launch
+ExecStop=/usr/bin/make stop
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=default.target
