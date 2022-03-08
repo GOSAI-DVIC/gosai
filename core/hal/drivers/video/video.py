@@ -1,5 +1,5 @@
 # Video driver
-
+import json
 import os
 import sys
 import time
@@ -28,7 +28,21 @@ class Driver(BaseDriver):
         self.create_event("source")
 
     def pre_run(self):
-        self.source = IntelCamera(640, 480)
+        # self.source = IntelCamera(640, 480)
+        with open("home/config.json","r") as f:
+            config = json.load(f)
+            if config["camera"]["type"] == "standard":
+                self.source = StandardCamera(
+                    config["camera"]["width"],
+                    config["camera"]["height"]
+                )
+            elif config["camera"]["type"] == "standard":
+                self.source = IntelCamera(
+                    config["camera"]["width"],
+                    config["camera"]["height"])
+            else:
+                print("Camera not defined in config.json")
+
 
     def loop(self):
         # print(self.source)
