@@ -11,8 +11,6 @@ class Driver(BaseDriver):
     def __init__(self, name: str, parent, max_fps: int = 120):
         super().__init__(name, parent)
 
-        self.paused = False
-
         self.register_to_driver("video", "color")
 
         self.create_event("cue_data")
