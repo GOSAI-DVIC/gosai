@@ -10,6 +10,7 @@ from multiprocessing import Process, Value
 import numpy as np
 import redis
 
+LOGS_PATH = "core/hal/logs"
 
 class BaseDriver(Process):
     """Base class for all drivers"""
@@ -25,6 +26,7 @@ class BaseDriver(Process):
         self.registered = {}  # Lists of entities registered to each events
         self.requires = {}
         self.db = redis.Redis(host="localhost", port=6379, db=0)
+        self.callbacks = {}
 
     def execute(self, command, arguments):
         """Executes a command with the given arguments"""
@@ -105,7 +107,7 @@ class BaseDriver(Process):
             self.log(f"Tried to add data for an unknown event '{event}'", 3)
             return False
 
-        self.db.set(f"{self.name}_{event}", pickle.dumps(data))
+        # self.db.set(f"{self.name}_{event}", pickle.dumps(data))
         self.db.publish(f"{self.name}_{event}", pickle.dumps(data))
         return True
 
@@ -124,7 +126,7 @@ class BaseDriver(Process):
 
     def register_to_driver(self, driver_name, event):
         """
-        Registers the driver to the event of another driver
+        Registers this driver to the event of another driver.
         """
         if driver_name not in self.requires:
             self.requires[driver_name] = []
@@ -183,6 +185,107 @@ class BaseDriver(Process):
             self.log(f"not subscrbed to {event} from {source}", 3)
             return False
 
+    def create_callback(self, action: str, callback: callable) -> bool:
+        """
+        Creates a callback for an action that can be executed by any source.
+        - 'action' is a string that identifies the action to execute.
+        - 'callback' is the function that will be called when the action is executed.
+            To do so, a message must be sent via the redis server on the channel called
+            '{self.name}_exec_{action}'
+        """
+        self.log(f"Creating callback for action '{action}'", 2)
+        if action in self.callbacks:
+            self.log(f"Callback already exists for action '{action}'", 3)
+            return False
+
+        def _subscriber(self, action: str, callback: callable) -> None:
+            ps = self.db.pubsub()
+            ps.subscribe(f"{self.name}_exec_{action}")
+            for binary_data in ps.listen():
+                if action not in self.callbacks:
+                    self.log(f"Callback for action '{action}' not needed anymore", 3)
+                    return
+                try:
+                    data = pickle.loads(bytes(binary_data["data"]))
+                    callback(self, data)
+                except Exception as e:
+                    self.log(f"Error while loading callback data: {e}", 3)
+                    pass
+
+        sub = threading.Thread(
+            target=_subscriber,
+            args=(
+                self,
+                action,
+                callback,
+            ),
+        )
+        self.callbacks[action] = sub
+        sub.start()
+
+        return True
+
+    def create_callback_on_event(
+        self, action: str, callback: callable, source: str, event: str
+    ) -> bool:
+        """
+        Creates a callback for an action that will be called when an event is triggered.
+        - 'action' is a string that identifies the action.
+        - 'callback' is the function that will be called when the event from 'source'
+            is triggered.
+        - 'source' is the name of the driver that will trigger the event.
+        - 'event' is the name of the event that will trigger the action.
+        """
+        self.log(f"Creating callback for action '{action}' on event '{event}'", 2)
+        if action in self.callbacks:
+            self.log(f"Callback already exists for action '{action}'", 3)
+            return False
+
+        if source not in self.requires or event not in self.requires[source]:
+            self.register_to_driver(source, event)
+
+        def _subscriber(
+            self, action: str, callback: callable, source: str, event: str
+        ) -> None:
+            ps = self.db.pubsub()
+            ps.subscribe(f"{source}_{event}")
+            for binary_data in ps.listen():
+                if action not in self.callbacks:
+                    self.log(f"Callback for action '{action}' not needed anymore", 3)
+                    return
+                try:
+                    data = pickle.loads(bytes(binary_data["data"]))
+                    callback(self, data)
+                except Exception as e:
+                    self.log(f"Error while loading callback data: {e}", 3)
+                    pass
+
+        sub = threading.Thread(
+            target=_subscriber,
+            args=(
+                self,
+                action,
+                callback,
+                source,
+                event,
+            ),
+        )
+        self.callbacks[action] = sub
+        sub.start()
+
+        return True
+
+    def delete_callback(self, action: str) -> bool:
+        """
+        Deletes a callback for an action
+        """
+        if action not in self.callbacks:
+            self.log(f"Callback does not exist for action '{action}'", 3)
+            return False
+
+        del self.callbacks[action]
+        return True
+
     def log(self, message, level=1):
         """Save logs. TODO: Temporary file"""
 
@@ -190,10 +293,10 @@ class BaseDriver(Process):
             print(f"{self.name}: {message}")
 
         if level >= 2:
-            with open(f"core/hal/logs/{self.name}.log", "a+") as log:
+            with open(f"{LOGS_PATH}/{self.name}.log", "a+") as log:
                 log.write(
                     f"{datetime.datetime.now().strftime('%b-%d-%G-%I:%M:%S%p')} : {message}\n"
                 )
 
     def __str__(self):
-        return str(self.name)
+        return str(f"driver_{self.name}")
