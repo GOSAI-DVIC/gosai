@@ -86,6 +86,9 @@ class IntelCamera:
         color_frame = np.fliplr(np.asanyarray(color_frame.get_data()))
         depth_frame = np.fliplr(np.asanyarray(depth_frame.get_data()))
 
+        color_frame = color_frame.copy()
+        depth_frame = depth_frame.copy()
+
         return [color_frame, depth_frame]
 
     def reset(self):
