@@ -24,7 +24,7 @@ Edit the .env file to to set your dockerhub username, the repository you want to
 
 The following method uses `systemctl` to ready GOSAI for demos.
 
-Create a service in `/home/{USER}/.config/systemd/user/` called `gosai.service`. This service
+Create a service in `/home/{USER}/.config/systemd/user/` called `gosai.service`. This service needs to use `make launch` in the project repository. See the example `./build/gosai.service`.
 
 ## Install an exisisting project
 
