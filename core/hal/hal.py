@@ -27,8 +27,6 @@ class HardwareAbstractionLayer:
         self.drivers = {}
 
         # for driver_name in self.available_drivers:
-            
-            
 
     def init_driver(self, driver_name: str) -> bool:
         """
@@ -50,12 +48,12 @@ class HardwareAbstractionLayer:
         """
         Starts a driver and all its dependecies
         """
-        if driver_name not in self.drivers:
-                self.init_driver(driver_name)
-
         if driver_name not in self.available_drivers:
             self.log(f"{driver_name} is not a valid driver", 3)
             return False
+
+        if driver_name not in self.drivers:
+                self.init_driver(driver_name)
 
         driver = self.drivers[driver_name]
 
