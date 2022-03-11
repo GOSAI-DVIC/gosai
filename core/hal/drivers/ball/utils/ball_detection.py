@@ -1,63 +1,104 @@
+from turtle import pos
 import numpy as np
 import cv2
 import json
 
-def init(filename_bg = "background_no_warped.jpg"):
+def init(filename_bg = "background.jpg"):
     with open('home/calibration/calibration_data.json', 'r') as f:
         data = json.load(f)
-    empty_bg = cv2.imread(f"core/hal/drivers/ball/utils/{filename_bg}")
-    return data,empty_bg
+    bkg = cv2.imread(f"core/hal/drivers/ball/utils/{filename_bg}")
+    return data, bkg
 
-def ImageProcessing(img,camera_data): #Process a frame : gray scale + warpPerspective
+def ImageProcessing(img, camera_data): #Process a frame : gray scale + warpPerspective
     img = img[:,:,2]
-    img = cv2.warpPerspective(img, np.array(camera_data["poolFocus_matrix"]), (1920,1080), flags=cv2.INTER_LINEAR)
+    img = cv2.warpPerspective(img, np.array(camera_data["poolFocus_matrix"]), (1920, 1080), flags=cv2.INTER_LINEAR)
     return img
 
-def BallDetection(empty_bg,frame,camera_data):
-    empty_bg = ImageProcessing(empty_bg,camera_data)
-    frame = ImageProcessing(frame,camera_data)
+# def ball_dectection(empty: np.ndarray, frame: np.ndarray, cam2screen: np.ndarray) -> np.ndarray:
+#     """Ball Detection
+    
+#     Detect pool balls in screen coords and then project their position into projector coords
 
-    #Images soustraction and processing
-    soustraction=cv2.absdiff(empty_bg, frame)
-    soustraction=cv2.GaussianBlur(soustraction,(5,5),0)
-    _, soustraction = cv2.threshold(soustraction, 100, 255, cv2.THRESH_BINARY)
+#     Parameters
+#     ----------
+#     empty: np.ndarray
+#         reference empty background to perform frame difference
 
-    #Contours detection
-    contours, _ = cv2.findContours(soustraction, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    l=[]
+#     frame: np.ndarray
+#         current frame from camera
 
-    for c in contours:
-        M = cv2.moments(c)
-        # Surface trop petite ?
-        if M["m00"]<np.pi*15**2:
+#     cam2screen: np.ndarray
+#         camera to screen projection matrix
+
+#     Returns
+#     -------
+#     balls: np.ndarray
+#         detected ball projector coords
+#     """
+#     return None
+
+# from dataclasses import dataclass
+
+# import json
+
+
+# @dataclass
+# class CameraData:
+#     projection_matrix:  np.ndarray
+#     poolFocus_matrix: np.ndarray
+#     detected_coords: np.ndarray
+#     pool_coords: np.ndarray
+#     screen_coords: np.ndarray
+#
+#     @classmethod
+#     def from_dict(cls, path: str) -> "CameraData":
+#         with open(path, "r") as fp:
+#             data = json.load(fp)
+#         return cls(**{k: np.ndarray(v) for k, v in data.items()})
+
+
+# camdata = CameraData.from_dict("pathtosjon.json")
+# camdata.projection_matrix
+
+
+def BallDetection(bkg, frame, camera_data):
+    matrix = np.array(camera_data["projection_matrix"])
+    inv_matrix = np.linalg.inv(matrix)
+
+    frame = cv2.absdiff(bkg, frame)
+    frame = ImageProcessing(frame, camera_data)
+    frame = cv2.GaussianBlur(frame, (5, 5), 0)
+    _, frame = cv2.threshold(frame, 100, 255, cv2.THRESH_BINARY)
+
+    contours, _ = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    moments = map(cv2.moments, contours)
+
+    balls = [(i * 1080, j * 1920) for i in range(2) for j in range(2)]
+    for contour, moment in zip(contours, moments):
+        if moment["m00"] < np.pi * 15 ** 2:
             continue
-        lX=[x for [[x, _]] in c]
-        lY=[y for [[_, y]] in c]
 
-        x = int(M["m10"] / M["m00"])
-        y = int(M["m01"] / M["m00"])
-        ecartype = np.std([((x-ix)**2 + (y-iy)**2)**0.5 for ix, iy in zip(lX, lY)])
-        # ça ressemble à un cercle ?
-        if ecartype < 10:
+        contour = np.array(contour)[:, 0, :]
+        position = np.array([
+            int(moment["m10"] / moment["m00"]),
+            int(moment["m01"] / moment["m00"]),
+            1,
+        ])
 
-            matrix = np.array(camera_data["projection_matrix"])
-            point = np.array([[x],[y],[1]])
-            outpoint = matrix.dot(point)
-            # print(outpoint)
-            # print(" ")
-            # p = (x,y)
-            # p_array = np.array([[p[0], p[1]]], dtype=np.float32)
-            # transformed_points = cv2.warpPerspective(p_array, np.array(camera_data["m_camera2screen"]), (1920,1080), flags=cv2.INTER_LINEAR)
-            # print(IsMatrixFullOfZero(transformed_points))
-            l+=[(int(outpoint[0][0]),int(outpoint[1][0]))]
-    return l
+        widths = np.sqrt(((position[None, :2] - contour) ** 2).sum(axis=1))
+        if np.std(widths) < 10:
+            x_, y_, _ = position
+            d = inv_matrix[2, 0] * x_ + inv_matrix[2, 1] * y_ + inv_matrix[2, 2]
+            x = inv_matrix[0, 0] * x_ + inv_matrix[0, 1] * y_ + inv_matrix[0, 2] / d
+            y = inv_matrix[1, 0] * x_ + inv_matrix[1, 1] * y_ + inv_matrix[1, 2] / d
 
-def IsMatrixFullOfZero(matrix):
-    rep = False
-    for i in range(1920):
-        for j in range(1080):
-            if(matrix[i][j] != 0):
-                rep = True
-                print(i,j)
+            # position = inv_matrix @ position
+            # position = matrix @ position
+            # x, y, z = position
+            
+            balls.append((int(x), int(y)))
 
-    return rep
+    return balls
+
+def is_null(matrix: np.ndarray) -> bool:
+    return (matrix == 0).sum() > 0
