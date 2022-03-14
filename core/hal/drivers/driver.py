@@ -107,7 +107,7 @@ class BaseDriver(Process):
             self.log(f"Tried to add data for an unknown event '{event}'", 3)
             return False
 
-        # self.db.set(f"{self.name}_{event}", pickle.dumps(data))
+        self.db.set(f"{self.name}_{event}", pickle.dumps(data))
         self.db.publish(f"{self.name}_{event}", pickle.dumps(data))
         return True
 
