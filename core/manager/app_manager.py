@@ -1,7 +1,9 @@
 import datetime
 import os
 
+
 LOGS_PATH = "core/hal/logs"
+
 
 class AppManager:
     """Manages the apps"""
@@ -84,9 +86,7 @@ class AppManager:
             self.log(f"Started application '{app_name}'", 2)
 
         except Exception as e:
-            self.log(
-                f"Failed to start application '{app_name}': {e}", 4
-            )
+            self.log(f"Failed to start application '{app_name}': {e}", 4)
             return False
 
         return True
@@ -123,9 +123,7 @@ class AppManager:
             self.log(f"Stopped application '{app_name}'", 2)
 
         except Exception as e:
-            self.log(
-                f"Failed to stop application '{app_name}': {e}", 4
-            )
+            self.log(f"Failed to stop application '{app_name}': {e}", 4)
             return False
 
         return True
