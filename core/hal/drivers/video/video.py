@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import time
+from os import path
 
 from core.hal.drivers.video.cameras import IntelCamera, StandardCamera
 from core.hal.drivers.driver import BaseDriver
@@ -27,21 +28,26 @@ class Driver(BaseDriver):
         self.create_event("depth")
         self.create_event("source")
 
+
     def pre_run(self):
         # self.source = IntelCamera(640, 480)
-        with open("home/config.json","r") as f:
-            config = json.load(f)
-            if config["camera"]["type"] == "standard":
-                self.source = StandardCamera(
-                    config["camera"]["width"],
-                    config["camera"]["height"]
-                )
-            elif config["camera"]["type"] == "standard":
-                self.source = IntelCamera(
-                    config["camera"]["width"],
-                    config["camera"]["height"])
-            else:
-                print("Camera not defined in config.json")
+        if path.exists("home/config.json"):
+            with open("home/config.json","r") as f:
+                config = json.load(f)
+                if "camera" in config and "type" in config["camera"]:
+                    if config["camera"]["type"] == "standard":
+                        self.source = StandardCamera(
+                            config["camera"]["width"],
+                            config["camera"]["height"]
+                        )
+                    elif config["camera"]["type"] == "intel":
+                        self.source = IntelCamera(
+                            config["camera"]["width"],
+                            config["camera"]["height"])
+                else:
+                    self.source = StandardCamera(1920, 1080)
+        else:
+            self.source = StandardCamera(1920, 1080)
 
 
     def loop(self):
@@ -54,6 +60,7 @@ class Driver(BaseDriver):
             self.set_event_data("depth", depth)
 
         time.sleep(1 / self.fps)  # Runs faster to be sure to get the current frame
+
 
     def execute(self, command, arguments=""):
         super().execute(command, arguments)

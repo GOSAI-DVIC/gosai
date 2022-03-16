@@ -13,9 +13,7 @@ class BaseApplication(threading.Thread):
         self.manager = manager
 
         self.requires = {} # Select what driver you want to use
-
         self.data = {} # data that is sent to the js script
-
         self.started = False
 
         self.db = redis.Redis(host='localhost', port=6379, db=0)
@@ -35,8 +33,8 @@ class BaseApplication(threading.Thread):
 
     def listener(self, source, event, data) -> None:
         """
-        Gets notified when some data (named "event")
-        of a driver ("source") is updated
+        Gets notified when some data (named "data")
+        of a driver's event ("source" and "event") is updated
         """
         if source not in self.requires:
             self.hal.log(f"{self.name}: subscribed to an unrequested event.")
@@ -49,6 +47,14 @@ class BaseApplication(threading.Thread):
             return
         # Write your code here (what to do when the data is recieved)
 
+    def execute(self, driver, action, data):
+        """
+        Executes an action of a driver
+        - 'driver' is the name of the driver
+        - 'action' is the name of the action
+        - 'data' is the data that will be sent to the drvier's callback
+        """
+        self.db.publish(f"{driver}_exec_{action}", pickle.dumps(data))
 
     def stop(self):
         """Stops the application"""
