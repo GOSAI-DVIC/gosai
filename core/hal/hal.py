@@ -4,6 +4,7 @@ import datetime
 import os
 from typing import Any
 
+
 DRIVERS_PATH = "core/hal/drivers"
 LOGS_PATH = "core/hal/logs"
 
@@ -51,7 +52,7 @@ class HardwareAbstractionLayer:
         Starts a driver and all its dependecies
         """
         if driver_name not in self.drivers:
-                self.init_driver(driver_name)
+            self.init_driver(driver_name)
 
         if driver_name not in self.available_drivers:
             self.log(f"{driver_name} is not a valid driver", 3)
