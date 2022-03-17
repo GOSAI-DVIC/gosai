@@ -2,12 +2,13 @@
 
 import cv2
 import mediapipe as mp
+from google.protobuf.json_format import MessageToDict
 
 
 def init():
     mp_hands = mp.solutions.hands
     return mp_hands.Hands(
-        min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=0
+        min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=0, max_num_hands=2
     )
 
 
@@ -22,6 +23,7 @@ def find_all_hands(hands, frame, window):
     image = image[:, min_width:max_width]
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = cv2.flip(image, 1)
 
     # e1 = time.time()
     # print(f"    Convert image: {(e1 - start)*1000} ms")
@@ -42,8 +44,8 @@ def find_all_hands(hands, frame, window):
                 # for landmark in results.multi_hand_landmarks.landmark:
                 hands_landmarks[-1].append(
                     [
-                        min_width + int(landmark.x * image.shape[1]),
-                        int(landmark.y * image.shape[0]),
+                        landmark.x + (1 - window) / 2,
+                        landmark.y,
                     ]
                 )
 
@@ -51,7 +53,11 @@ def find_all_hands(hands, frame, window):
 
     if results.multi_handedness:
         for hand_handedness in results.multi_handedness:
-            hands_handedness.append([hand_handedness.label, hand_handedness.score])
+            handedness_dict = MessageToDict(hand_handedness)["classification"][0]
+            # print(handedness_dict)
+            hands_handedness.append(
+                [handedness_dict["index"], handedness_dict["label"], handedness_dict["score"]]
+            )
 
     # e3 = time.time()
     # print(f"    Convert data: {(e3 - e2)*1000} ms")
