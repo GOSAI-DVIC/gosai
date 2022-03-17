@@ -255,7 +255,7 @@ class BaseDriver(Process):
                     return
                 try:
                     data = pickle.loads(bytes(binary_data["data"]))
-                    callback(self, data)
+                    callback(data)
                 except Exception as e:
                     self.log(f"Error while loading callback data: {e}", 3)
                     pass
