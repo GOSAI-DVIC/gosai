@@ -51,7 +51,7 @@ def detect_balls(bkg: np.ndarray, frame: np.ndarray, camera: Camera) -> list(tup
 
     contours, _ = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     moments = list(map(cv2.moments, contours))
-    
+
     balls = []
     for contour, moment in zip(contours, moments):
         if moment["m00"] < DEFAULT_MIN_MOMENT_00:
@@ -94,6 +94,7 @@ class Driver(BaseDriver):
 
         self.fps = max_fps
         self.stable_fps = RuningMean(60, 1)
+        self.history = []
 
     def pre_run(self) -> None:
         super().pre_run()
@@ -109,6 +110,8 @@ class Driver(BaseDriver):
 
         frame = self.parent.get_driver_event_data("video", "color")
         if frame is not None:
+            if self.bkg.shape != frame.shape:
+                self.bkg = cv2.resize(self.bkg, (frame.shape[1], frame.shape[0]))
             balls = detect_balls(self.bkg, frame, self.camera)
             self.set_event_data("balls", balls)
 
@@ -116,5 +119,12 @@ class Driver(BaseDriver):
         time.sleep(max(1 / self.fps - dt, DEFAULT_MIN_SLEEP))
 
         dt = time.time() - start_t
-        fps = self.stable_fps.update(1 / dt)
-        self.set_event_data("fps", f"{fps:.2f}")
+        # fps = self.stable_fps.update(1 / dt)
+        fps = 1 / dt
+        if len(self.history) < 50:
+            self.history.append(fps)
+        else:
+            self.history.pop(0)
+            self.history.append(fps)
+
+        self.set_event_data("fps", f"{np.mean(self.history):.2f}")
