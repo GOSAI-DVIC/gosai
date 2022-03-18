@@ -61,7 +61,7 @@ class Driver(BaseDriver):
         if depth is not None:
             self.set_event_data("depth", depth)
 
-        time.sleep(1 / self.fps)  # Runs faster to be sure to get the current frame
+        # time.sleep(1 / self.fps)  # Runs faster to be sure to get the current frame
 
     def execute(self, command, arguments=""):
         super().execute(command, arguments)
