@@ -31,7 +31,7 @@ class Driver(BaseDriver):
         """Runs sign detection on frame"""
         start_t = time.time()
 
-        hand_pose = self.parent.get_driver_event_data("hand_pose", "raw_data")["hands_landmarks"]
+        hand_pose = data["hands_landmarks"]
 
         if hand_pose is not None:
             hand_sign = [hs.find_gesture(self.sign_provider, pose) for pose in hand_pose]
