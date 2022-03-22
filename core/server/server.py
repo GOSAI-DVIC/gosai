@@ -55,6 +55,14 @@ class Server:
         def platform_home_path(path):
             return send_from_directory("../../home", path)
 
+        @self.app.route("/control")
+        def control():
+            return render_template("control/index.html")
+
+        self.app.route("/control/<path:path>")
+        def control_path(path):
+            return send_from_directory("templates/control", path)
+
 
     def start(self, socket_port=5000):
         """Starts the server on the given port"""
