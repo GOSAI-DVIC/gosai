@@ -31,6 +31,14 @@ class AppManager:
         def _(data) -> None:
             self.stop(data["application_name"])
 
+        @self.server.sio.on("window_loaded")
+        def _() -> None:
+            for app_name in self.started_apps.keys():
+                self.server.send_data(
+                    "start_application", {"application_name": app_name}
+                )
+
+
     def list_applications(self) -> list:
         """Lists all available applications"""
 
