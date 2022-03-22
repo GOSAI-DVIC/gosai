@@ -14,8 +14,8 @@ import time
 
 DEFAULT_MIN_SLEEP = 1e-4  # In seconds ~ 0.1ms
 
-DEFAULT_JSON_PATH = "home/calibration/calibration_data.json"
-DEFAULT_BKG_PATH = "core/hal/drivers/ball/background.jpg"
+DEFAULT_JSON_PATH = "core/calibration/calibration_data.json"
+DEFAULT_BKG_PATH = "home/background.jpg"
 
 DEFAULT_SIZE = 1920, 1080
 DEFAULT_MIN_MOMENT_00 = np.pi * 15 ** 2
