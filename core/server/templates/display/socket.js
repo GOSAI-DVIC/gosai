@@ -1,6 +1,6 @@
-const socket = io.connect('ws://0.0.0.0:5000', {
+const socket = io.connect('ws://' + window.location.host, {
     cors: {
-        origin: "ws://0.0.0.0:5000",
+        origin: "ws://" + window.location.host,
         methods: ["GET", "POST"]
     },
     transports: ["websocket"]
@@ -14,7 +14,7 @@ socket.on("start_application", async (data) => {
         modules[application_name].selfCanvas.show();
         modules[application_name].resume();
     } else {
-        const module = await import("/home/apps/" + application_name  + "/display.js")
+        const module = await import("/platform/home/apps/" + application_name  + "/display.js")
 
         const application = module[application_name]
 

@@ -17,6 +17,7 @@ function setup() {
 
 function draw() {
     background(0);
+    let start = Date.now();
 
     for (const [name, module] of Object.entries(modules)) {
         if (module.activated) {
@@ -24,6 +25,9 @@ function draw() {
             module.show();
         }
     }
+
+    let end = Date.now();
+    // console.log(end - start);
 }
 
 function windowResized() {
