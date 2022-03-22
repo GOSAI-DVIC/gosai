@@ -34,10 +34,13 @@ class Server:
         self.hal = hal
 
         self.queue = Queue()
+        self.background_thread_started = False
 
         @self.sio.on("connect")
         def connect(*args):
-            self.sio.start_background_task(self.send_queued_data)
+            if not self.background_thread_started:
+                self.sio.start_background_task(self.send_queued_data)
+                self.background_thread_started = True
 
         @self.app.route("/")
         def home():
