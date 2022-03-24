@@ -58,11 +58,11 @@ class Server:
         def platform_home_path(path):
             return send_from_directory("../../home", path)
 
-        @self.app.route("/control")
-        def control():
+        @self.app.route("/remote")
+        def remote():
             return render_template("control/index.html")
 
-        self.app.route("/control/<path:path>")
+        @self.app.route("/remote/<path:path>")
         def control_path(path):
             return send_from_directory("templates/control", path)
 
