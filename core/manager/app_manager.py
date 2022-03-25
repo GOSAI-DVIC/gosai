@@ -38,6 +38,25 @@ class AppManager:
                     "start_application", {"application_name": app_name}
                 )
 
+        @self.server.sio.on("get_started_applications")
+        def _() -> None:
+            self.server.send_data(
+                "started_applications",
+                {"applications": self.list_started_applications()},
+            )
+
+        @self.server.sio.on("get_stopped_applications")
+        def _() -> None:
+            self.server.send_data(
+                "stopped_applications",
+                {"applications": self.list_stopped_applications()},
+            )
+
+        @self.server.sio.on("get_available_applications")
+        def _() -> None:
+            self.server.send_data(
+                "available_applications", {"applications": self.list_applications()}
+            )
 
     def list_applications(self) -> list:
         """Lists all available applications"""
@@ -85,9 +104,7 @@ class AppManager:
             app.start()
 
             # Start the js app
-            self.server.send_data(
-                "start_application", {"application_name": app_name}
-            )
+            self.server.send_data("start_application", {"application_name": app_name})
 
             # Store the app as a started app
             self.started_apps[app_name] = app
@@ -98,7 +115,6 @@ class AppManager:
             return False
 
         return True
-
 
     def stop(self, app_name: str) -> bool:
         """Stops an application"""
@@ -115,17 +131,13 @@ class AppManager:
             app = self.started_apps[app_name]
             for driver_name in app.requires:
                 for event in app.requires[driver_name]:
-                    self.hal.unregister_from_driver(
-                        driver_name, app, event
-                    )
+                    self.hal.unregister_from_driver(driver_name, app, event)
 
             # Stop the python app
             app.stop()
 
             # Stop the js app
-            self.server.send_data(
-                "stop_application", {"application_name": app_name}
-            )
+            self.server.send_data("stop_application", {"application_name": app_name})
 
             del self.started_apps[app_name]
             self.log(f"Stopped application '{app_name}'", 2)
