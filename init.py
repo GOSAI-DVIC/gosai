@@ -12,9 +12,9 @@ server = Server(hal)
 server.start()
 
 app_manager = AppManager(hal, server)
-app_manager.start("triangles")
+app_manager.start("menu")
 
-start_chrome()
+start_chrome(server.path)
 
 console = Console(hal, server, app_manager)
 console.start()
