@@ -1,6 +1,11 @@
-socket = io.connect('ws://' + window.location.host, {
+let path_parameter = window.location.pathname.split('/');
+path_parameter.splice(-1);
+const path = path_parameter.join('/');
+
+const socket = io.connect('ws://' + window.location.host, {
+    path: path + "/socket.io",
     cors: {
-        origin: "ws://" + window.location.host,
+        origin: "*",
         methods: ["GET", "POST"]
     },
     transports: ["websocket"]
