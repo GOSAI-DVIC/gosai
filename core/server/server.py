@@ -11,7 +11,7 @@ def start_chrome(path):
     def _start_chrome(path):
         options = ["--start-fullscreen", "--incognito", "--disable-logging"]
         options_line = " ".join(options)
-        cmd = f"chromium http://127.0.0.1:5000/{path}/platform {options_line}"
+        cmd = f"chromium http://127.0.0.1:8000/{path}/platform {options_line}"
         os.system(f'/bin/bash -c "{cmd} &> /dev/null"')
 
     threading.Thread(target=_start_chrome, args=(path,), daemon=True).start()
@@ -79,7 +79,7 @@ class Server:
         self.path = base_path
 
 
-    def start(self, socket_port=5000):
+    def start(self, socket_port=8000):
         """Starts the server on the given port"""
 
         def _start_socket(self, port):
