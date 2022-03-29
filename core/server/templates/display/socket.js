@@ -2,7 +2,7 @@ let path_parameter = window.location.pathname.split('/');
 path_parameter.splice(-1);
 const path = path_parameter.join('/');
 
-export const socket = io.connect('ws://' + window.location.host, {
+export const socket = io.connect(window.location.origin, {
     path: path + "/socket.io",
     cors: {
         origin: "*",
@@ -10,6 +10,7 @@ export const socket = io.connect('ws://' + window.location.host, {
     },
     transports: ["websocket"]
 });
+
 
 socket.on("start_application", async (data) => {
     const application_name = data["application_name"];
