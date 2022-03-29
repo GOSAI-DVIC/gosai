@@ -8,6 +8,9 @@ const socket = io.connect(window.location.origin, {
         origin: "*",
         methods: ["GET", "POST"]
     },
+	agent: false,
+	upgrade: false,
+	rejectUnauthorized: false,
     transports: ["websocket"]
 });
 
