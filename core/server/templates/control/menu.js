@@ -46,6 +46,7 @@ function setup() {
     angleMode(DEGREES);
     mobileDevice = isMobileDevice()
     platform_name = platform_config.name;
+    platform_name = platform_name[0].toUpperCase()+ platform_name.substring(1)
     socket.emit("get_available_applications");
     socket.emit("get_started_applications")
     canvas = createCanvas(windowWidth, windowHeight);
@@ -73,13 +74,12 @@ function draw() {
     textSize(title_size * 0.9)
     textAlign(CENTER, CENTER);
     fill(128, 191, 255);
-    text(path.split("/").pop(), width / 2, head_line / 2)
+    text(`${platform_name}`, width / 2, head_line / 2)
 
     // Powered by Gosai
     textSize(title_size * 0.2)
     textAlign(CENTER, CENTER);
     fill(151, 130, 255);
-    // text(`${mobileDevice}`, width / 2, head_line *0.85)
     text(`Powered by GOSAI`, width / 2, head_line * 0.85)
 
     //LINE UNDER TITLE
