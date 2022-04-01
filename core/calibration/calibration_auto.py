@@ -227,7 +227,7 @@ def ordering(l_point1, l_point2):
         cv2.circle(frame,p2,20,(0,255,0),-1)
 
     cv2.imshow('Pool',frame)
-    cv2.waitKey(2000)
+    cv2.waitKey(1000)
     
     return l_ordered_point
 
@@ -274,7 +274,7 @@ cv2.putText(calibration_test2,
             1,
             cv2.LINE_AA)
 cv2.imshow('Pool', calibration_test2)
-cv2.waitKey(0)
+# cv2.waitKey(0)
 
 test_1 = cv2.warpPerspective(calibration_test2, projection_matrix, (1920,1080), flags=cv2.INTER_LINEAR)
 cv2.putText(test_1,
@@ -286,7 +286,7 @@ cv2.putText(test_1,
             1,
             cv2.LINE_AA)
 cv2.imshow('Pool',test_1)
-cv2.waitKey(0)
+# cv2.waitKey(0)
 
 test_2 = cv2.warpPerspective(frame_camera, poolFocus_matrix, (1920,1080), flags=cv2.INTER_LINEAR)
 cv2.putText(test_2,
@@ -298,7 +298,7 @@ cv2.putText(test_2,
             1,
             cv2.LINE_AA)
 cv2.imshow('Pool',test_2)
-cv2.waitKey(0)
+# cv2.waitKey(0)
 
 ############### Export Data in json file ###############
 
