@@ -4,7 +4,7 @@ from cv2 import aruco
 from itertools import permutations  
 import json
 
-projected_coords = [[550,550],[450,750],[1250,600],[1230,850]]
+projected_coords = [[450,500],[450,800], [1300, 550], [1350,850]]
 #projected_coords = [[400,300],[400,780],[1520,300],[1520,780]] #Original test coords
 screen_coords=[[0,0], [0,1080],[1920,0],[1920,1080]]
 
@@ -115,16 +115,19 @@ frame_camera=background.copy()
 def drawArucoFrame():
     #place aruco patters on images at projected_coords coordinates
     arucoFrame=np.full((1080,1920,3), 255,np.uint8)
+    aruco0 = cv2.imread("core/calibration/aruco0.png")
+    aruco1 = cv2.imread("core/calibration/aruco1.png")
+    aruco2 = cv2.imread("core/calibration/aruco2.png")
+    aruco3 = cv2.imread("core/calibration/aruco3.png")
+    # aruco4 = cv2.imread("core/calibration/aruco4.png")
+    # aruco5 = cv2.imread("core/calibration/aruco5.png")
 
-    aruco0 = cv2.imread("home/calibration/aruco0.png")
-    aruco1 = cv2.imread("home/calibration/aruco1.png")
-    aruco2 = cv2.imread("home/calibration/aruco2.png")
-    aruco3 = cv2.imread("home/calibration/aruco3.png")  
-    
     arucoFrame[projected_coords[0][1]:projected_coords[0][1]+aruco0.shape[0], projected_coords[0][0]:projected_coords[0][0]+aruco0.shape[1]] = aruco0
     arucoFrame[projected_coords[1][1]:projected_coords[1][1]+aruco1.shape[0], projected_coords[1][0]:projected_coords[1][0]+aruco1.shape[1]] = aruco1
     arucoFrame[projected_coords[2][1]:projected_coords[2][1]+aruco2.shape[0], projected_coords[2][0]:projected_coords[2][0]+aruco2.shape[1]] = aruco2
     arucoFrame[projected_coords[3][1]:projected_coords[3][1]+aruco3.shape[0], projected_coords[3][0]:projected_coords[3][0]+aruco3.shape[1]] = aruco3
+    # arucoFrame[projected_coords[4][1]:projected_coords[4][1]+aruco4.shape[0], projected_coords[4][0]:projected_coords[4][0]+aruco4.shape[1]] = aruco4
+    # arucoFrame[projected_coords[5][1]:projected_coords[5][1]+aruco5.shape[0], projected_coords[5][0]:projected_coords[5][0]+aruco5.shape[1]] = aruco5
 
     return arucoFrame 
 
@@ -161,9 +164,10 @@ frame = get_frame()
 coords = findArucoMarkers(frame)
 
 if len(coords) == 4:
-    detected_coords = coords
+    detected_coords = coords[:4]
 else: #select manually
-    print('Manual Calibration required')
+    print()
+    print('Manual Calibration required : click on top-right of Aruco square')
     for x,y in pool_coords:
         cv2.circle(frame, (x,y), 20, (0,0,255), -1)
 
@@ -307,7 +311,7 @@ d_information={"projection_matrix": projection_matrix,
 
 d_information={k:v.tolist() for k,v in d_information.items()}
 
-with open('home/calibration/calibration_data.json', 'w') as f:
+with open('core/calibration/calibration_data.json', 'w') as f:
     json.dump(d_information, f, indent=4)
 
 print("calibration terminée")

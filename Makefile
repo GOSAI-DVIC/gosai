@@ -41,3 +41,9 @@ endif
 stop:
 	-docker stop $(REPO)
 	-docker stop $(REPO)-$(REDIS_REPO)
+
+calibration:
+	python3 core/calibration/calibration_auto.py
+
+background:
+	python3 core/calibration/capture_empty_bg.py
