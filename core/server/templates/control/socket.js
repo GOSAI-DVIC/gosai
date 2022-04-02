@@ -29,9 +29,17 @@ socket.on("started_applications", async (data) => {
 socket.on("start_application", async (data) => {
     let new_app = data["application_name"]
     update_app_button(new_app, 1)
+    if (new_app == "yawa") {
+        speaker_request = true
+    }
+    // speaker_request = true
 });
 
 socket.on("stop_application", async (data) => {
     let new_app = data["application_name"]
     update_app_button(new_app, 0)
 });
+
+socket.on("sound", async (data) => {
+    speaker_request = true;
+})

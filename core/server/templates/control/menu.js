@@ -10,7 +10,8 @@ const screenheight = 698.4;
 let global_data = {};
 let recieved = false;
 
-let img;
+let mic_img;
+let spk_img;
 let image_size;
 let app_number;
 let head_line;
@@ -26,7 +27,11 @@ let text_size;
 let app;
 let name_to_buttons = {};
 let colors = ["Thistle", "SpringGreen", "black"]
-let micro = false;
+let micro = false; //micro state
+let micro_start = false;
+let speaker = false; //speaker state
+let speaker_start = false;
+let speaker_request = false;
 let angle = 0;
 let radius = 125;
 let x;
@@ -37,8 +42,16 @@ let mobileDevice = false;
 let platform_name;
 let platform_config;
 
+let mic, recorder, soundFile;
+var audio = new Audio("./control/assets/mySound.mp3");
+audio.onended = function() {
+    speaker_start = false;
+    speaker_request = false;
+}
+
 function preload() {
-    img = loadImage('./control/assets/microphone.jpg');
+    mic_img = loadImage('./control/assets/microphone.jpg');
+    spk_img = loadImage('./control/assets/speaker.jpg');
     platform_config = loadJSON('./platform/home/config.json');
 }
 
@@ -51,7 +64,8 @@ function setup() {
     socket.emit("get_started_applications")
     canvas = createCanvas(windowWidth, windowHeight);
     image_size = height * 0.1;
-    img.resize(image_size, image_size * 1.6);
+    mic_img.resize(image_size, image_size * 1.6);
+    spk_img.resize(image_size*1.6, image_size*1.6)
     frameRate(120);
 
     app_number = 4;
@@ -64,6 +78,18 @@ function setup() {
     button_heigth = (body - 2 * (big_margin + little_margin)) / app_number
     title_size = parseInt((width + height) * 0.04)
     text_size = parseInt(button_heigth * 0.4)
+
+    // // create an audio in
+    // mic = new p5.AudioIn();
+    // // users must manually enable their browser microphone for recording to work properly!
+    // mic.start();
+    // // create a sound recorder
+    // recorder = new p5.SoundRecorder();
+    // // connect the mic to the recorder
+    // recorder.setInput(mic);
+    // // create an empty sound file that we will use to playback the recording
+    // soundFile = new p5.SoundFile();
+    
 }
 
 function draw() {
@@ -92,16 +118,17 @@ function draw() {
     line(0.45 * width, footer_line, 0.55 * width, footer_line);
 
     //MICROPHONE
-    image(img, width / 2 - img.width / 2, (footer_line + height) / 2 - (img.height / 2));
+    push()
+    translate(-width/6,0)
+    image(mic_img, width / 2 - mic_img.width / 2, (footer_line + height) / 2 - (mic_img.height / 2));
     push()
     noFill();
     circle(width / 2, (footer_line + height) / 2, image_size * 1.8)
     pop();
 
-
-
-    if (mouseIsPressed && (dist(mouseX, mouseY, width / 2, (footer_line + height) / 2) < image_size * 0.9)) {
+    if (mouseIsPressed  && (dist(mouseX, mouseY, width / 2 -width/6, (footer_line + height) / 2) < image_size * 0.9)) {
         micro = true;
+
         x = radius * cos(angle);
         y = radius * sin(angle);
         push()
@@ -114,6 +141,47 @@ function draw() {
         pop();
     } else {
         micro = false;
+    }
+    pop();
+
+    // if (micro && !micro_start) {
+    //     recorder.record(soundFile)
+    //     micro_start = true
+    // }
+    // if (!micro && micro_start) {
+    //     recorder.stop();
+    //     saveSound(soundFile,'mySound.wav');
+    //     micro_start = false;
+    // }
+
+    //SPEAKER
+    push()
+    translate(width/6,0)
+    image(spk_img, width / 2 - spk_img.width / 2, (footer_line + height) / 2 - (spk_img.height / 2));
+    push()
+    noFill();
+    circle(width / 2, (footer_line + height) / 2, image_size * 1.8)
+    pop()
+
+    if ((mouseIsPressed  && (dist(mouseX, mouseY, width / 2 +width/6, (footer_line + height) / 2) < image_size * 0.9)) || speaker_request) {
+        speaker = true;
+        speaker_start = true;
+        speaker_button();
+        x = radius * cos(angle);
+        y = radius * sin(angle);
+        push()
+        noFill();
+        strokeWeight(image_size * 0.1)
+        stroke(151, 130, 255)
+        circle(width / 2, (footer_line + height) / 2, image_size * 1.9)
+        stroke(128, 191, 255);
+        arc(width / 2, (footer_line + height) / 2, image_size * 2.1, image_size * 2.1, 270 + x, 90 + y);
+        pop();
+    } else {
+        speaker = false;
+    }
+    if (!speaker && speaker_start) {
+        stop_audio()
     }
     angle++;
 }
@@ -168,4 +236,12 @@ function update_app_button(app_name, flag) {
             })
         });
     }
+}
+
+function speaker_button() {
+    audio.play()
+}
+
+function stop_audio() {
+    audio.pause()
 }
