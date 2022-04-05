@@ -6,7 +6,7 @@ import time
 from queue import Queue
 
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, request, render_template, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -33,11 +33,11 @@ class Server:
             self.hal.log("Server: No platform name found in .env file", 3)
             platform_name = "default"
 
-        base_path = f"gosai/{platform_name}"
+        self.base_path = f"gosai/{platform_name}"
 
         self.sio = SocketIO(
             self.app,
-            path= f"{base_path}/socket.io",
+            path= f"{self.base_path}/socket.io",
             logger=False,
             engineio_logger=False,
             async_mode="eventlet",
@@ -46,63 +46,17 @@ class Server:
 
         self.hal = hal
 
+        self.clients = {}
+
         self.queue = Queue()
         self.background_thread_started = False
 
         self.control_password = "314159"
 
-        @self.sio.on("connect")
-        def connect(*args):
-            if not self.background_thread_started:
-                self.sio.start_background_task(self.send_queued_data)
-                self.background_thread_started = True
+        self.path = self.base_path
 
-        @self.sio.on("get_control_password")
-        def get_control_password():
-            self.sio.emit("control_password", { "control_password" :self.control_password}, room=request.sid)
-
-        @self.sio.on("generate_control_password")
-        def generate_control_password():
-            self.generate_control_password()
-            print("--control_password : " + self.control_password)
-            self.sio.emit("control_password", { "control_password" :self.control_password}, room=request.sid)
-
-        @self.sio.on("check_control_password")
-        def check_control_password(data : dict):
-            check = False
-            if (data["control_password"] == self.control_password):
-                check = True
-            self.sio.emit("checked_control_password", {"checked" : check}, room=request.sid)
-
-        @self.app.route("/gosai")
-        def home():
-            return "OK"
-
-        @self.app.route(f"/{base_path}/platform")
-        def platform():
-            return render_template("display/index.html")
-
-        @self.app.route(f"/{base_path}/platform/<path:path>")
-        def platform_path(path):
-            return send_from_directory("templates/display", path)
-
-        @self.app.route(f"/{base_path}/platform/home/<path:path>")
-        def platform_home_path(path):
-            return send_from_directory("../../home", path)
-
-        @self.app.route(f"/{base_path}/control")
-        def control():
-            return render_template("control/index.html")
-
-        @self.app.route(f"/{base_path}/control/<path:path>")
-        def control_path(path):
-            return send_from_directory("templates/control", path)
-
-        @self.app.route(f"/{base_path}/core/<path:path>")
-        def core_path(path):
-            return send_from_directory("../", path)        
-
-        self.path = base_path
+        create_socket_api(self)
+        create_flask_api(self)
 
     def daily_control_password_generator(self):
         """Generate daily a 6 digits password to access /control"""
@@ -159,3 +113,93 @@ class Server:
             if not self.queue.empty():
                 name, data = self.queue.get()
                 self.sio.emit(name, data)
+
+def create_socket_api(server : Server):
+    @server.sio.on("connect")
+    def connect(*args):
+        server.clients[request.sid] = [request.remote_addr]
+        print(server.clients)
+        if not server.background_thread_started:
+            server.sio.start_background_task(server.send_queued_data)
+            server.background_thread_started = True
+    
+    @server.sio.on('disconnect')
+    def disconnect():
+        del server.clients[request.sid]
+        print(server.clients)
+
+    @server.sio.on("get_users")
+    def get_users():
+        server.sio.emit("connected_users", server.clients)
+
+    @server.sio.on("get_control_password")
+    def get_control_password():
+        server.sio.emit("control_password", { "control_password" :server.control_password}, room=request.sid)
+
+    @server.sio.on("generate_control_password")
+    def generate_control_password():
+        server.generate_control_password()
+        print("--control_password : " + server.control_password)
+        server.sio.emit("control_password", { "control_password" :server.control_password}, room=request.sid)
+
+    @server.sio.on("check_control_password")
+    def check_control_password(data : dict):
+        check = False
+        if (data["control_password"] == server.control_password):
+            check = True
+        server.sio.emit("checked_control_password", {"checked" : check}, room=request.sid)
+
+    @server.sio.on("sound")
+    def _():
+        server.sio.emit("sound")
+
+    @server.sio.on("get_started_drivers")
+    def _():
+        server.sio.emit("started_drivers", {"drivers" : server.hal.get_started_drivers()})
+
+    @server.sio.on("get_stopped_drivers")
+    def _():
+        server.sio.emit("stopped_drivers", {"drivers" : server.hal.get_stopped_drivers()})    
+
+    @server.sio.on("get_available_drivers")
+    def _():
+        server.sio.emit("available_drivers", {"drivers" : server.hal.get_drivers()})
+
+
+def create_flask_api(server : Server):
+
+    @server.app.route("/gosai")
+    def home():
+        return "OK"
+
+    @server.app.route(f"/{server.base_path}/platform")
+    def platform():
+        return render_template("display/index.html")
+
+    @server.app.route(f"/{server.base_path}/platform/<path:path>")
+    def platform_path(path):
+        return send_from_directory("templates/display", path)
+
+    @server.app.route(f"/{server.base_path}/platform/home/<path:path>")
+    def platform_home_path(path):
+        return send_from_directory("../../home", path)
+
+    @server.app.route(f"/{server.base_path}/control")
+    def control():
+        return render_template("control/index.html")
+
+    @server.app.route(f"/{server.base_path}/control/<path:path>")
+    def control_path(path):
+        return send_from_directory("templates/control", path)
+
+    @server.app.route(f"/{server.base_path}/dashboard")
+    def dashboard():
+        return render_template("dashboard/index.html")
+
+    @server.app.route(f"/{server.base_path}/dashboard/<path:path>")
+    def dashboard_path(path):
+        return send_from_directory("templates/dashboard", path)
+
+    @server.app.route(f"/{server.base_path}/core/<path:path>")
+    def core_path(path):
+        return send_from_directory("../", path)
