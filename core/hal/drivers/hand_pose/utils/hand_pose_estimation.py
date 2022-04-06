@@ -1,4 +1,5 @@
 # Source : https://google.github.io/mediapipe/solutions/hands.html
+import time
 
 import cv2
 import mediapipe as mp
@@ -13,7 +14,7 @@ def init():
 
 
 def find_all_hands(hands, frame, window):
-    # start = time.time()
+    # start_t = int(time.time()*1000)
 
     image = frame.copy()
 
@@ -65,4 +66,5 @@ def find_all_hands(hands, frame, window):
     return {
         "hands_landmarks": hands_landmarks,
         "hands_handedness": hands_handedness,
+        # "time": start_t# int(time.time()*1000),
     }
