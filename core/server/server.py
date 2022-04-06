@@ -10,7 +10,9 @@ from flask import Flask, request, render_template, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
+
 def start_chrome(path):
+    """Launch a chrome browser to display the platform"""
     def _start_chrome(path):
         options = ["--start-fullscreen", "--incognito", "--disable-logging"]
         options_line = " ".join(options)
@@ -21,7 +23,8 @@ def start_chrome(path):
 
 
 class Server:
-    """ Main server class """
+    """Main server class"""
+
     def __init__(self, hal):
         self.app = Flask(__name__)
         self.app.config["SECRET_KEY"] = "secret!"
@@ -37,7 +40,7 @@ class Server:
 
         self.sio = SocketIO(
             self.app,
-            path= f"{self.base_path}/socket.io",
+            path=f"{self.base_path}/socket.io",
             logger=False,
             engineio_logger=False,
             async_mode="eventlet",
@@ -64,16 +67,17 @@ class Server:
         def _daily_control_password_generator(self):
             self.control_password = str(random.randint(0, 999999)).zfill(6)
             time.sleep(_waitToTomorrow())
-        
+
         def _waitToTomorrow():
-            '''Wait to tomorrow 00:00 am.'''
-            tomorrow = dt.datetime.replace(dt.datetime.now() + dt.timedelta(days=1),
-                        hour=0,minute=0,second=0)
+            """Wait to tomorrow 00:00 am."""
+            tomorrow = dt.datetime.replace(
+                dt.datetime.now() + dt.timedelta(days=1), hour=0, minute=0, second=0
+            )
             delta = tomorrow - dt.datetime.now()
             return delta.seconds
 
         threading.Thread(
-            target= _daily_control_password_generator, args=(self,), daemon=True
+            target=_daily_control_password_generator, args=(self,), daemon=True
         ).start()
 
     def generate_control_password(self):
@@ -85,7 +89,7 @@ class Server:
 
         def _start_socket(self, port):
             self.sio.run(self.app, host="0.0.0.0", port=port)
-        
+
         self.daily_control_password_generator()
 
         threading.Thread(
@@ -114,40 +118,51 @@ class Server:
                 name, data = self.queue.get()
                 self.sio.emit(name, data)
 
-def create_socket_api(server : Server):
+
+def create_socket_api(server: Server):
     @server.sio.on("connect")
     def connect(*args):
         server.clients[request.sid] = [request.remote_addr]
-        print(server.clients)
         if not server.background_thread_started:
             server.sio.start_background_task(server.send_queued_data)
             server.background_thread_started = True
-    
-    @server.sio.on('disconnect')
+
+    @server.sio.on("disconnect")
     def disconnect():
         del server.clients[request.sid]
-        print(server.clients)
 
     @server.sio.on("get_users")
     def get_users():
-        server.sio.emit("connected_users", server.clients)
+        server.sio.emit(
+            "connected_users",
+            {"users": server.clients}
+            )
 
     @server.sio.on("get_control_password")
     def get_control_password():
-        server.sio.emit("control_password", { "control_password" :server.control_password}, room=request.sid)
+        server.sio.emit(
+            "control_password",
+            {"control_password": server.control_password},
+            room=request.sid,
+        )
 
     @server.sio.on("generate_control_password")
     def generate_control_password():
         server.generate_control_password()
-        print("--control_password : " + server.control_password)
-        server.sio.emit("control_password", { "control_password" :server.control_password}, room=request.sid)
+        server.sio.emit(
+            "control_password",
+            {"control_password": server.control_password},
+            room=request.sid,
+        )
 
     @server.sio.on("check_control_password")
-    def check_control_password(data : dict):
+    def check_control_password(data: dict):
         check = False
-        if (data["control_password"] == server.control_password):
+        if data["control_password"] == server.control_password:
             check = True
-        server.sio.emit("checked_control_password", {"checked" : check}, room=request.sid)
+        server.sio.emit(
+            "checked_control_password", {"checked": check}, room=request.sid
+        )
 
     @server.sio.on("sound")
     def _():
@@ -155,19 +170,22 @@ def create_socket_api(server : Server):
 
     @server.sio.on("get_started_drivers")
     def _():
-        server.sio.emit("started_drivers", {"drivers" : server.hal.get_started_drivers()})
+        server.sio.emit(
+            "started_drivers", {"drivers": server.hal.get_started_drivers()}
+        )
 
     @server.sio.on("get_stopped_drivers")
     def _():
-        server.sio.emit("stopped_drivers", {"drivers" : server.hal.get_stopped_drivers()})    
+        server.sio.emit(
+            "stopped_drivers", {"drivers": server.hal.get_stopped_drivers()}
+        )
 
     @server.sio.on("get_available_drivers")
     def _():
-        server.sio.emit("available_drivers", {"drivers" : server.hal.get_drivers()})
+        server.sio.emit("available_drivers", {"drivers": server.hal.get_drivers()})
 
 
-def create_flask_api(server : Server):
-
+def create_flask_api(server: Server):
     @server.app.route("/gosai")
     def home():
         return "OK"
