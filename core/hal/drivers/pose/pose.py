@@ -57,6 +57,6 @@ class Driver(BaseDriver):
             self.log(f"Total time: {(end_t - start_t)*1000}ms")
             self.log(f"FPS: {int(1/(end_t - start_t))}")
 
-        dt = max((1 / self.fps) - (end_t - start_t), 0.0001)
+        # dt = max((1 / self.fps) - (end_t - start_t), 0.0001)
 
-        time.sleep(dt)
+        # time.sleep(dt)
