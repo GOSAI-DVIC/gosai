@@ -14,6 +14,7 @@ class Console(threading.Thread):
         time.sleep(1)
         print("")
         while 1:
+            time.sleep(0.5)
             print("")
             command = input(">>: ")
             execute = command.split()[0]
