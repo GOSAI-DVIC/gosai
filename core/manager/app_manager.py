@@ -1,8 +1,7 @@
-import datetime
 import os
+import pickle
 
-
-LOGS_PATH = "core/hal/logs"
+import redis
 
 
 class AppManager:
@@ -12,6 +11,7 @@ class AppManager:
         """Initializes the app manager"""
         self.hal = hal
         self.server = server
+        self.db = redis.Redis(host="localhost", port=6379, db=0)
 
         self.name = "app_manager"
         self.available_apps = [
@@ -148,12 +148,8 @@ class AppManager:
 
         return True
 
-    def log(self, message, level=1):
-        """Logs a message"""
-        if level >= int(os.environ["LOG_LEVEL"]):
-            print(f"{self.name}: {message}")
-
-        with open(f"{LOGS_PATH}/app_manager.log", "a+") as log:
-            log.write(
-                f"{datetime.datetime.now().strftime('%b-%d-%G-%I:%M:%S%p')} : {message}\n"
-            )
+    def log(self, content, level=1):
+        """Logs via the redis database"""
+        data = {"source": self.name, "content": content, "level": level}
+        self.db.set(f"log", pickle.dumps(data))
+        self.db.publish(f"log", pickle.dumps(data))

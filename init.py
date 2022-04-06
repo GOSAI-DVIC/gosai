@@ -2,6 +2,7 @@ import os
 
 from core.console.console import Console
 from core.hal.hal import HardwareAbstractionLayer
+from core.logs.logger import Logger
 from core.manager.app_manager import AppManager
 from core.server.server import Server, start_chrome
 
@@ -11,8 +12,12 @@ hal = HardwareAbstractionLayer()
 server = Server(hal)
 server.start()
 
+logger = Logger(server)
+logger.log_listenner()
+
 app_manager = AppManager(hal, server)
 app_manager.start("menu")
+app_manager.start("show_hands")
 
 start_chrome(server.path)
 

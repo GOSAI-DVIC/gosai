@@ -1,16 +1,12 @@
 # Base driver template
 
-import datetime
-import os
 import pickle
 import threading
 import time
 from multiprocessing import Process, Value
 
-import numpy as np
 import redis
 
-LOGS_PATH = "core/hal/logs"
 
 class BaseDriver(Process):
     """Base class for all drivers"""
@@ -286,17 +282,15 @@ class BaseDriver(Process):
         del self.callbacks[action]
         return True
 
-    def log(self, message, level=1):
-        """Save logs. TODO: Temporary file"""
-
-        if level >= int(os.environ["LOG_LEVEL"]):
-            print(f"{self.name}: {message}")
-
-        if level >= 2:
-            with open(f"{LOGS_PATH}/{self.name}.log", "a+") as log:
-                log.write(
-                    f"{datetime.datetime.now().strftime('%b-%d-%G-%I:%M:%S%p')} : {message}\n"
-                )
+    def log(self, content, level=1):
+        """Logs via the redis database"""
+        data = {
+            "source": self.name,
+            "content": content,
+            "level": level
+        }
+        self.db.set(f"log", pickle.dumps(data))
+        self.db.publish(f"log", pickle.dumps(data))
 
     def __str__(self):
         return str(f"driver_{self.name}")

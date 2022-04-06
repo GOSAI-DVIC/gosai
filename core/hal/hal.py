@@ -1,11 +1,12 @@
 # Hardware Abstraction Layer
 
-import datetime
 import os
+import pickle
 from typing import Any
 
+import redis
+
 DRIVERS_PATH = "core/hal/drivers"
-LOGS_PATH = "core/hal/logs"
 
 
 class HardwareAbstractionLayer:
@@ -15,6 +16,8 @@ class HardwareAbstractionLayer:
     """
 
     def __init__(self):
+
+        self.db = redis.Redis(host="localhost", port=6379, db=0)
 
         self.name = "hal"
         self.log(f"Starting {self.name}")
@@ -53,7 +56,7 @@ class HardwareAbstractionLayer:
             return False
 
         if driver_name not in self.drivers:
-                self.init_driver(driver_name)
+            self.init_driver(driver_name)
 
         driver = self.drivers[driver_name]
 
@@ -130,15 +133,8 @@ class HardwareAbstractionLayer:
         """Returns a list of available drivers"""
         return self.available_drivers
 
-    def log(self, message, level=1):
-        """
-        Logs every things (for now in the console)
-        TODO: create a temporary log file
-        """
-        if level >= int(os.environ["LOG_LEVEL"]):
-            print(f"{self.name}: {message}")
-
-        with open(f"{LOGS_PATH}/{self.name}.log", "a+") as log:
-            log.write(
-                f"{datetime.datetime.now().strftime('%b-%d-%G-%I:%M:%S%p')} : {message}\n"
-            )
+    def log(self, content, level=1):
+        """Logs via the redis database"""
+        data = {"source": self.name, "content": content, "level": level}
+        self.db.set(f"log", pickle.dumps(data))
+        self.db.publish(f"log", pickle.dumps(data))
