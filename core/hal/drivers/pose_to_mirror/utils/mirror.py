@@ -47,7 +47,7 @@ def mirror_points_with_interpolation(points: list, old_points: list, t: int = 0.
         x = width * (point[0] - x_offset) / screen_width
         y = height * (point[1] - y_offset) / screen_height
         if len(points) == len(old_points) and t < 1:
-            if(y > 0):
+            if y > 0:
                 x = lerp(old_points[i][0], x, t)
                 y = lerp(old_points[i][1], y, t)
             else:
