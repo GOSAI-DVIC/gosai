@@ -3,13 +3,14 @@
 import cv2
 import mediapipe as mp
 
+
 def init():
     mp_holistic = mp.solutions.holistic
     return mp_holistic.Holistic(
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5,
-        smooth_landmarks=False,
-        model_complexity=0
+        smooth_landmarks=True,
+        model_complexity=0,
     )
 
 
@@ -38,50 +39,50 @@ def find_all_poses(holistic, frame, window):
     body_landmarks = []
 
     if results.pose_landmarks:
-        for landmark in results.pose_landmarks.landmark:
-            body_landmarks.append(
-                [
-                    min_width + int(landmark.x * image.shape[1]),
-                    int(landmark.y * image.shape[0]),
-                    round(landmark.visibility, 2)
-                ]
-            )
+        body_landmarks = [
+            [
+                min_width + int(landmark.x * image.shape[1]),
+                int(landmark.y * image.shape[0]),
+                round(landmark.visibility, 2),
+            ]
+            for landmark in results.pose_landmarks.landmark
+        ]
 
     faces_landmarks = []
 
     if results.face_landmarks:
-        for landmark in results.face_landmarks.landmark:
-            faces_landmarks.append(
-                [
-                    min_width + int(landmark.x * image.shape[1]),
-                    int(landmark.y * image.shape[0]),
-                    round(landmark.visibility, 2)
-                ]
-            )
+        faces_landmarks = [
+            [
+                min_width + int(landmark.x * image.shape[1]),
+                int(landmark.y * image.shape[0]),
+                round(landmark.visibility, 2),
+            ]
+            for landmark in results.face_landmarks.landmark
+        ]
 
     left_hands_landmarks = []
 
     if results.left_hand_landmarks:
-        for landmark in results.left_hand_landmarks.landmark:
-            left_hands_landmarks.append(
-                [
-                    min_width + int(landmark.x * image.shape[1]),
-                    int(landmark.y * image.shape[0]),
-                    round(landmark.visibility, 2)
-                ]
-            )
+        left_hands_landmarks = [
+            [
+                min_width + int(landmark.x * image.shape[1]),
+                int(landmark.y * image.shape[0]),
+                round(landmark.visibility, 2),
+            ]
+            for landmark in results.left_hand_landmarks.landmark
+        ]
 
     right_hands_landmarks = []
 
     if results.right_hand_landmarks:
-        for landmark in results.right_hand_landmarks.landmark:
-            right_hands_landmarks.append(
-                [
-                    min_width + int(landmark.x * image.shape[1]),
-                    int(landmark.y * image.shape[0]),
-                    round(landmark.visibility, 2)
-                ]
-            )
+        right_hands_landmarks = [
+            [
+                min_width + int(landmark.x * image.shape[1]),
+                int(landmark.y * image.shape[0]),
+                round(landmark.visibility, 2),
+            ]
+            for landmark in results.right_hand_landmarks.landmark
+        ]
 
     # e3 = time.time()
     # print(f"    Convert data: {(e3 - e2)*1000} ms")
