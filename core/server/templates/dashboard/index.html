@@ -7,13 +7,27 @@
     <script src="./platform/src/libs/socket.io-3.0.5.js"></script>
     <script src="./platform/src/libs/p5.js"></script>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="./platform/src/style/style.css">
+    <link rel="stylesheet" type="text/css" href="./dashboard/src/style/style.css">
     <style> body {padding: 0; margin: 0;} canvas {vertical-align: top;} </style>
 </head>
 
 <body>
-    <script src="./dashboard/menu.js"></script>
-    <script src="./dashboard/socket.js"></script>
+    <script src="./dashboard/src/scripts/main.js"></script>
+    <script src="./dashboard/src/scripts/socket.js"></script>
+    <p id="title">GOSAI Dashboard</p>
+    <div id="main">
+        <div id="console">
+            <p id="console-output"></p>
+            <div id="console-command">
+                <input id="console-input" placeholder="Input your command here"></input>
+                <button id="console-submit">Submit</button>
+            </div>
+        </div>
+        <div id="info">
+
+        </div>
+
+    </div>
 </body>
 
 </html>

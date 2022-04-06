@@ -14,3 +14,13 @@ const socket = io.connect(window.location.origin, {
     transports: ["websocket"]
 });
 
+socket.on("log_history", data => {
+    history = data["history"];
+    generate_console_logs();
+})
+
+socket.on("log", log => {
+    add_to_logs(log);
+});
+
+socket.emit("get_log_history");
