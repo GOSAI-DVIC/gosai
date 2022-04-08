@@ -44,14 +44,21 @@ class BaseDriver(Process):
 
     def run(self):
         """Runs when the thread is started"""
-
-        self.pre_run()
+        try:
+            self.pre_run()
+        except Exception as e:
+            self.log(f"Error when starting the driver: {e}", 4)
+            return
         # Starts the required drivers
         self.log("Driver running", 2)
 
         while 1:
             if not self.paused.value:
-                self.loop()
+                try:
+                    self.loop()
+                except Exception as e:
+                    self.log(f"Error when running the driver: {e}", 4)
+                    return
             else:
                 time.sleep(0.5)
 
