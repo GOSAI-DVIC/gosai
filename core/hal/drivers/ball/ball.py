@@ -88,7 +88,7 @@ class Driver(BaseDriver):
     def __init__(self, name: str, parent, max_fps: int = 120) -> None:
         super().__init__(name, parent)
 
-        self.register_to_driver("video", "color")
+        self.register_to_driver("camera", "color")
         self.create_event("balls")
         self.create_event("fps")
 
@@ -108,7 +108,7 @@ class Driver(BaseDriver):
     def loop(self) -> None:
         start_t = time.time()
 
-        frame = self.parent.get_driver_event_data("video", "color")
+        frame = self.parent.get_driver_event_data("camera", "color")
         if frame is not None:
             if self.bkg.shape != frame.shape:
                 self.bkg = cv2.resize(self.bkg, (frame.shape[1], frame.shape[0]))

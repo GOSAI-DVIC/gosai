@@ -17,7 +17,7 @@ class Driver(BaseDriver):
     def __init__(self, name: str, parent, max_fps: int = 60):
         super().__init__(name, parent)
 
-        self.register_to_driver("video", "color")
+        self.register_to_driver("camera", "color")
 
         self.create_event("raw_data")
 
@@ -34,7 +34,7 @@ class Driver(BaseDriver):
     def loop(self):
         start_t = time.time()
 
-        color = self.parent.get_driver_event_data("video", "color")
+        color = self.parent.get_driver_event_data("camera", "color")
 
         if color is not None:
             raw_data = pe.find_all_poses(self.holistic, color, self.window)

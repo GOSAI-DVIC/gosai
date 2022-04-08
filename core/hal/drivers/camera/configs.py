@@ -8,7 +8,7 @@ class StandardCamera:
     """
 
     def __init__(self, width, height, id: int = 0):
-        self.name = "basic"
+        self.name = "standard"
         self.width = width
         self.height = height
         self.cap = cv.VideoCapture(id)
@@ -87,8 +87,8 @@ class IntelCamera:
         color_frame = np.fliplr(np.asanyarray(color_frame.get_data()))
         depth_frame = np.fliplr(np.asanyarray(depth_frame.get_data()))
 
-        color_frame = color_frame.copy()
-        depth_frame = depth_frame.copy()
+        # color_frame = color_frame.copy()
+        # depth_frame = depth_frame.copy()
 
         return [color_frame, depth_frame]
 

@@ -63,20 +63,20 @@ def CropCoords(lefty: float,righty: float) -> Any:
     j=[float(DEFAULT_SIZE[0]-1),float(righty)]
 
     try:
-        # Calculate the coefficients. y=ax+b 
+        # Calculate the coefficients. y=ax+b
         a = (j[1] - i[1]) / (j[0] - i[0])
         b = i[1] - a * i[0]
         if(lefty<0):
             i=[(-b/a) -1, 0.]
         elif(lefty > DEFAULT_SIZE[1]-1):
             i=[((DEFAULT_SIZE[1]-b)/a) -1, float(DEFAULT_SIZE[1]-1)]
-        
+
         if(righty<0):
             j=[(-b/a) - 1, 0.]
         elif(righty>DEFAULT_SIZE[1]-1):
             j=[((DEFAULT_SIZE[1]-b)/a) -1, float(DEFAULT_SIZE[1] -1)]
     except:
-        print("An exception occurred") 
+        print("An exception occurred")
 
     i = np.array([int(i[0]), int(i[1]), 1])
     j = np.array([int(j[0]), int(j[1]), 1])
@@ -88,7 +88,7 @@ def detect_cue(bkg: np.ndarray, frame: np.ndarray, camera: Camera) -> list(tuple
     cue = False
     # a,b = -1, -1
     a1, a2, b1, b2 = -1,-1, -1, -1
-    
+
     frame = cv2.absdiff(bkg, frame)
     frame = camera.warp_projection(frame, DEFAULT_SIZE)
     frame = cv2.GaussianBlur(frame, (5, 5), 0)
@@ -133,7 +133,7 @@ class Driver(BaseDriver):
     def __init__(self, name: str, parent, max_fps: int = 120) -> None:
         super().__init__(name, parent)
 
-        self.register_to_driver("video", "color")
+        self.register_to_driver("camera", "color")
         self.create_event("cue")
         self.create_event("fps")
 
@@ -153,7 +153,7 @@ class Driver(BaseDriver):
     def loop(self) -> None:
         start_t = time.time()
 
-        frame = self.parent.get_driver_event_data("video", "color")
+        frame = self.parent.get_driver_event_data("camera", "color")
         if frame is not None:
             if self.bkg.shape != frame.shape:
                 self.bkg = cv2.resize(self.bkg, (frame.shape[1], frame.shape[0]))

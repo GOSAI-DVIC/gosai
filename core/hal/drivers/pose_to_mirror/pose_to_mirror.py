@@ -19,7 +19,7 @@ class Driver(BaseDriver):
         super().__init__(name, parent)
 
         self.register_to_driver("pose", "raw_data")
-        self.register_to_driver("video", "depth")
+        self.register_to_driver("camera", "depth")
         self.create_event("projected_data")
         self.create_event("mirrored_data")
 
@@ -64,7 +64,7 @@ class Driver(BaseDriver):
         start_t = time.time()
 
         raw_data = self.parent.get_driver_event_data("pose", "raw_data")
-        depth = self.parent.get_driver_event_data("video", "depth")
+        depth = self.parent.get_driver_event_data("camera", "depth")
 
         if raw_data is not None and bool(raw_data["body_pose"]) and depth is not None:
             flag_1 = time.time()

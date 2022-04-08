@@ -5,7 +5,7 @@ import sys
 import time
 from os import path
 
-from core.hal.drivers.video.cameras import IntelCamera, StandardCamera
+from core.hal.drivers.camera.configs import IntelCamera, StandardCamera
 from core.hal.drivers.driver import BaseDriver
 
 
