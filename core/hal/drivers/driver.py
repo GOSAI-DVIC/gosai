@@ -89,6 +89,8 @@ class BaseDriver(Process):
                 self.parent.unregister_from_driver(driver_name, self, event)
 
         self.paused.value = 1
+        # Notify the parent that the driver is stopped
+        self.db.publish(f"driver_stopped", pickle.dumps({"driver_name": self.name}))
 
     def create_event(self, event) -> bool:
         """Adds an event to the driver"""
