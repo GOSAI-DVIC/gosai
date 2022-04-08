@@ -2,6 +2,7 @@
 
 import os
 import pickle
+import threading
 from typing import Any
 
 import redis
@@ -15,11 +16,11 @@ class HardwareAbstractionLayer:
     Should be used by the apps to access the drivers
     """
 
-    def __init__(self):
-
+    def __init__(self, server):
+        self.name = "hal"
+        self.server = server
         self.db = redis.Redis(host="localhost", port=6379, db=0)
 
-        self.name = "hal"
         self.log(f"Starting {self.name}")
         self.available_drivers = [
             f.path.split("/")[-1]
@@ -28,6 +29,9 @@ class HardwareAbstractionLayer:
         ]
 
         self.drivers = {}
+
+        self.add_api()
+        self.monitor_driver_stopping()
 
         # for driver_name in self.available_drivers:
 
@@ -75,7 +79,22 @@ class HardwareAbstractionLayer:
             if driver.paused.value:
                 driver.resume()
 
+        self.update_api_listeners()
         return True
+
+    def monitor_driver_stopping(self):
+        """Monitors when a driver is stopped to update the api"""
+        def _monitor_driver_stopping():
+            ps = self.db.pubsub()
+            ps.subscribe(f"driver_stopped")
+            for msg in ps.listen():
+                try:
+                    driver_name = pickle.loads(msg["data"])["driver_name"]
+                    self.update_api_listeners()
+                except Exception as e:
+                    pass
+
+        threading.Thread(target=_monitor_driver_stopping).start()
 
     def register_to_driver(self, driver_name: str, entity: str, event: str) -> bool:
         """
@@ -127,6 +146,9 @@ class HardwareAbstractionLayer:
         for driver_name, driver in self.drivers.items():
             if not driver.started.value or driver.paused.value:
                 stopped_drivers.append(driver_name)
+        for driver_name in self.available_drivers:
+            if driver_name not in self.drivers:
+                stopped_drivers.append(driver_name)
         return stopped_drivers
 
     def get_drivers(self) -> str:
@@ -138,3 +160,32 @@ class HardwareAbstractionLayer:
         data = {"source": self.name, "content": content, "level": level}
         self.db.set(f"log", pickle.dumps(data))
         self.db.publish(f"log", pickle.dumps(data))
+
+    def add_api(self):
+        """Adds the Hal api to the server"""
+
+        @self.server.sio.on("get_started_drivers")
+        def _():
+            self.server.send_data(
+                "started_drivers", {"drivers": self.get_started_drivers()}
+            )
+
+        @self.server.sio.on("get_stopped_drivers")
+        def _():
+            self.server.send_data(
+                "stopped_drivers", {"drivers": self.get_stopped_drivers()}
+            )
+
+        @self.server.sio.on("get_available_drivers")
+        def _():
+            self.server.send_data("available_drivers", {"drivers": self.get_drivers()})
+
+    def update_api_listeners(self):
+        """Updates the Hal api listeners"""
+        self.server.send_data(
+            "started_drivers", {"drivers": self.get_started_drivers()}
+        )
+        self.server.send_data(
+            "stopped_drivers", {"drivers": self.get_stopped_drivers()}
+        )
+        self.server.send_data("available_drivers", {"drivers": self.get_drivers()})
