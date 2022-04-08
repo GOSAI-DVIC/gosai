@@ -9,11 +9,11 @@ class AppManager:
 
     def __init__(self, hal, server):
         """Initializes the app manager"""
+        self.name = "app_manager"
         self.hal = hal
         self.server = server
         self.db = redis.Redis(host="localhost", port=6379, db=0)
 
-        self.name = "app_manager"
         self.available_apps = [
             f.name
             for f in os.scandir("home/apps")
@@ -23,40 +23,7 @@ class AppManager:
 
         self.data = {}
 
-        @self.server.sio.on("start_application")
-        def _(data) -> None:
-            self.start(data["application_name"])
-
-        @self.server.sio.on("stop_application")
-        def _(data) -> None:
-            self.stop(data["application_name"])
-
-        @self.server.sio.on("window_loaded")
-        def _() -> None:
-            for app_name in self.started_apps.keys():
-                self.server.send_data(
-                    "start_application", {"application_name": app_name}
-                )
-
-        @self.server.sio.on("get_started_applications")
-        def _() -> None:
-            self.server.send_data(
-                "started_applications",
-                {"applications": self.list_started_applications()},
-            )
-
-        @self.server.sio.on("get_stopped_applications")
-        def _() -> None:
-            self.server.send_data(
-                "stopped_applications",
-                {"applications": self.list_stopped_applications()},
-            )
-
-        @self.server.sio.on("get_available_applications")
-        def _() -> None:
-            self.server.send_data(
-                "available_applications", {"applications": self.list_applications()}
-            )
+        self.add_api()
 
     def list_applications(self) -> list:
         """Lists all available applications"""
@@ -109,6 +76,7 @@ class AppManager:
             # Store the app as a started app
             self.started_apps[app_name] = app
             self.log(f"Started application '{app_name}'", 2)
+            self.update_api_listeners()
 
         except Exception as e:
             self.log(f"Failed to start application '{app_name}': {e}", 4)
@@ -141,6 +109,7 @@ class AppManager:
 
             del self.started_apps[app_name]
             self.log(f"Stopped application '{app_name}'", 2)
+            self.update_api_listeners()
 
         except Exception as e:
             self.log(f"Failed to stop application '{app_name}': {e}", 4)
@@ -153,3 +122,57 @@ class AppManager:
         data = {"source": self.name, "content": content, "level": level}
         self.db.set(f"log", pickle.dumps(data))
         self.db.publish(f"log", pickle.dumps(data))
+
+    def add_api(self):
+        """Adds the App manager api to the server"""
+
+        @self.server.sio.on("start_application")
+        def _(data) -> None:
+            self.start(data["application_name"])
+
+        @self.server.sio.on("stop_application")
+        def _(data) -> None:
+            self.stop(data["application_name"])
+
+        @self.server.sio.on("window_loaded")
+        def _() -> None:
+            for app_name in self.started_apps.keys():
+                self.server.send_data(
+                    "start_application", {"application_name": app_name}
+                )
+
+        @self.server.sio.on("get_started_applications")
+        def _() -> None:
+            self.server.send_data(
+                "started_applications",
+                {"applications": self.list_started_applications()},
+            )
+
+        @self.server.sio.on("get_stopped_applications")
+        def _() -> None:
+            self.server.send_data(
+                "stopped_applications",
+                {"applications": self.list_stopped_applications()},
+            )
+
+        @self.server.sio.on("get_available_applications")
+        def _() -> None:
+            self.server.send_data(
+                "available_applications", {"applications": self.list_applications()}
+            )
+
+    def update_api_listeners(self):
+        """Updates the App manager api listeners"""
+        self.server.send_data(
+            "started_applications",
+            {"applications": self.list_started_applications()},
+        )
+
+        self.server.send_data(
+            "stopped_applications",
+            {"applications": self.list_stopped_applications()},
+        )
+
+        self.server.send_data(
+            "available_applications", {"applications": self.list_applications()}
+        )
