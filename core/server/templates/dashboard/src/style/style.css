@@ -29,7 +29,7 @@ head, body {
     flex-direction: row;
 }
 
-@media all and (max-width:800px) {
+@media all and (max-width:1024px) {
     #main {
         flex-direction: column;
         width: calc(100% - 2rem);
