@@ -47,40 +47,39 @@ def eval_command(console: Console, command: str) -> None:
 
     elif execute == "help":
         result = "Available commands:\n"
-        result += "    exit - exit the application\n"
+        # result += "    exit - exit the application\n"
         result += "    help - show this help\n"
         result += "    ls drivers - list all available drivers\n"
         result += "    ls applications - list all available applications\n"
         result += "    log $level - set the log level\n"
+        result += "    password - Show the current password to access control\n"
+        result += "    password generate - Generates a new password to access control\n"
         result += "    restart $app_name - restart an app\n"
         result += "    start $app_name - start an app\n"
         result += "    stop $app_name - stop an app\n"
         console.log(result)
+        return
 
-    elif execute == "start":
-        if len(arguments) == 0:
-            console.log("Please specify an application to start", 3)
+    elif execute == "log":
+        if len(arguments) == 1:
+            try:
+                assert int(arguments[0]) in range(0, 3)
+                os.environ["LOG_LEVEL"] = str(int(arguments[0]))
+                console.log("Log level set to " + arguments[0], 3)
+                return
+            except Exception as e:
+                console.log("Invalid log level: " + str(e))
+                return
         else:
-            console.app_manager.start(arguments[0])
-
-    elif execute == "stop":
-        if len(arguments) == 0:
-            console.log("Please specify an application to stop", 3)
-        else:
-            console.app_manager.stop(arguments[0])
-
-    elif execute == "restart":
-        if len(arguments) == 0:
-            console.log("Please specify an application to restart", 3)
-        elif len(arguments) == 1:
-            console.app_manager.stop(arguments[0])
-            console.app_manager.start(arguments[0])
+            console.log("Please specify a log level", 3)
+            return
 
     elif execute == "ls":
         if len(arguments) == 1 and arguments[0] == "drivers":
             result = "Available drivers:\n"
             result += "\n".join(console.hal.get_drivers()) + "\n"
             console.log(result)
+            return
 
         if (
             len(arguments) == 2
@@ -90,6 +89,7 @@ def eval_command(console: Console, command: str) -> None:
             result = "Started drivers:\n"
             result += "\n".join(console.hal.get_started_drivers()) + "\n"
             console.log(result)
+            return
 
         if (
             len(arguments) == 2
@@ -99,11 +99,13 @@ def eval_command(console: Console, command: str) -> None:
             result = "Stopped drivers:\n"
             result += "\n".join(console.hal.get_stopped_drivers()) + "\n"
             console.log(result)
+            return
 
         if len(arguments) == 1 and arguments[0] == "applications":
             result = "Available applications:\n"
             result += "\n".join(console.app_manager.list_applications()) + "\n"
             console.log(result)
+            return
 
         if (
             len(arguments) == 2
@@ -113,6 +115,7 @@ def eval_command(console: Console, command: str) -> None:
             result = "Started applications:\n"
             result += "\n".join(console.app_manager.list_started_applications()) + "\n"
             console.log(result)
+            return
 
         if (
             len(arguments) == 2
@@ -122,17 +125,47 @@ def eval_command(console: Console, command: str) -> None:
             result = "Stopped applications:\n"
             result += "\n".join(console.app_manager.list_stopped_applications()) + "\n"
             console.log(result)
+            return
 
-    elif execute == "log":
-        if len(arguments) == 1:
-            try:
-                assert int(arguments[0]) in range(0, 3)
-                os.environ["LOG_LEVEL"] = str(int(arguments[0]))
-                console.log("Log level set to " + arguments[0], 3)
-            except Exception as e:
-                console.log("Invalid log level: " + str(e))
+    elif execute == "password":
+        if len(arguments) == 0:
+            result = "Password to access control: " + console.server.control_password
+            console.log(result)
+            return
+
+        elif len(arguments) == 1 and arguments[0] == "generate":
+            console.server.generate_control_password()
+            result = (
+                "New password to access control generated: "
+                + console.server.control_password
+            )
+            console.log(result)
+            return
+
+    elif execute == "restart":
+        if len(arguments) == 0:
+            console.log("Please specify an application to restart", 3)
+            return
+
+        elif len(arguments) == 1:
+            console.app_manager.stop(arguments[0])
+            console.app_manager.start(arguments[0])
+            return
+
+    elif execute == "start":
+        if len(arguments) == 0:
+            console.log("Please specify an application to start", 3)
+            return
         else:
-            console.log("Please specify a log level", 3)
+            console.app_manager.start(arguments[0])
+            return
 
-    else:
-        console.log("Unknown command: " + command, 3)
+    elif execute == "stop":
+        if len(arguments) == 0:
+            console.log("Please specify an application to stop", 3)
+            return
+        else:
+            console.app_manager.stop(arguments[0])
+            return
+
+    console.log("Unknown command: " + command, 3)
