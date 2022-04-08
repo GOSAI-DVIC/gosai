@@ -12,6 +12,7 @@ class StandardCamera:
         self.width = width
         self.height = height
         self.cap = cv.VideoCapture(id)
+        assert self.cap is not None and self.cap.isOpened(), "CV2 error: Camera not found"
         self.cap.set(3, self.width)
         self.cap.set(4, self.height)
 
