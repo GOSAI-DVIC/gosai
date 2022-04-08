@@ -87,3 +87,37 @@ head, body {
 #info {
     width: 100%;
 }
+
+.level-info {
+    color: #95fff1;
+}
+
+.level-warning {
+    color: #ffd700;
+}
+
+.level-error {
+    color: #ff0000;
+}
+
+#info {
+    width: 100%;
+    height: calc(100vh - 6rem);
+    margin: 0;
+    padding: 1rem;
+    display: flex;
+    justify-content: left;
+    flex-direction: column;
+}
+
+.info-title {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin: 1rem 0 0.5rem 0;
+}
+
+.info-stats {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

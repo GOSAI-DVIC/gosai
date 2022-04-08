@@ -19,12 +19,33 @@
         <div id="console">
             <p id="console-output"></p>
             <div id="console-command">
-                <input id="console-input" placeholder="Input your command here"></input>
-                <button id="console-submit">Submit</button>
+                <input id="console-input" placeholder="Input your command here" onkeydown="do_send(event)"></input>
+                <button id="console-submit" onclick="send_command()">Submit</button>
             </div>
         </div>
         <div id="info">
-
+            <div id="clients" class="info-tab">
+                <p class="info-title">Clients</p>
+                <div id="clients-stats" class="info-stats">
+                    <p class="info-subtitle">Connected clients: <span id="clients-stats-connected">0</span></p>
+                </div>
+            </div>
+            <div id="applications" class="info-tab">
+                <p class="info-title">Applications</p>
+                <div id="applications-stats" class="info-stats">
+                    <p class="info-subtitle">Available applications:  <span id="applications-stats-available">0</span></p>
+                    <p class="info-subtitle">Started applications:  <span id="applications-stats-started">0</span></p>
+                    <p class="info-subtitle">Stopped applications:  <span id="applications-stats-stopped">0</span></p>
+                </div>
+            </div>
+            <div id="drivers" class="info-tab">
+                <p class="info-title">Drivers</p>
+                <div id="drivers-stats" class="info-stats">
+                    <p class="info-subtitle">Available drivers:  <span id="drivers-stats-available">0</span></p>
+                    <p class="info-subtitle">Started drivers:  <span id="drivers-stats-started">0</span></p>
+                    <p class="info-subtitle">Stopped drivers:  <span id="drivers-stats-stopped">0</span></p>
+                </div>
+            </div>
         </div>
 
     </div>
