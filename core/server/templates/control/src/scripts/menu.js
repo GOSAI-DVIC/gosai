@@ -45,24 +45,22 @@ function preload() {
 
 function setup() {
     platform_name =
-    platform_config.name[0].toUpperCase() +
-    platform_config.name.substring(1);
+        platform_config.name[0].toUpperCase() +
+        platform_config.name.substring(1);
 
     document.getElementById("title").innerHTML = platform_name;
 
     socket.emit("get_available_applications");
     socket.emit("get_started_applications");
 
-    canvas = createCanvas(windowWidth * 0.9, 200);
+    canvas = createCanvas(windowWidth * 0.9, min(windowWidth * 0.35, 750 * 0.35));
     canvas.parent("canvas-div");
 
     angleMode(DEGREES);
     imageMode(CENTER);
     frameRate(120);
 
-    image_size = height * 0.4;
-    mic_img.resize(image_size, 1.6*image_size);
-    spk_img.resize(1.6*image_size, 1.6*image_size);
+    image_size = min(height * 0.4, 100);
 
     mic_coords = {
         x: (2 * width) / 6,
@@ -86,6 +84,21 @@ function setup() {
     // soundFile = new p5.SoundFile();
 }
 
+function windowResized() {
+    resizeCanvas(windowWidth * 0.9, min(windowWidth * 0.35, 750 * 0.35));
+    image_size = min(height * 0.4, 100);
+
+    mic_coords = {
+        x: (2 * width) / 6,
+        y: height / 2,
+    };
+
+    spk_coords = {
+        x: (4 * width) / 6,
+        y: height / 2,
+    };
+}
+
 function draw() {
     background(0);
 
@@ -93,7 +106,7 @@ function draw() {
     push();
     stroke(214, 128, 255);
     strokeWeight(3);
-    image(mic_img, mic_coords.x, mic_coords.y);
+    image(mic_img, mic_coords.x, mic_coords.y, image_size, 1.6 * image_size);
     noFill();
     circle(mic_coords.x, mic_coords.y, image_size * 1.8);
 
@@ -136,14 +149,14 @@ function draw() {
     push();
     stroke(214, 128, 255);
     strokeWeight(3);
-    image(spk_img, spk_coords.x, spk_coords.y);
+    image(spk_img, spk_coords.x, spk_coords.y, 1.6 * image_size, 1.6 * image_size);
     noFill();
     circle(spk_coords.x, spk_coords.y, image_size * 1.8);
 
     if (
         (mouseIsPressed &&
             dist(mouseX, mouseY, spk_coords.x, spk_coords.y) <
-                image_size * 0.9) ||
+            image_size * 0.9) ||
         speaker_request
     ) {
         speaker = true;
@@ -172,10 +185,6 @@ function draw() {
     }
     pop();
     angle++;
-}
-
-function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
 }
 
 function isMobileDevice() {
