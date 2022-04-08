@@ -8,9 +8,10 @@ from core.server.server import Server, start_chrome
 
 os.environ["LOG_LEVEL"] = "2"
 
-hal = HardwareAbstractionLayer()
-server = Server(hal)
+server = Server()
 server.start()
+
+hal = HardwareAbstractionLayer(server)
 
 logger = Logger(server)
 logger.log_listenner()

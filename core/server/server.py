@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+import pickle
 import random
 import threading
 import time
@@ -9,6 +10,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, render_template, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
+import redis
 
 
 def start_chrome(path):
@@ -25,7 +27,7 @@ def start_chrome(path):
 class Server:
     """Main server class"""
 
-    def __init__(self, hal):
+    def __init__(self):
         self.app = Flask(__name__)
         self.app.config["SECRET_KEY"] = "secret!"
         CORS(self.app)
@@ -33,7 +35,7 @@ class Server:
         load_dotenv("home/.env")
         platform_name = os.getenv("PLATFORM")
         if platform_name is None:
-            self.hal.log("Server: No platform name found in .env file", 3)
+            self.log("No platform name found in .env file", 3)
             platform_name = "default"
 
         self.base_path = f"gosai/{platform_name}"
@@ -46,8 +48,6 @@ class Server:
             async_mode="eventlet",
             cors_allowed_origins="*",
         )
-
-        self.hal = hal
 
         self.clients = {}
 
@@ -118,11 +118,21 @@ class Server:
                 name, data = self.queue.get()
                 self.sio.emit(name, data)
 
+    def log(self, content, level=1):
+        """Logs via the redis database"""
+        data = {"source": "server", "content": content, "level": level}
+        self.db.set(f"log", pickle.dumps(data))
+        self.db.publish(f"log", pickle.dumps(data))
+
 
 def create_socket_api(server: Server):
     @server.sio.on("connect")
     def connect(*args):
         server.clients[request.sid] = [request.remote_addr]
+        server.sio.emit(
+            "connected_users",
+            {"users": server.clients}
+            )
         if not server.background_thread_started:
             server.sio.start_background_task(server.send_queued_data)
             server.background_thread_started = True
@@ -130,6 +140,10 @@ def create_socket_api(server: Server):
     @server.sio.on("disconnect")
     def disconnect():
         del server.clients[request.sid]
+        server.sio.emit(
+            "connected_users",
+            {"users": server.clients}
+            )
 
     @server.sio.on("get_users")
     def get_users():
@@ -167,22 +181,6 @@ def create_socket_api(server: Server):
     @server.sio.on("sound")
     def _():
         server.sio.emit("sound")
-
-    @server.sio.on("get_started_drivers")
-    def _():
-        server.sio.emit(
-            "started_drivers", {"drivers": server.hal.get_started_drivers()}
-        )
-
-    @server.sio.on("get_stopped_drivers")
-    def _():
-        server.sio.emit(
-            "stopped_drivers", {"drivers": server.hal.get_stopped_drivers()}
-        )
-
-    @server.sio.on("get_available_drivers")
-    def _():
-        server.sio.emit("available_drivers", {"drivers": server.hal.get_drivers()})
 
 
 def create_flask_api(server: Server):
