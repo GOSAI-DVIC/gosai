@@ -9,13 +9,23 @@
     <!-- <script src="./platform/src/libs/p5.sound.min.js"></script>
     <script src="./platform/src/libs/p5.sound.js"></script> -->
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="./platform/src/style/style.css">
-    <style> body {padding: 0; margin: 0;} canvas {vertical-align: top;} </style>
+    <link rel="stylesheet" type="text/css" href="./control/src/style/style.css">
 </head>
 
 <body>
-    <script src="./control/menu.js"></script>
-    <script src="./control/socket.js"></script>
+    <script src="./control/src/scripts/menu.js"></script>
+    <script src="./control/src/scripts/socket.js"></script>
+    <div id="main">
+        <div id="header-div">
+            <h1 id="title">Platform_name</h1>
+            <h2 id="subtitle">Powered by GOSAI</h2>
+        </div>
+        <hr id="top-line">
+        <div id="buttons-div"></div>
+        <hr id="bottom-line">
+        <div id="canvas-div"></div>
+
+    </div>
 </body>
 
 </html>
