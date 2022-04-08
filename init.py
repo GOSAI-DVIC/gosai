@@ -18,7 +18,6 @@ logger.log_listenner()
 
 app_manager = AppManager(hal, server)
 app_manager.start("menu")
-app_manager.start("show_hands")
 
 start_chrome(server.path)
 
