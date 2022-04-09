@@ -128,14 +128,18 @@ class Server:
 def create_socket_api(server: Server):
     @server.sio.on("connect")
     def connect(*args):
-        server.clients[request.sid] = [request.remote_addr]
+        server.clients[request.sid] = {
+            "address": request.remote_addr,
+            "source": request.args.get("source"),
+            "time": dt.datetime.now().strftime('%b-%d-%G-%I:%M:%S%p')
+            }
         server.sio.emit(
             "connected_users",
             {"users": server.clients}
             )
         if not server.background_thread_started:
-            server.sio.start_background_task(server.send_queued_data)
             server.background_thread_started = True
+            server.sio.start_background_task(server.send_queued_data)
 
     @server.sio.on("disconnect")
     def disconnect():
