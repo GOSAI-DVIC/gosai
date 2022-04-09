@@ -23,7 +23,6 @@ class Console(threading.Thread):
 
     def run(self):
         time.sleep(1)
-        print("")
         while 1:
             time.sleep(0.5)
             print("")
@@ -43,20 +42,20 @@ def eval_command(console: Console, command: str) -> None:
 
     if execute == "exit":
         console.log("Exiting...")
-        sys.exit()
+        exit()
 
     elif execute == "help":
         result = "Available commands:\n"
-        # result += "    exit - exit the application\n"
-        result += "    help - show this help\n"
-        result += "    ls drivers - list all available drivers\n"
-        result += "    ls applications - list all available applications\n"
-        result += "    log $level - set the log level\n"
+        result += "    exit - exit the application\n"
+        result += "    help - Show this helper\n"
+        result += "    ls drivers - List all available drivers\n"
+        result += "    ls applications - List all available applications\n"
+        result += "    log $level - Set the log level\n"
         result += "    password - Show the current password to access control\n"
         result += "    password generate - Generates a new password to access control\n"
-        result += "    restart $app_name - restart an app\n"
-        result += "    start $app_name - start an app\n"
-        result += "    stop $app_name - stop an app\n"
+        result += "    restart $app_name - Restart an app\n"
+        result += "    start $app_name - Start an app\n"
+        result += "    stop $app_name - Stop an app\n"
         console.log(result)
         return
 
