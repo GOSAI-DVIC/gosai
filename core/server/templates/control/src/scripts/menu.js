@@ -44,11 +44,13 @@ function preload() {
 }
 
 function setup() {
-    platform_name =
-        platform_config.name[0].toUpperCase() +
-        platform_config.name.substring(1);
+    if (platform_config.name != undefined) {
+        platform_name =
+            platform_config.name[0].toUpperCase() +
+            platform_config.name.substring(1);
 
-    document.getElementById("title").innerHTML = platform_name;
+        document.getElementById("title").innerHTML = platform_name;
+    }
 
     socket.emit("get_available_applications");
     socket.emit("get_started_applications");
