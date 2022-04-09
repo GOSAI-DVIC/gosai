@@ -57,7 +57,7 @@ function send_command() {
     document.getElementById("console-input").value = "";
 }
 
-function do_send(event) {
+function key_action(event) {
     switch (event.key) {
         case "Enter":
             send_command();
@@ -88,5 +88,46 @@ function do_send(event) {
             break;
         default:
             break;
+    }
+}
+
+function generate_clients_table(clients) {
+    sids = Object.keys(clients);
+    document.getElementById("clients-table-body").innerHTML = "";
+    console.log(clients)
+    for (let i = 0; i < sids.length; i++){
+        let row = document.createElement("tr");
+        let sid = sids[i];
+
+        let sid_cell = document.createElement("td");
+        sid_cell.innerHTML = sid;
+        row.appendChild(sid_cell);
+
+        let ip_cell = document.createElement("td");
+        ip_cell.innerHTML = clients[sid]["address"];
+        row.appendChild(ip_cell);
+
+        let source_cell = document.createElement("td");
+        source_cell.innerHTML = clients[sid]["source"];
+        row.appendChild(source_cell);
+
+        let time_cell = document.createElement("td");
+        time_cell.innerHTML = clients[sid]["time"];
+        row.appendChild(time_cell);
+        document.getElementById("clients-table-body").appendChild(row);
+    }
+
+}
+
+function generate_table_from_list(table_id, list) {
+    document.getElementById(table_id).innerHTML = "";
+    for (let i = 0; i < list.length; i++) {
+        let row = document.createElement("tr");
+
+        let name_cell = document.createElement("td");
+        name_cell.innerHTML = list[i];
+        row.appendChild(name_cell);
+
+        document.getElementById(table_id).appendChild(row);
     }
 }

@@ -26,42 +26,49 @@ socket.on("log", (log) => {
 
 socket.on("available_applications", (data) => {
     let applications = data["applications"];
+    generate_table_from_list("available-applications-table-body", applications);
     let display = document.getElementById("applications-stats-available");
     display.innerText = applications.length;
 });
 
 socket.on("started_applications", (data) => {
     let applications = data["applications"];
+    generate_table_from_list("started-applications-table-body", applications);
     let display = document.getElementById("applications-stats-started");
     display.innerText = applications.length;
 });
 
 socket.on("stopped_applications", (data) => {
     let applications = data["applications"];
+    generate_table_from_list("stopped-applications-table-body", applications);
     let display = document.getElementById("applications-stats-stopped");
     display.innerText = applications.length;
 });
 
 socket.on("available_drivers", (data) => {
     let drivers = data["drivers"];
+    generate_table_from_list("available-drivers-table-body", drivers);
     let display = document.getElementById("drivers-stats-available");
     display.innerText = drivers.length;
 });
 
 socket.on("started_drivers", (data) => {
     let drivers = data["drivers"];
+    generate_table_from_list("started-drivers-table-body", drivers);
     let display = document.getElementById("drivers-stats-started");
     display.innerText = drivers.length;
 });
 
 socket.on("stopped_drivers", (data) => {
     let drivers = data["drivers"];
+    generate_table_from_list("stopped-drivers-table-body", drivers);
     let display = document.getElementById("drivers-stats-stopped");
     display.innerText = drivers.length;
 });
 
 socket.on("connected_users", (data) => {
     let clients = data["users"];
+    generate_clients_table(clients);
     let display = document.getElementById("clients-stats-connected");
     display.innerText = Object.keys(clients).length;
 });
