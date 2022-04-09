@@ -11,7 +11,8 @@ const socket = io.connect(window.location.origin, {
 	agent: false,
 	upgrade: false,
 	rejectUnauthorized: false,
-    transports: ["websocket"]
+    transports: ["websocket"],
+    query: "source=control"
 });
 
 socket.on("available_applications", async (data) => {

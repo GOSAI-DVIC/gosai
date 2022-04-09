@@ -12,6 +12,7 @@ const socket = io.connect(window.location.origin, {
     upgrade: false,
     rejectUnauthorized: false,
     transports: ["websocket"],
+    query: "source=dashboard"
 });
 
 socket.on("log_history", (data) => {
