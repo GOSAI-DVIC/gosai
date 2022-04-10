@@ -4,6 +4,7 @@ import os
 import pickle
 import threading
 from typing import Any
+from matplotlib.style import available
 
 import redis
 
@@ -84,6 +85,7 @@ class HardwareAbstractionLayer:
 
     def monitor_driver_stopping(self):
         """Monitors when a driver is stopped to update the api"""
+
         def _monitor_driver_stopping():
             ps = self.db.pubsub()
             ps.subscribe(f"driver_stopped")
@@ -108,6 +110,7 @@ class HardwareAbstractionLayer:
 
         self.drivers[driver_name].register(entity, event)
 
+        self.update_api_listeners()
         return True
 
     def unregister_from_driver(self, driver_name: str, entity: str, event: str) -> bool:
@@ -120,6 +123,7 @@ class HardwareAbstractionLayer:
 
         self.drivers[driver_name].unregister(entity, event)
 
+        self.update_api_listeners()
         return True
 
     def get_driver_event_data(self, driver_name: str, event: str) -> Any:
@@ -137,7 +141,18 @@ class HardwareAbstractionLayer:
         started_drivers = []
         for driver_name, driver in self.drivers.items():
             if driver.started.value and not driver.paused.value:
-                started_drivers.append(driver_name)
+                registered_entities = {
+                    event: [entity.name for entity in driver.registered[event]]
+                    for event in driver.registered
+                }
+
+                started_drivers.append(
+                    {
+                        "name": driver_name,
+                        "started": 1,
+                        "registered_entities": registered_entities,
+                    }
+                )
         return started_drivers
 
     def get_stopped_drivers(self) -> str:
@@ -145,15 +160,32 @@ class HardwareAbstractionLayer:
         stopped_drivers = []
         for driver_name, driver in self.drivers.items():
             if not driver.started.value or driver.paused.value:
-                stopped_drivers.append(driver_name)
+                registered_entities = {
+                    event: [entity.name for entity in driver.registered[event]]
+                    for event in driver.registered
+                }
+                stopped_drivers.append(
+                    {
+                        "name": driver_name,
+                        "started": 0,
+                        "registered_entities": registered_entities,
+                    }
+                )
         for driver_name in self.available_drivers:
             if driver_name not in self.drivers:
-                stopped_drivers.append(driver_name)
+                stopped_drivers.append(
+                    {
+                        "name": driver_name,
+                        "started": 0,
+                        "registered_entities": {},
+                    }
+                )
         return stopped_drivers
 
     def get_drivers(self) -> str:
         """Returns a list of available drivers"""
-        return self.available_drivers
+        available_drivers = self.get_started_drivers() + self.get_stopped_drivers()
+        return available_drivers
 
     def log(self, content, level=1):
         """Logs via the redis database"""
