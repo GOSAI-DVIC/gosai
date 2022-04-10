@@ -47,8 +47,10 @@ def eval_command(console: Console, command: str) -> None:
                 return
 
             if len(arguments) == 1 and arguments[0] == "ls":
-                result = "Available applications:\n"
-                result += "\n".join(console.app_manager.list_applications()) + "\n"
+                result = "\nAvailable applications:\n"
+                result += (
+                    "\n".join("\t" + [app["name"] for app in console.app_manager.list_applications()]) + "\n"
+                )
                 console.log(result)
                 return
 
@@ -57,9 +59,10 @@ def eval_command(console: Console, command: str) -> None:
                 and arguments[0] == "ls"
                 and arguments[1] == "started"
             ):
-                result = "Started applications:\n"
+                result = "\nStarted applications:\n"
                 result += (
-                    "\n".join(console.app_manager.list_started_applications()) + "\n"
+                    "\n".join("\t" + [app["name"] for app in console.app_manager.list_started_applications()])
+                    + "\n"
                 )
                 console.log(result)
                 return
@@ -69,9 +72,10 @@ def eval_command(console: Console, command: str) -> None:
                 and arguments[0] == "ls"
                 and arguments[1] == "stopped"
             ):
-                result = "Stopped applications:\n"
+                result = "\nStopped applications:\n"
                 result += (
-                    "\n".join(console.app_manager.list_stopped_applications()) + "\n"
+                    "\n".join("\t" + [app["name"] for app in console.app_manager.list_stopped_applications()])
+                    + "\n"
                 )
                 console.log(result)
                 return
@@ -110,8 +114,13 @@ def eval_command(console: Console, command: str) -> None:
                 return
 
             if len(arguments) == 1 and arguments[0] == "ls":
-                result = "Available drivers:\n"
-                result += "\n".join(console.hal.get_drivers()) + "\n"
+                result = "\nAvailable drivers:\n"
+                result += (
+                    "\n".join(
+                        ["\t" + driver["name"] for driver in console.hal.get_drivers()]
+                    )
+                    + "\n"
+                )
                 console.log(result)
                 return
 
@@ -120,8 +129,16 @@ def eval_command(console: Console, command: str) -> None:
                 and arguments[0] == "ls"
                 and arguments[1] == "started"
             ):
-                result = "Started drivers:\n"
-                result += "\n".join(console.hal.get_started_drivers()) + "\n"
+                result = "\nStarted drivers:\n"
+                result += (
+                    "\n".join(
+                        [
+                            "\t" + driver["name"]
+                            for driver in console.hal.get_started_drivers()
+                        ]
+                    )
+                    + "\n"
+                )
                 console.log(result)
                 return
 
@@ -130,8 +147,16 @@ def eval_command(console: Console, command: str) -> None:
                 and arguments[0] == "ls"
                 and arguments[1] == "stopped"
             ):
-                result = "Stopped drivers:\n"
-                result += "\n".join(console.hal.get_stopped_drivers()) + "\n"
+                result = "\nStopped drivers:\n"
+                result += (
+                    "\n".join(
+                        [
+                            "\t" + driver["name"]
+                            for driver in console.hal.get_stopped_drivers()
+                        ]
+                    )
+                    + "\n"
+                )
                 console.log(result)
                 return
 
@@ -236,7 +261,6 @@ def helper(console: Console, exec_name: str = "") -> None:
         result += "\trestart <application_name> - Restart an application\n"
         console.log(result)
         return
-
 
     elif exec_name == "drivers":
         result = "\nName:\n"
