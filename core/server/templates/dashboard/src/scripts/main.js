@@ -103,7 +103,6 @@ function key_action(event) {
 function generate_clients_table(clients) {
     sids = Object.keys(clients);
     document.getElementById("clients-table-body").innerHTML = "";
-    console.log(clients)
     for (let i = 0; i < sids.length; i++) {
         let row = document.createElement("tr");
         let sid = sids[i];
@@ -128,15 +127,67 @@ function generate_clients_table(clients) {
 
 }
 
-function generate_table_from_list(table_id, list) {
-    document.getElementById(table_id).innerHTML = "";
-    for (let i = 0; i < list.length; i++) {
+
+function generate_drivers_table(drivers) {
+    document.getElementById("drivers-table-body").innerHTML = "";
+
+    for(let driver of drivers){
         let row = document.createElement("tr");
-
         let name_cell = document.createElement("td");
-        name_cell.innerHTML = list[i];
+        let status_cell = document.createElement("td");
+        let status = driver["started"];
+        if (status == 1) {
+            name_cell.innerHTML = "<span class='started'>" + driver["name"] + "</span>";
+            status_cell.innerHTML = "<span class='started'>started</span>";
+        }
+        else {
+            name_cell.innerHTML = "<span class='stopped'>" + driver["name"] + "</span>";
+            status_cell.innerHTML = "<span class='stopped'>stopped</span>";
+        }
         row.appendChild(name_cell);
+        row.appendChild(status_cell);
 
-        document.getElementById(table_id).appendChild(row);
+        let registered_cell = document.createElement("td");
+        registered_cell.innerHTML = calcutlate_entities(driver["registered_entities"]);
+        row.appendChild(registered_cell);
+        document.getElementById("drivers-table-body").appendChild(row);
     }
+}
+
+function generate_applications_table(applications) {
+    document.getElementById("applications-table-body").innerHTML = "";
+
+    for(let application of applications){
+        let row = document.createElement("tr");
+        let name_cell = document.createElement("td");
+        let status_cell = document.createElement("td");
+        let status = application["started"];
+        if (status == 1) {
+            name_cell.innerHTML = "<span class='started'>" + application["name"] + "</span>";
+            status_cell.innerHTML = "<span class='started'>started</span>";
+        }
+        else {
+            name_cell.innerHTML = "<span class='stopped'>" + application["name"] + "</span>";
+            status_cell.innerHTML = "<span class='stopped'>stopped</span>";
+        }
+        row.appendChild(name_cell);
+        row.appendChild(status_cell);
+
+        document.getElementById("applications-table-body").appendChild(row);
+    }
+}
+
+
+
+function calcutlate_entities(events) {
+    let entities = [];
+    console.log(events);
+    for(let [name, event_entities] of Object.entries(events)) {
+        for(let entity of event_entities) {
+            if(!entities.includes(entity)) {
+                entities.push(entity);
+            }
+        }
+    }
+    return entities.length;
 }

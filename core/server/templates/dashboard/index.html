@@ -6,14 +6,14 @@
     <meta name="viewport"
         content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
     <script src="./platform/src/libs/socket.io-3.0.5.js"></script>
+    <script src="./dashboard/src/libs/chart.min.js"></script>
+
     <!-- <script src="./platform/src/libs/p5.js"></script> -->
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="./dashboard/src/style/style.css">
 </head>
 
 <body>
-    <script src="./dashboard/src/scripts/main.js"></script>
-    <script src="./dashboard/src/scripts/socket.js"></script>
     <p id="title">GOSAI Dashboard</p>
     <div id="main">
         <div id="console">
@@ -43,97 +43,61 @@
 
                 </div>
             </div>
-            <div id="applications" class="info-tab">
-                <p class="info-title">Applications</p>
-                <div id="applications-stats" class="info-stats">
-                    <div>
+            <div id="applications-drivers" class="info-tab">
+                <p class="info-title">Applications & Drivers</p>
+                <div id="applications-drivers-stats">
+                    <div id="applications-stats" class="info-stats">
+                        <!-- <p class="info-subtitle">Available applications: <span id="applications-stats-available">0</span></p>
+                        <p class="info-subtitle">Stopped applications: <span id="applications-stats-stopped">0</span></p>
+                        <p class="info-subtitle">Started applications: <span id="applications-stats-started">0</span></p> -->
+
                         <table>
                             <thead>
                                 <tr>
-                                    <th>
-                                        <p>Available applications: <span id="applications-stats-available">0</span></p>
-                                    </th>
+                                    <th colspan="2">Applications</th>
+                                </tr>
+                                <tr>
+                                    <th>name</th>
+                                    <th>status</th>
                                 </tr>
                             </thead>
-                            <tbody id="available-applications-table-body">
+                            <tbody id="applications-table-body">
                             </tbody>
                         </table>
                     </div>
-                    <div>
+                    <div id="drivers-stats" class="info-stats">
+                        <!-- <p class="info-subtitle">Available drivers: <span id="drivers-stats-available">0</span></p>
+                        <p class="info-subtitle">Stopped drivers: <span id="drivers-stats-stopped">0</span></p>
+                        <p class="info-subtitle">Started drivers: <span id="drivers-stats-started">0</span></p> -->
+
                         <table>
                             <thead>
                                 <tr>
-                                    <th>
-                                        <p>Stopped applications: <span id="applications-stats-stopped">0</span></p>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="stopped-applications-table-body">
-                            </tbody>
-                        </table>
-                    </div>
-                    <div>
-                        <table>
-                            <thead>
                                 <tr>
-                                    <th>
-                                        <p>Started applications: <span id="applications-stats-started">0</span></p>
-                                    </th>
+                                    <th colspan="3">Drivers</th>
+                                </tr>
+                                <tr>
+                                    <th>name</th>
+                                    <th>status</th>
+                                    <th>registered entities</th>
+                                </tr>
                                 </tr>
                             </thead>
-                            <tbody id="started-applications-table-body">
+                            <tbody id="drivers-table-body">
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            <div id="drivers" class="info-tab">
-                <p class="info-title">Drivers</p>
-                <div id="drivers-stats" class="info-stats">
-                    <div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>
-                                        <p>Available drivers: <span id="drivers-stats-available">0</span></p>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="available-drivers-table-body">
-                            </tbody>
-                        </table>
-                    </div>
-                    <div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>
-                                        <p>Stopped drivers: <span id="drivers-stats-stopped">0</span></p>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="stopped-drivers-table-body">
-                            </tbody>
-                        </table>
-                    </div>
-                    <div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>
-                                        <p>Started drivers: <span id="drivers-stats-started">0</span></p>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="started-drivers-table-body">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div id="performances-stats">
+                <p class="info-title">Performances</p>
+                <canvas id="fps-performances-chart" height="300px"></canvas>
             </div>
         </div>
-
     </div>
+    <script src="./dashboard/src/scripts/main.js"></script>
+    <script src="./dashboard/src/scripts/charts.js"></script>
+    <script src="./dashboard/src/scripts/socket.js"></script>
 </body>
 
 </html>

@@ -140,16 +140,44 @@ head, body {
     flex-direction: column;
 }
 
+#applications-drivers-stats {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    align-items: flex-start;
+    width: 100%;
+}
+
+#applications-stats {
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+#drivers-stats {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.started{
+    color: #68ff81;
+}
+
+.stopped{
+    color: #a30000;
+}
+
 table {
     background-color: rgb(70, 70, 70);
 }
 
-div #applications-stats > div {
-    width: 30%;
-}
-
-div #drivers-stats > div {
-    width: 30%;
+table > thead > tr {
+    border-collapse: collapse;
 }
 
 table > thead > tr > th {
@@ -166,9 +194,14 @@ table > thead > tr > th > p{
 
 table > tbody > tr > td {
     text-align: center;
-    height: 1.5rem;
+    height: 1.4rem;
 }
 
 /* #clients-table-header-sid {
     width: 25%;
 } */
+
+#fps-performances-chart{
+    width: 100%;
+    height: 50px;
+}
