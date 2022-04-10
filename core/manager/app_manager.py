@@ -28,18 +28,33 @@ class AppManager:
     def list_applications(self) -> list:
         """Lists all available applications"""
 
-        return self.available_apps
+        return [
+            {
+                "name": app_name,
+                "started": int(app_name in self.started_apps),
+            }
+            for app_name in self.available_apps
+        ]
 
     def list_started_applications(self) -> list:
         """Lists all started applications"""
 
-        return list(self.started_apps.keys())
+        return [
+            {
+                "name": app_name,
+                "started": 1,
+            }
+            for app_name in self.started_apps
+        ]
 
     def list_stopped_applications(self) -> list:
         """Lists all stopped applications"""
 
         return [
-            app_name
+            {
+                "name": app_name,
+                "started": 0,
+            }
             for app_name in self.available_apps
             if app_name not in self.started_apps
         ]
