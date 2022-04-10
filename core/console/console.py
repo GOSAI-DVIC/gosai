@@ -37,134 +37,245 @@ class Console(threading.Thread):
 
 
 def eval_command(console: Console, command: str) -> None:
-    execute = command.split()[0]
-    arguments = command.split()[1:]
+    try:
+        execute = command.split()[0]
+        arguments = command.split()[1:]
 
-    if execute == "exit":
-        console.log("Exiting...")
-        exit()
+        if execute == "applications":
+            if len(arguments) == 0:
+                helper(console, "applications")
+                return
 
-    elif execute == "help":
-        result = "Available commands:\n"
-        result += "    exit - exit the application\n"
-        result += "    help - Show this helper\n"
-        result += "    ls drivers - List all available drivers\n"
-        result += "    ls applications - List all available applications\n"
-        result += "    log $level - Set the log level\n"
-        result += "    password - Show the current password to access control\n"
-        result += "    password generate - Generates a new password to access control\n"
-        result += "    restart $app_name - Restart an app\n"
-        result += "    start $app_name - Start an app\n"
-        result += "    stop $app_name - Stop an app\n"
+            if len(arguments) == 1 and arguments[0] == "ls":
+                result = "Available applications:\n"
+                result += "\n".join(console.app_manager.list_applications()) + "\n"
+                console.log(result)
+                return
+
+            if (
+                len(arguments) == 2
+                and arguments[0] == "ls"
+                and arguments[1] == "started"
+            ):
+                result = "Started applications:\n"
+                result += (
+                    "\n".join(console.app_manager.list_started_applications()) + "\n"
+                )
+                console.log(result)
+                return
+
+            if (
+                len(arguments) == 2
+                and arguments[0] == "ls"
+                and arguments[1] == "stopped"
+            ):
+                result = "Stopped applications:\n"
+                result += (
+                    "\n".join(console.app_manager.list_stopped_applications()) + "\n"
+                )
+                console.log(result)
+                return
+
+            if len(arguments) == 1 and arguments[0] == "start":
+                console.log("Please specify an application to start", 3)
+                return
+
+            if len(arguments) == 1 and arguments[0] == "stop":
+                console.log("Please specify an application to stop", 3)
+                return
+
+            if len(arguments) == 1 and arguments[0] == "restart":
+                console.log("Please specify an application to restart", 3)
+                return
+
+            if len(arguments) == 2 and arguments[0] == "start":
+                console.app_manager.start(arguments[1])
+                return
+
+            if len(arguments) == 2 and arguments[0] == "stop":
+                console.app_manager.stop(arguments[1])
+                return
+
+            if len(arguments) == 2 and arguments[0] == "restart":
+                console.app_manager.stop(arguments[1])
+                console.app_manager.start(arguments[1])
+                return
+
+            helper(console, "applications")
+            return
+
+        elif execute == "drivers":
+            if len(arguments) == 0:
+                helper(console, "drivers")
+                return
+
+            if len(arguments) == 1 and arguments[0] == "ls":
+                result = "Available drivers:\n"
+                result += "\n".join(console.hal.get_drivers()) + "\n"
+                console.log(result)
+                return
+
+            if (
+                len(arguments) == 2
+                and arguments[0] == "ls"
+                and arguments[1] == "started"
+            ):
+                result = "Started drivers:\n"
+                result += "\n".join(console.hal.get_started_drivers()) + "\n"
+                console.log(result)
+                return
+
+            if (
+                len(arguments) == 2
+                and arguments[0] == "ls"
+                and arguments[1] == "stopped"
+            ):
+                result = "Stopped drivers:\n"
+                result += "\n".join(console.hal.get_stopped_drivers()) + "\n"
+                console.log(result)
+                return
+
+            if len(arguments) == 2 and arguments[0] == "get":
+                console.log("You must specify the event name")
+                return
+
+            if len(arguments) == 3 and arguments[0] == "get":
+                data = console.hal.get_driver_event_data(arguments[1], arguments[2])
+                if data is False or data is None:
+                    return
+                result = f"The last data of {arguments[1]} on {arguments[2]} is {data}"
+                console.log(result)
+                return
+
+            helper(console, "drivers")
+            return
+
+        # elif execute == "exit":
+        #     console.log("Exiting...")
+        #     exit()
+
+        elif execute == "help":
+            if len(arguments) == 0:
+                helper(console)
+                return
+
+            if len(arguments) == 1:
+                helper(console, arguments[0])
+                return
+
+        elif execute == "log":
+            if len(arguments) == 1:
+                try:
+                    assert int(arguments[0]) in range(0, 4)
+                    os.environ["LOG_LEVEL"] = str(int(arguments[0]))
+                    console.log("Log level set to " + arguments[0], 3)
+                    return
+                except Exception as e:
+                    console.log("Invalid log level: " + str(e))
+                    return
+            else:
+                console.log("Please specify a log level", 3)
+                return
+
+        elif execute == "password":
+            if len(arguments) == 0:
+                helper(console, "password")
+                return
+
+            if len(arguments) == 1 and arguments[0] == "show":
+                result = (
+                    "Password to access control: " + console.server.control_password
+                )
+                console.log(result)
+                return
+
+            elif len(arguments) == 1 and arguments[0] == "generate":
+                console.server.generate_control_password()
+                result = (
+                    "New password to access control generated: "
+                    + console.server.control_password
+                )
+                console.log(result)
+                return
+
+            helper(console, "password")
+            return
+
+        console.log("Unknown command: " + command, 3)
+    except Exception as e:
+        console.log("Error: " + str(e), 3)
+
+
+def helper(console: Console, exec_name: str = "") -> None:
+    """Helper function to show the help"""
+    if exec_name == "":
+        result = "\nAvailable commands:\n"
+        result += "\tapplications - show / manipulate applications\n"
+        result += "\tdrivers      - show / manipulate drivers\n"
+        # result += "\texit         - exit the program\n"
+        result += "\thelp         - show this help\n"
+        result += "\tlog          - show / manipulate the log level\n"
+        result += "\tpassword     - show / generate a new password\n"
+        result += "\n"
+        result += "For more information about a command, type 'help <command>'\n"
+
         console.log(result)
         return
 
-    elif execute == "log":
-        if len(arguments) == 1:
-            try:
-                assert int(arguments[0]) in range(0, 3)
-                os.environ["LOG_LEVEL"] = str(int(arguments[0]))
-                console.log("Log level set to " + arguments[0], 3)
-                return
-            except Exception as e:
-                console.log("Invalid log level: " + str(e))
-                return
-        else:
-            console.log("Please specify a log level", 3)
-            return
+    elif exec_name == "applications":
+        result = "\nName:\n"
+        result += "\tapplications - show / manipulate applications\n\n"
+        result += "Usage:\n"
+        result += "\tapplications [arguments]\n\n"
+        result += "Arguments:\n"
+        result += "\tls - List all available applications\n"
+        result += "\tls started - List all started applications\n"
+        result += "\tls stopped - List all stopped applications\n"
+        result += "\tstart <application_name> - Start an application\n"
+        result += "\tstop <application_name> - Stop an application\n"
+        result += "\trestart <application_name> - Restart an application\n"
+        console.log(result)
+        return
 
-    elif execute == "ls":
-        if len(arguments) == 1 and arguments[0] == "drivers":
-            result = "Available drivers:\n"
-            result += "\n".join(console.hal.get_drivers()) + "\n"
-            console.log(result)
-            return
 
-        if (
-            len(arguments) == 2
-            and arguments[0] == "drivers"
-            and arguments[1] == "started"
-        ):
-            result = "Started drivers:\n"
-            result += "\n".join(console.hal.get_started_drivers()) + "\n"
-            console.log(result)
-            return
+    elif exec_name == "drivers":
+        result = "\nName:\n"
+        result += "\tdrivers - show / manipulate drivers\n\n"
+        result += "Usage:\n"
+        result += "\tdrivers [arguments]\n\n"
+        result += "Arguments:\n"
+        result += "\tls - List all available drivers\n"
+        result += "\tls started - List all started drivers\n"
+        result += "\tls stopped - List all stopped drivers\n"
+        result += "\tget <driver_name> <event_name> - Get the last data of an event\n"
 
-        if (
-            len(arguments) == 2
-            and arguments[0] == "drivers"
-            and arguments[1] == "stopped"
-        ):
-            result = "Stopped drivers:\n"
-            result += "\n".join(console.hal.get_stopped_drivers()) + "\n"
-            console.log(result)
-            return
+        console.log(result)
+        return
 
-        if len(arguments) == 1 and arguments[0] == "applications":
-            result = "Available applications:\n"
-            result += "\n".join(console.app_manager.list_applications()) + "\n"
-            console.log(result)
-            return
+    elif exec_name == "log":
+        result = "\nName:\n"
+        result += "\tlog - show / manipulate the log level\n\n"
+        result += "Usage:\n"
+        result += "\tlog [arguments]\n\n"
+        result += "Arguments:\n"
+        result += "\t<log_level> - Set the log level\n"
+        result += "\t\t1 - Debug\n"
+        result += "\t\t2 - Info\n"
+        result += "\t\t3 - Warning\n"
+        console.log(result)
+        return
 
-        if (
-            len(arguments) == 2
-            and arguments[0] == "applications"
-            and arguments[1] == "started"
-        ):
-            result = "Started applications:\n"
-            result += "\n".join(console.app_manager.list_started_applications()) + "\n"
-            console.log(result)
-            return
+    elif exec_name == "password":
+        result = "\nName:\n"
+        result += "\tpassword - show / generate a new password\n\n"
+        result += "Usage:\n"
+        result += "\tpassword [arguments]\n\n"
+        result += "Arguments:\n"
+        result += "\tshow - Show the current password\n"
+        result += "\tgenerate - Generate a new password\n"
+        console.log(result)
+        return
 
-        if (
-            len(arguments) == 2
-            and arguments[0] == "applications"
-            and arguments[1] == "stopped"
-        ):
-            result = "Stopped applications:\n"
-            result += "\n".join(console.app_manager.list_stopped_applications()) + "\n"
-            console.log(result)
-            return
-
-    elif execute == "password":
-        if len(arguments) == 0:
-            result = "Password to access control: " + console.server.control_password
-            console.log(result)
-            return
-
-        elif len(arguments) == 1 and arguments[0] == "generate":
-            console.server.generate_control_password()
-            result = (
-                "New password to access control generated: "
-                + console.server.control_password
-            )
-            console.log(result)
-            return
-
-    elif execute == "restart":
-        if len(arguments) == 0:
-            console.log("Please specify an application to restart", 3)
-            return
-
-        elif len(arguments) == 1:
-            console.app_manager.stop(arguments[0])
-            console.app_manager.start(arguments[0])
-            return
-
-    elif execute == "start":
-        if len(arguments) == 0:
-            console.log("Please specify an application to start", 3)
-            return
-        else:
-            console.app_manager.start(arguments[0])
-            return
-
-    elif execute == "stop":
-        if len(arguments) == 0:
-            console.log("Please specify an application to stop", 3)
-            return
-        else:
-            console.app_manager.stop(arguments[0])
-            return
-
-    console.log("Unknown command: " + command, 3)
+    else:
+        console.log("Unknown command: " + exec_name, 3)
+        return
