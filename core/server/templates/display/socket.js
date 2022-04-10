@@ -50,3 +50,23 @@ socket.on("stop_application", async (data) => {
 });
 
 socket.emit("window_loaded");
+
+let fps = 0;
+let fps_prev_millis = 0;
+let fps_prev_frameCount = 0;
+
+setInterval(() => {
+    fps = 1000 * (frameCount - fps_prev_frameCount) / (window.performance.now() - fps_prev_millis);
+
+    stats = {
+        "fps": fps,
+        "frameCount": frameCount,
+        "time": Date.now(),
+        "modules_consumptions": modules_consumptions
+    }
+    socket.emit("set_display_statistics", stats);
+    fps_prev_millis = window.performance.now();
+    fps_prev_frameCount = frameCount;
+    modules_consumptions = {};
+
+}, 500);
