@@ -33,6 +33,11 @@ function log_to_str(data) {
             level_color = "level-info";
             break;
     }
+    let message = data["content"];
+    message = message.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
+    message = message.replace(/</g, "&#60;");
+    message = message.replace(/>/g, "&#62;");
+
     let result =
         "<span class='" +
         level_color +
@@ -43,14 +48,18 @@ function log_to_str(data) {
         " : " +
         data["source"] +
         "</span> : " +
-        data["content"] +
+        message +
         "<br>";
-    return result.replace(/\n/g, "<br />");
+
+    result = result.replace(/\n/g, "<br />");
+    return result;
 }
 
 function send_command() {
     let command = document.getElementById("console-input").value;
-    socket.emit("execute_command", { command: command });
+    socket.emit("execute_command", {
+        command: command
+    });
     command_history.push(command);
     current_command = "";
     command_index = -1;
@@ -95,7 +104,7 @@ function generate_clients_table(clients) {
     sids = Object.keys(clients);
     document.getElementById("clients-table-body").innerHTML = "";
     console.log(clients)
-    for (let i = 0; i < sids.length; i++){
+    for (let i = 0; i < sids.length; i++) {
         let row = document.createElement("tr");
         let sid = sids[i];
 
