@@ -22,15 +22,15 @@ socket.on("available_applications", async (data) => {
 
 socket.on("started_applications", async (data) => {
     let started_apps = data["applications"];
-    started_apps.forEach(app_name => {
-        update_app_button(app_name, 1)
+    started_apps.forEach(app => {
+        update_app_button(app["name"], 1)
     });
 });
 
 socket.on("stopped_applications", async (data) => {
     let stopped_apps = data["applications"];
-    stopped_apps.forEach(app_name => {
-        update_app_button(app_name, 0)
+    stopped_apps.forEach(app => {
+        update_app_button(app["name"], 0)
     });
 });
 

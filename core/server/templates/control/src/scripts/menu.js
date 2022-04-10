@@ -206,12 +206,12 @@ function isMobileDevice() {
     return check;
 }
 
-function create_app_button(application_list) {
+function create_app_button(applications_list) {
     //BUTTONS
     if (Object.keys(name_to_buttons).length > 0) return;
-    app_number = application_list.length;
+    app_number = applications_list.length;
     for (let i = 0; i < app_number; i++) {
-        let app_name = application_list[i];
+        let app_name = applications_list[i]["name"];
         button = createButton(
             app_name[0].toUpperCase() + app_name.substring(1)
         );
