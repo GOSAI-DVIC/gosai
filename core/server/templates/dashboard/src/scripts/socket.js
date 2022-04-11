@@ -42,10 +42,31 @@ socket.on("connected_users", (data) => {
 });
 
 socket.on("display_statistics", (data) => {
-    update_fps_chart({x : data["time"], y : data["fps"]});
+    update_fps_chart({
+        x: data["time"],
+        y: data["fps"]
+    });
+    update_ms_chart({
+        timestamp: data["time"],
+        data: data["modules_consumptions"]
+    });
 });
+
+socket.on("recent_performances", data => {
+    // socket.emit("purge_recent_performances");
+    let drivers_performances = data["performances"]["driver"];
+    if (drivers_performances != undefined){
+        update_drivers_lp_chart({
+            timestamp: Date.now(),
+            data: data["performances"]["driver"]
+        });
+    }
+})
 
 socket.emit("get_log_history");
 socket.emit("get_available_applications");
 socket.emit("get_available_drivers");
 socket.emit("get_users");
+setInterval(() => {
+    socket.emit("get_recent_performances");
+}, 500);
