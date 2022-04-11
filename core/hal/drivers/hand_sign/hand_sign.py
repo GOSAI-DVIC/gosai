@@ -11,6 +11,8 @@ class Driver(BaseDriver):
     def __init__(self, name: str, parent, max_fps: int = 60):
         super().__init__(name, parent)
 
+        self.type = "no_loop"
+
         self.register_to_driver("hand_pose", "raw_data")
 
         self.create_event("sign")
@@ -55,6 +57,5 @@ class Driver(BaseDriver):
             self.log(f"Total time: {(end_t - start_t)*1000}ms")
             self.log(f"FPS: {int(1/(end_t - start_t))}")
 
-        dt = max((1 / self.fps) - (end_t - start_t), 0.0001)
-
-        time.sleep(dt)
+        # dt = max((1 / self.fps) - (end_t - start_t), 0.0001)
+        # time.sleep(dt)
