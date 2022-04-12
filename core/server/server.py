@@ -50,7 +50,6 @@ class Server:
         )
 
         self.clients = {}
-        self.display_stats = {}
 
         self.queue = Queue()
         self.background_thread_started = False
@@ -186,16 +185,6 @@ def create_socket_api(server: Server):
     @server.sio.on("sound")
     def _():
         server.sio.emit("sound")
-
-    @server.sio.on("set_display_statistics")
-    def set_display_statistics(data):
-        server.display_stats = data
-        server.sio.emit("display_statistics", data)
-
-    @server.sio.on("get_display_statistics")
-    def get_display_statistics():
-        server.sio.emit("display_statistics", server.display_stats)
-
 
 def create_flask_api(server: Server):
     @server.app.route("/gosai")
