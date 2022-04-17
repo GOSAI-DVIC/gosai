@@ -226,9 +226,23 @@ class BaseDriver(Process):
                     return
                 try:
                     data = pickle.loads(bytes(binary_data["data"]))
-                    start_t = time.time()
-                    callback(data)
-                    self.record_performance("loop_time", 1000*(time.time() - start_t))
+
+                    def _execute_callback(callback: callable, data) -> None:
+                        start_t = time.time()
+                        exec_time = callback(data)
+                        if not self.paused.value:
+                            exec_time = (
+                                1000 * (time.time() - start_t)
+                                if exec_time is None
+                                else exec_time
+                            )
+                            self.record_performance(action, exec_time)
+
+                    threading.Thread(
+                        target=_execute_callback, args=(callback, data)
+                    ).start()
+                except pickle.UnpicklingError as e:
+                    continue
                 except Exception as e:
                     self.log(f"Error while loading callback data: {e}", 3)
 
@@ -276,10 +290,21 @@ class BaseDriver(Process):
                 try:
                     if not self.paused.value:
                         data = pickle.loads(bytes(binary_data["data"]))
-                        start_t = time.time()
-                        callback(data)
-                        if not self.paused.value:
-                            self.record_performance("loop_time", 1000*(time.time() - start_t))
+
+                        def _execute_callback(callback: callable, data) -> None:
+                            start_t = time.time()
+                            exec_time = callback(data)
+                            if not self.paused.value:
+                                exec_time = (
+                                    1000 * (time.time() - start_t)
+                                    if exec_time is None
+                                    else exec_time
+                                )
+                                self.record_performance(action, exec_time)
+
+                        threading.Thread(
+                            target=_execute_callback, args=(callback, data)
+                        ).start()
                 except Exception as e:
                     self.log(f"Error while loading callback data: {e}", 3)
 
