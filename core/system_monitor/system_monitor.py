@@ -71,6 +71,8 @@ class Monitor:
                         self.recent_performances[rec_src_type][rec_src_name] = {}
                     self.recent_performances[rec_src_type][rec_src_name][rec_type] = rec_data
 
+                except pickle.UnpicklingError as e:
+                    pass
                 except Exception as e:
                     self.log(f"Error while loading performance data: {e}", 3)
                     pass

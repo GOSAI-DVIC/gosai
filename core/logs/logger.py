@@ -64,14 +64,16 @@ class Logger:
                 try:
                     data = pickle.loads(bytes(binary_data["data"]))
                     self.log(data["source"], data["content"], data["level"])
+                except pickle.UnpicklingError as e:
+                    pass
                 except Exception as e:
                     self.log("logger", f"Error while loading logged data: {e}", 3)
                     pass
 
         threading.Thread(target=_log_listenner, args=(self,)).start()
 
-    def log_to_string(log):
+    def log_to_string(self, log):
         """
-        Logs a message to a string
+        Transforms a log to a string
         """
         return f"{log['source']}: {log['content']}"
