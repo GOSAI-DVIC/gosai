@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 
@@ -58,6 +59,24 @@ class AppManager:
             for app_name in self.available_apps
             if app_name not in self.started_apps
         ]
+
+    def start_up(self):
+        """Starts up the app manager"""
+        try:
+            if os.path.exists("home/config.json"):
+                with open("home/config.json", "r") as f:
+                    config = json.load(f)
+                    if "applications" in config and "startup" in config["applications"]:
+                        for app_name in config["applications"]["startup"]:
+                            self.start(app_name)
+
+                    if "applications" in config and "disabled" in config["applications"]:
+                        for app_name in config["applications"]["disabled"]:
+                            if app_name in self.started_apps:
+                                self.stop(app_name)
+                            self.available_apps.remove(app_name)
+        except Exception as e:
+            self.log(f"Failed to start up the applications: {e}", 4)
 
     def start(self, app_name: str) -> bool:
         """Starts an application"""
