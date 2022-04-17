@@ -3,7 +3,7 @@
 import os
 import pickle
 import threading
-from typing import Any
+from typing import Any, Dict, List
 from matplotlib.style import available
 
 import redis
@@ -136,7 +136,7 @@ class HardwareAbstractionLayer:
 
         return self.drivers[driver_name].get_event_data(event)
 
-    def get_started_drivers(self) -> str:
+    def get_started_drivers(self) -> List[Dict]:
         """Returns a list of drivers that are started"""
         started_drivers = []
         for driver_name, driver in self.drivers.items():
@@ -155,7 +155,7 @@ class HardwareAbstractionLayer:
                 )
         return started_drivers
 
-    def get_stopped_drivers(self) -> str:
+    def get_stopped_drivers(self) -> List[Dict]:
         """Returns a list of drivers that are stopped"""
         stopped_drivers = []
         for driver_name, driver in self.drivers.items():
@@ -182,7 +182,7 @@ class HardwareAbstractionLayer:
                 )
         return stopped_drivers
 
-    def get_drivers(self) -> str:
+    def get_drivers(self) -> List[Dict]:
         """Returns a list of available drivers"""
         available_drivers = self.get_started_drivers() + self.get_stopped_drivers()
         return available_drivers
@@ -210,7 +210,9 @@ class HardwareAbstractionLayer:
 
         @self.server.sio.on("get_available_drivers")
         def _():
-            self.server.send_data("available_drivers", {"drivers": self.get_drivers()})
+            self.server.send_data(
+                "available_drivers", {"drivers": self.get_drivers()}
+            )
 
     def update_api_listeners(self):
         """Updates the Hal api listeners"""
@@ -220,4 +222,6 @@ class HardwareAbstractionLayer:
         self.server.send_data(
             "stopped_drivers", {"drivers": self.get_stopped_drivers()}
         )
-        self.server.send_data("available_drivers", {"drivers": self.get_drivers()})
+        self.server.send_data(
+            "available_drivers", {"drivers": self.get_drivers()}
+        )
