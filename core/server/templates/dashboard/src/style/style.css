@@ -238,3 +238,12 @@ table > tbody > tr > td {
 #drivers-looptime-chart{
     width: 100%;
 }
+
+#drivers-not-looptime-stats{
+    width: 100%;
+    height: 450px;
+}
+
+#drivers-not-looptime-chart{
+    width: 100%;
+}

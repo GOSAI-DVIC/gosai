@@ -58,7 +58,11 @@ socket.on("recent_performances", data => {
     if (drivers_performances != undefined){
         update_drivers_lp_chart({
             timestamp: Date.now(),
-            data: data["performances"]["driver"]
+            data: drivers_performances
+        });
+        update_drivers_nlp_chart({
+            timestamp: Date.now(),
+            data: drivers_performances
         });
     }
 })

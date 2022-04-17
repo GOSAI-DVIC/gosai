@@ -181,7 +181,6 @@ function generate_applications_table(applications) {
 
 function calcutlate_entities(events) {
     let entities = [];
-    console.log(events);
     for(let [name, event_entities] of Object.entries(events)) {
         for(let entity of event_entities) {
             if(!entities.includes(entity)) {
