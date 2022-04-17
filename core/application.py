@@ -42,10 +42,10 @@ class BaseApplication(threading.Thread):
             return
 
         if source not in self.requires:
-            self.hal.log(f"{self.name}: subscribed to an unrequested event.")
+            self.log(f"Subscribed to an unrequested source: {source}", 3)
             return
         if event not in self.requires[source]:
-            self.hal.log(f"{self.name}: not subscrbed to {event} from {source}")
+            self.log(f"Subscribed to an unrequested event: {event} from {source} but gett", 3)
             return
 
         if not self.started:
