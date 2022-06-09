@@ -53,20 +53,20 @@ class BaseDriver(Process):
             return
         # Starts the required drivers
         self.log("Driver running", 2)
-        self.lop_times = []
+        loop_times = []
         while 1:
             try:
                 if not self.paused.value and self.type != "no_loop":
                     start_t = time.time()
                     self.loop()
                     end_t = time.time()
-                    self.lop_times.append(1000 * (end_t - start_t))
-                    if len(self.lop_times) == 5:
+                    loop_times.append(1000 * (end_t - start_t))
+                    if len(loop_times) == 5:
                         if not self.paused.value:
                             self.record_performance(
-                                "loop_time", sum(self.lop_times) / len(self.lop_times)
+                                "loop_time", sum(loop_times) / len(loop_times)
                             )
-                        self.lop_times = []
+                        loop_times = []
                 else:
                     time.sleep(0.5)
 
