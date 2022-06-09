@@ -305,6 +305,8 @@ class BaseDriver(Process):
                         threading.Thread(
                             target=_execute_callback, args=(callback, data)
                         ).start()
+                except pickle.UnpicklingError as e:
+                    continue
                 except Exception as e:
                     self.log(f"Error while loading callback data: {e}", 3)
 
