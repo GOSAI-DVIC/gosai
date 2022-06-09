@@ -334,7 +334,7 @@ class BaseDriver(Process):
         del self.callbacks[action]
         return True
 
-    def record_performance(self, record_type: str, data: Any) -> None:
+    def record_performance(self, record_name: str, data: Any) -> None:
         """
         Records performance data for this driver.
         """
@@ -343,7 +343,7 @@ class BaseDriver(Process):
                 "name": self.name,
                 "type": "driver",
             },
-            "type": record_type,
+            "type": record_name,
             "data": data,
         }
         self.db.set(
