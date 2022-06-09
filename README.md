@@ -32,4 +32,4 @@ To install an existing project, simply clone the project in a directory called h
 
 ## Create your own project
 
-Refer to [this tutorial]() to learn how to develop on gosai.
+Refer to [this tutorial](https://dvic.devinci.fr/tutorial/how-to-program-on-GOSAI) to learn how to develop on gosai.
