@@ -22,8 +22,8 @@ def find_all_poses(holistic, frame, window):
     min_width, max_width = int((0.5 - window / 2) * frame.shape[1]), int(
         (0.5 + window / 2) * frame.shape[1]
     )
+    image = cv2.flip(image, 1)
     image = image[:, min_width:max_width]
-
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # e1 = time.time()
@@ -41,8 +41,8 @@ def find_all_poses(holistic, frame, window):
     if results.pose_landmarks:
         body_landmarks = [
             [
-                min_width + int(landmark.x * image.shape[1]),
-                int(landmark.y * image.shape[0]),
+                (0.5 - window / 2) + landmark.x * window,
+                landmark.y,
                 round(landmark.visibility, 2),
             ]
             for landmark in results.pose_landmarks.landmark
@@ -53,8 +53,8 @@ def find_all_poses(holistic, frame, window):
     if results.face_landmarks:
         faces_landmarks = [
             [
-                min_width + int(landmark.x * image.shape[1]),
-                int(landmark.y * image.shape[0]),
+                (0.5 - window / 2) + landmark.x * window,
+                landmark.y,
                 round(landmark.visibility, 2),
             ]
             for landmark in results.face_landmarks.landmark
@@ -65,8 +65,8 @@ def find_all_poses(holistic, frame, window):
     if results.left_hand_landmarks:
         left_hands_landmarks = [
             [
-                min_width + int(landmark.x * image.shape[1]),
-                int(landmark.y * image.shape[0]),
+                (0.5 - window / 2) + landmark.x * window,
+                landmark.y,
                 round(landmark.visibility, 2),
             ]
             for landmark in results.left_hand_landmarks.landmark
@@ -77,8 +77,8 @@ def find_all_poses(holistic, frame, window):
     if results.right_hand_landmarks:
         right_hands_landmarks = [
             [
-                min_width + int(landmark.x * image.shape[1]),
-                int(landmark.y * image.shape[0]),
+                (0.5 - window / 2) + landmark.x * window,
+                landmark.y,
                 round(landmark.visibility, 2),
             ]
             for landmark in results.right_hand_landmarks.landmark

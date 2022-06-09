@@ -15,7 +15,7 @@ class Driver(BaseDriver):
     Translate the pose from world coordinates to screen coordinates
     """
 
-    def __init__(self, name: str, parent, max_fps: int = 60):
+    def __init__(self, name: str, parent, max_fps: int = 30):
         super().__init__(name, parent)
 
         self.register_to_driver("pose", "raw_data")
