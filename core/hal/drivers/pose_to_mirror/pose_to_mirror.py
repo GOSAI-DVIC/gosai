@@ -94,7 +94,7 @@ class Driver(BaseDriver):
                 raw_data["right_hand_sign"] = hs.find_gesture(
                     self.sign_provider,
                     hs.normalize_data(
-                        raw_data["right_hand_sign"],
+                        raw_data["right_hand_pose"],
                         self.source["width"],
                         self.source["height"],
                     ),
