@@ -84,6 +84,19 @@ def find_all_poses(holistic, frame, window):
             for landmark in results.right_hand_landmarks.landmark
         ]
 
+    body_wolrd_landmarks = []
+
+    if results.pose_world_landmarks:
+        body_wolrd_landmarks = [
+            [
+                landmark.x,
+                landmark.y,
+                landmark.z,
+                round(landmark.visibility, 2),
+            ]
+            for landmark in results.pose_world_landmarks.landmark
+        ]
+
     # e3 = time.time()
     # print(f"    Convert data: {(e3 - e2)*1000} ms")
 
@@ -92,4 +105,5 @@ def find_all_poses(holistic, frame, window):
         "body_pose": body_landmarks,
         "right_hand_pose": left_hands_landmarks,
         "left_hand_pose": right_hands_landmarks,
+        "body_world_pose": body_wolrd_landmarks,
     }

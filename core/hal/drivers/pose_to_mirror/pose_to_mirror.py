@@ -78,7 +78,8 @@ class Driver(BaseDriver):
                 depth_frame=depth,
                 depth_radius=2,
             )
-            projected_data = {"body_pose": body}
+            projected_data = raw_data.copy()
+            projected_data["body_pose"] = body
 
             projected_data["right_hand_pose"] = project(
                 points=raw_data["right_hand_pose"],
@@ -93,7 +94,7 @@ class Driver(BaseDriver):
                 raw_data["right_hand_sign"] = hs.find_gesture(
                     self.sign_provider,
                     hs.normalize_data(
-                        raw_data["right_hand_pose"],
+                        raw_data["right_hand_sign"],
                         self.source["width"],
                         self.source["height"],
                     ),
