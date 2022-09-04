@@ -41,6 +41,7 @@ endif
 stop:
 	-docker stop $(REPO)
 	-docker stop $(REPO)-$(REDIS_REPO)
+	-pkill -9 -f "python3 init.py"
 
 
 calibration:
