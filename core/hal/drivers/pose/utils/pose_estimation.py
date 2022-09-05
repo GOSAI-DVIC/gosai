@@ -46,7 +46,7 @@ def find_all_poses(holistic, frame, window):
     min_width, max_width = int((0.5 - window / 2) * frame.shape[1]), int(
         (0.5 + window / 2) * frame.shape[1]
     )
-    image = cv2.flip(image, 1)
+    # image = cv2.flip(image, 1)
     image = image[:, min_width:max_width]
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -56,7 +56,6 @@ def find_all_poses(holistic, frame, window):
     image.flags.writeable = False
 
     results = holistic.process(image)
-
     # e2 = time.time()
     # print(f"    Infer image: {(e2 - e1)*1000} ms")
 
