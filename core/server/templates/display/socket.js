@@ -32,7 +32,7 @@ socket.on("start_application", async (data) => {
 
         console.log("Starting:" + application_name);
 
-        application.set(width, height, socket);
+        application.set(window.innerWidth, window.innerHeight, socket);
         modules[application_name] = application;
     }
 

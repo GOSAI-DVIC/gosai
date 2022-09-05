@@ -15,7 +15,7 @@ let global_data = {};
 let recieved = false;
 
 function setup() {
-    canvas = createCanvas(windowWidth, windowHeight);
+    canvas = createCanvas(window.innerWidth, window.innerHeight);
     frameRate(120);
 }
 

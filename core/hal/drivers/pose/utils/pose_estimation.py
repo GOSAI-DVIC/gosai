@@ -13,6 +13,30 @@ def init():
         model_complexity=0,
     )
 
+def landmarks_to_array(landmarks, window=1):
+    landmark_array = [
+        [
+            (0.5 - window / 2) + landmark.x * window,
+            landmark.y,
+            round(landmark.visibility, 2),
+        ]
+        for landmark in landmarks
+    ]
+    return landmark_array
+
+
+def world_landmarks_to_array(landmarks, window=1):
+    landmark_array = [
+        [
+            landmark.x,
+            landmark.y,
+            landmark.z,
+            round(landmark.visibility, 2),
+        ]
+        for landmark in landmarks
+    ]
+    return landmark_array
+
 
 def find_all_poses(holistic, frame, window):
     # start = time.time()
@@ -22,8 +46,8 @@ def find_all_poses(holistic, frame, window):
     min_width, max_width = int((0.5 - window / 2) * frame.shape[1]), int(
         (0.5 + window / 2) * frame.shape[1]
     )
+    image = cv2.flip(image, 1)
     image = image[:, min_width:max_width]
-
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # e1 = time.time()
@@ -36,74 +60,16 @@ def find_all_poses(holistic, frame, window):
     # e2 = time.time()
     # print(f"    Infer image: {(e2 - e1)*1000} ms")
 
-    body_landmarks = []
-
-    if results.pose_landmarks:
-        body_landmarks = [
-            [
-                min_width + int(landmark.x * image.shape[1]),
-                int(landmark.y * image.shape[0]),
-                round(landmark.visibility, 2),
-            ]
-            for landmark in results.pose_landmarks.landmark
-        ]
-
-    faces_landmarks = []
-
-    if results.face_landmarks:
-        faces_landmarks = [
-            [
-                min_width + int(landmark.x * image.shape[1]),
-                int(landmark.y * image.shape[0]),
-                round(landmark.visibility, 2),
-            ]
-            for landmark in results.face_landmarks.landmark
-        ]
-
-    left_hands_landmarks = []
-
-    if results.left_hand_landmarks:
-        left_hands_landmarks = [
-            [
-                min_width + int(landmark.x * image.shape[1]),
-                int(landmark.y * image.shape[0]),
-                round(landmark.visibility, 2),
-            ]
-            for landmark in results.left_hand_landmarks.landmark
-        ]
-
-    right_hands_landmarks = []
-
-    if results.right_hand_landmarks:
-        right_hands_landmarks = [
-            [
-                min_width + int(landmark.x * image.shape[1]),
-                int(landmark.y * image.shape[0]),
-                round(landmark.visibility, 2),
-            ]
-            for landmark in results.right_hand_landmarks.landmark
-        ]
-
-    body_wolrd_landmarks = []
-
-    if results.pose_world_landmarks:
-        body_wolrd_landmarks = [
-            [
-                landmark.x,
-                landmark.y,
-                landmark.z,
-                round(landmark.visibility, 2),
-            ]
-            for landmark in results.pose_world_landmarks.landmark
-        ]
-
-    # e3 = time.time()
-    # print(f"    Convert data: {(e3 - e2)*1000} ms")
+    face_landmarks = landmarks_to_array(results.face_landmarks.landmark, window) if results.face_landmarks else []
+    body_landmarks = landmarks_to_array(results.pose_landmarks.landmark, window) if results.pose_landmarks else []
+    left_hand_landmarks = landmarks_to_array(results.left_hand_landmarks.landmark, window) if results.left_hand_landmarks else []
+    right_hand_landmarks = landmarks_to_array(results.right_hand_landmarks.landmark, window) if results.right_hand_landmarks else []
+    body_wolrd_landmarks = world_landmarks_to_array(results.pose_world_landmarks.landmark, window) if results.pose_world_landmarks else []
 
     return {
-        "face_mesh": faces_landmarks,
-        "body_pose": body_landmarks,
-        "right_hand_pose": left_hands_landmarks,
-        "left_hand_pose": right_hands_landmarks,
-        "body_world_pose": body_wolrd_landmarks,
+        "face_mesh": face_landmarks, # [[x, y, visibility]]
+        "body_pose": body_landmarks, # [[x, y, visibility]]
+        "right_hand_pose": left_hand_landmarks, # [[x, y, visibility]]
+        "left_hand_pose": right_hand_landmarks, # [[x, y, visibility]]
+        "body_world_pose": body_wolrd_landmarks, # [[x, y, z, visibility]]
     }

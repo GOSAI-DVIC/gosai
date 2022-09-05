@@ -15,7 +15,7 @@ class Driver(BaseDriver):
     Translate the pose from world coordinates to screen coordinates
     """
 
-    def __init__(self, name: str, parent, max_fps: int = 60):
+    def __init__(self, name: str, parent, max_fps: int = 30):
         super().__init__(name, parent)
 
         self.register_to_driver("pose", "raw_data")
@@ -69,6 +69,8 @@ class Driver(BaseDriver):
         if raw_data is not None and bool(raw_data["body_pose"]) and depth is not None:
             flag_1 = time.time()
 
+            projected_data = raw_data.copy()
+
             eyes = raw_data["body_pose"][0][0:2]
 
             body = project(
@@ -78,6 +80,7 @@ class Driver(BaseDriver):
                 depth_frame=depth,
                 depth_radius=2,
             )
+            
             projected_data = raw_data.copy()
             projected_data["body_pose"] = body
 
@@ -91,13 +94,10 @@ class Driver(BaseDriver):
             )
 
             if len(raw_data["right_hand_pose"]) > 0:
-                raw_data["right_hand_sign"] = hs.find_gesture(
+                projected_data["right_hand_sign"] = hs.find_gesture(
                     self.sign_provider,
-                    hs.normalize_data(
-                        raw_data["right_hand_pose"],
-                        self.source["width"],
-                        self.source["height"],
-                    ),
+                    raw_data["right_hand_pose"],
+
                 )
 
             projected_data["left_hand_pose"] = project(
@@ -112,11 +112,7 @@ class Driver(BaseDriver):
             if len(raw_data["left_hand_pose"]) > 0:
                 projected_data["left_hand_sign"] = hs.find_gesture(
                     self.sign_provider,
-                    hs.normalize_data(
-                        raw_data["left_hand_pose"],
-                        self.source["width"],
-                        self.source["height"],
-                    ),
+                    raw_data["left_hand_pose"]
                 )
 
             projected_data["face_mesh"] = project(

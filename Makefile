@@ -5,7 +5,7 @@ include home/.env
 IMNAME = ${USER}/${REPO}
 TAG = ${PLATFORM}-${DEVICE}-${VERSION}
 REDIS_REPO = redis
-REDIS_IMNAME = docker.io/bitnami/redis:6.2
+REDIS_IMNAME = docker.io/bitnami/redis:7.0
 
 boot:
 	-docker rm $(REPO)-$(REDIS_REPO)
@@ -41,6 +41,8 @@ endif
 stop:
 	-docker stop $(REPO)
 	-docker stop $(REPO)-$(REDIS_REPO)
+	-pkill -9 -f "python3 init.py"
+
 
 calibration:
 	python3 core/calibration/calibration_auto.py
