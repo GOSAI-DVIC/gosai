@@ -80,6 +80,8 @@ class Driver(BaseDriver):
                 depth_frame=depth,
                 depth_radius=2,
             )
+            
+            projected_data = raw_data.copy()
             projected_data["body_pose"] = body
 
             projected_data["right_hand_pose"] = project(

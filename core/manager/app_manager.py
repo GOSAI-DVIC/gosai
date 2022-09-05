@@ -74,7 +74,9 @@ class AppManager:
                         for app_name in config["applications"]["disabled"]:
                             if app_name in self.started_apps:
                                 self.stop(app_name)
-                            self.available_apps.remove(app_name)
+
+                            if app_name in self.available_apps:
+                                self.available_apps.remove(app_name)
         except Exception as e:
             self.log(f"Failed to start up the applications: {e}", 4)
 

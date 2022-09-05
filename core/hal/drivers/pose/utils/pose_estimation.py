@@ -60,7 +60,6 @@ def find_all_poses(holistic, frame, window):
     # e2 = time.time()
     # print(f"    Infer image: {(e2 - e1)*1000} ms")
 
-
     face_landmarks = landmarks_to_array(results.face_landmarks.landmark, window) if results.face_landmarks else []
     body_landmarks = landmarks_to_array(results.pose_landmarks.landmark, window) if results.pose_landmarks else []
     left_hand_landmarks = landmarks_to_array(results.left_hand_landmarks.landmark, window) if results.left_hand_landmarks else []
