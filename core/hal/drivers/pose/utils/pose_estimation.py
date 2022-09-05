@@ -13,11 +13,11 @@ def init():
         model_complexity=0,
     )
 
-def landmarks_to_array(landmarks, window=1):
+def landmarks_to_array(landmarks,  min_width, width, height):
     landmark_array = [
         [
-            (0.5 - window / 2) + landmark.x * window,
-            landmark.y,
+            min_width + int(landmark.x * width),
+            int(landmark.y * height),
             round(landmark.visibility, 2),
         ]
         for landmark in landmarks
@@ -60,10 +60,10 @@ def find_all_poses(holistic, frame, window):
     # e2 = time.time()
     # print(f"    Infer image: {(e2 - e1)*1000} ms")
 
-    face_landmarks = landmarks_to_array(results.face_landmarks.landmark, window) if results.face_landmarks else []
-    body_landmarks = landmarks_to_array(results.pose_landmarks.landmark, window) if results.pose_landmarks else []
-    left_hand_landmarks = landmarks_to_array(results.left_hand_landmarks.landmark, window) if results.left_hand_landmarks else []
-    right_hand_landmarks = landmarks_to_array(results.right_hand_landmarks.landmark, window) if results.right_hand_landmarks else []
+    face_landmarks = landmarks_to_array(results.face_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.face_landmarks else []
+    body_landmarks = landmarks_to_array(results.pose_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.pose_landmarks else []
+    left_hand_landmarks = landmarks_to_array(results.left_hand_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.left_hand_landmarks else []
+    right_hand_landmarks = landmarks_to_array(results.right_hand_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.right_hand_landmarks else []
     body_wolrd_landmarks = world_landmarks_to_array(results.pose_world_landmarks.landmark, window) if results.pose_world_landmarks else []
 
     return {

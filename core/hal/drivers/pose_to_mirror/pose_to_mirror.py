@@ -80,7 +80,7 @@ class Driver(BaseDriver):
                 depth_frame=depth,
                 depth_radius=2,
             )
-            
+
             projected_data = raw_data.copy()
             projected_data["body_pose"] = body
 
@@ -96,8 +96,11 @@ class Driver(BaseDriver):
             if len(raw_data["right_hand_pose"]) > 0:
                 projected_data["right_hand_sign"] = hs.find_gesture(
                     self.sign_provider,
-                    raw_data["right_hand_pose"],
-
+                    hs.normalize_data(
+                        raw_data["right_hand_pose"],
+                        self.source["width"],
+                        self.source["height"],
+                    )
                 )
 
             projected_data["left_hand_pose"] = project(
@@ -112,7 +115,11 @@ class Driver(BaseDriver):
             if len(raw_data["left_hand_pose"]) > 0:
                 projected_data["left_hand_sign"] = hs.find_gesture(
                     self.sign_provider,
-                    raw_data["left_hand_pose"]
+                    hs.normalize_data(
+                        raw_data["left_hand_pose"],
+                        self.source["width"],
+                        self.source["height"],
+                    )
                 )
 
             projected_data["face_mesh"] = project(
