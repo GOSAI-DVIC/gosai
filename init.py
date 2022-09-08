@@ -1,4 +1,5 @@
 import os
+import time
 
 from core.console.console import Console
 from core.hal.hal import HardwareAbstractionLayer
@@ -23,7 +24,8 @@ monitor.record_listenner()
 app_manager = AppManager(hal, server)
 app_manager.start_up()
 
-start_chrome(server.path)
+time.sleep(2)
 
 console = Console(hal, server, app_manager)
+start_chrome(server.path)
 console.start()

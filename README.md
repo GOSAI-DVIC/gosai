@@ -33,3 +33,11 @@ To install an existing project, simply clone the project in a directory called h
 ## Create your own project
 
 Refer to [this tutorial](https://dvic.devinci.fr/tutorial/how-to-program-on-GOSAI) to learn how to develop on gosai.
+
+## Developping
+
+### Boot in a virtual environment : 
+
+`python3 -m venv .venv `
+`pip3 install -r build/cpu/requirements.txt`
+`source .venv/bin/activate && make boot`

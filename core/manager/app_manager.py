@@ -1,7 +1,7 @@
 import json
 import os
 import pickle
-
+import traceback
 import redis
 
 
@@ -114,8 +114,8 @@ class AppManager:
             self.log(f"Started application '{app_name}'", 2)
             self.update_api_listeners()
 
-        except Exception as e:
-            self.log(f"Failed to start application '{app_name}': {e}", 4)
+        except Exception:
+            self.log(f"Failed to start application '{app_name}': {traceback.format_exc()}", 4)
             return False
 
         return True

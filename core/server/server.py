@@ -13,14 +13,15 @@ from flask_socketio import SocketIO
 import redis
 
 
+
 def start_chrome(path):
     """Launch a chrome browser to display the platform"""
+
     def _start_chrome(path):
         options = ["--start-fullscreen", "--incognito", "--disable-logging"]
         options_line = " ".join(options)
         cmd = f"chromium http://127.0.0.1:8000/{path}/platform {options_line}"
         os.system(f'/bin/bash -c "{cmd} &> /dev/null"')
-
     threading.Thread(target=_start_chrome, args=(path,), daemon=True).start()
 
 
@@ -75,7 +76,7 @@ class Server:
             )
             delta = tomorrow - dt.datetime.now()
             return delta.seconds
-
+        
         threading.Thread(
             target=_daily_control_password_generator, args=(self,), daemon=True
         ).start()
@@ -86,6 +87,7 @@ class Server:
 
     def start(self, socket_port=8000):
         """Starts the server on the given port"""
+
 
         def _start_socket(self, port):
             self.sio.run(self.app, host="0.0.0.0", port=port)
