@@ -1,13 +1,19 @@
 import cv2 as cv
 import numpy as np
+import os
+from dotenv import load_dotenv
 
+project_folder = os.path.expanduser('./home')
+load_dotenv(os.path.join(project_folder, '.env'))
+
+CAM_NUMBER = int(os.getenv('CAM_NUMBER'))
 
 class StandardCamera:
     """
     * A class that reads frames from the webcam (color only)
     """
 
-    def __init__(self, width, height, id: int = 0):
+    def __init__(self, width, height, id: int = CAM_NUMBER):
         self.name = "standard"
         self.width = width
         self.height = height

@@ -5,8 +5,16 @@ import cv2
 from cv2 import aruco
 from itertools import permutations  
 import json
+import os
+from dotenv import load_dotenv
 
-projected_coords = [[450,500],[450,800], [1300, 550], [1350,850]]
+project_folder = os.path.expanduser('./home')
+load_dotenv(os.path.join(project_folder, '.env'))
+CAM_NUMBER = int(os.getenv('CAM_NUMBER'))
+# print('CAM NUMBER is ', CAM_NUMBER)
+# print('type is ', type(CAM_NUMBER))
+
+projected_coords = [[500,400],[550,650], [1300, 450], [1350,650]]
 #projected_coords = [[400,300],[400,780],[1520,300],[1520,780]] #Original test coords
 screen_coords=[[0,0], [0,1080],[1920,0],[1920,1080]]
 sleeping_time = 300
@@ -34,7 +42,7 @@ cv2.setWindowProperty("Pool", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 def get_frame():
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(CAM_NUMBER)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
     
