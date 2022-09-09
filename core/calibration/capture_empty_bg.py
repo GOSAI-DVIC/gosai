@@ -1,4 +1,5 @@
 import cv2
+import json
 
 filename = "home/background.jpg"
 
