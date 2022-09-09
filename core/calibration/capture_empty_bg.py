@@ -7,7 +7,13 @@ cv2.namedWindow("Billard", cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty("Billard", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 #Config camera
-cap = cv2.VideoCapture(0)
+CAM_NUMBER = 0
+with open("home/config.json", "r") as f:
+                config = json.load(f)
+                if ("camera" in config and "number" in config["camera"]):
+                    CAM_NUMBER = config["camera"]["number"]
+
+cap = cv2.VideoCapture(CAM_NUMBER)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 

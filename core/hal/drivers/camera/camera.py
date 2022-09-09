@@ -35,22 +35,23 @@ class Driver(BaseDriver):
                 config = json.load(f)
                 if (
                     "camera" in config
+                    and "number" in config["camera"]
                     and "type" in config["camera"]
                     and "width" in config["camera"]
                     and "height" in config["camera"]
                 ):
                     if config["camera"]["type"] == "standard":
                         self.source = StandardCamera(
-                            config["camera"]["width"], config["camera"]["height"]
+                            config["camera"]["width"], config["camera"]["height"], config["camera"]["number"]
                         )
                     elif config["camera"]["type"] == "intel":
                         self.source = IntelCamera(
-                            config["camera"]["width"], config["camera"]["height"]
+                            config["camera"]["width"], config["camera"]["height"], config["camera"]["number"]
                         )
                 else:
-                    self.source = StandardCamera(1920, 1080)
+                    self.source = StandardCamera(1920, 1080, 0)
         else:
-            self.source = StandardCamera(1920, 1080)
+            self.source = StandardCamera(1920, 1080, 0)
 
     def loop(self):
         # print(self.source)
