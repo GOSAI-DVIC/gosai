@@ -115,7 +115,9 @@ class AppManager:
             self.update_api_listeners()
 
         except Exception:
-            self.log(f"Failed to start application '{app_name}': {traceback.format_exc()}", 4)
+            self.log(
+                f"Failed to start application '{app_name}': {traceback.format_exc()}", 4
+            )
             return False
 
         return True
@@ -128,7 +130,7 @@ class AppManager:
             return False
 
         if app_name not in self.started_apps:
-            self.log(f"Application '{app_name}' not started", 3)
+            self.log(f"Application '{app_name}' not started, could not stop", 3)
             return False
 
         try:
@@ -155,7 +157,23 @@ class AppManager:
 
     def log(self, content, level=1):
         """Logs via the redis database"""
-        data = {"source": self.name, "content": content, "level": level}
+        data = {
+            "service": "core",
+            "source": self.name,
+            "content": content,
+            "level": level,
+        }
+        self.db.set(f"log", pickle.dumps(data))
+        self.db.publish(f"log", pickle.dumps(data))
+
+    def log_for_application(self, source, content, level=1):
+        """Logs via the redis database"""
+        data = {
+            "service": "application",
+            "source": source,
+            "content": content,
+            "level": level,
+        }
         self.db.set(f"log", pickle.dumps(data))
         self.db.publish(f"log", pickle.dumps(data))
 
@@ -196,6 +214,14 @@ class AppManager:
             self.server.send_data(
                 "available_applications", {"applications": self.list_applications()}
             )
+
+        @self.server.sio.on("log_for_application_manager")
+        def _(data) -> None:
+            self.log(data["content"], data["level"])
+
+        @self.server.sio.on("log_for_application")
+        def _(data: dict):
+            self.log_for_application(data["source"], data["content"], data["level"])
 
     def update_api_listeners(self):
         """Updates the App manager api listeners"""

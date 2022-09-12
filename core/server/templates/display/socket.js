@@ -15,25 +15,31 @@ export const socket = io.connect(window.location.origin, {
     query: "source=display"
 });
 
+socket_link = socket;
 
 socket.on("start_application", async (data) => {
     const application_name = data["application_name"];
 
     if (Object.keys(modules).includes(application_name)) {
         if (!modules[application_name].activated) {
-            modules[application_name].activated = true;
-            modules[application_name].selfCanvas.show();
-            modules[application_name].resume();
+            try {
+                modules[application_name].activated = true;
+                modules[application_name].selfCanvas.show();
+                modules[application_name].resume();
+            } catch (e) {
+                catch_error(e, application_name, "Resume error", true);
+            }
         }
     } else {
-        const module = await import("./home/apps/" + application_name + "/display.js")
-
-        const application = module[application_name]
-
-        console.log("Starting:" + application_name);
-
-        application.set(window.innerWidth, window.innerHeight, socket);
-        modules[application_name] = application;
+        try {
+            const module = await import("./home/apps/" + application_name + "/display.js")
+            const application = module[application_name]
+            console.log("Starting:" + application_name);
+            application.set(window.innerWidth, window.innerHeight, socket);
+            modules[application_name] = application;
+        } catch (e) {
+            catch_error(e, application_name, "Start error", true);
+        }
     }
 
     socket.emit("started_" + application_name);
@@ -42,11 +48,17 @@ socket.on("start_application", async (data) => {
 socket.on("stop_application", async (data) => {
     const application_name = data["application_name"];
 
-    console.log("Stopping:" + application_name);
+    try {
+        console.log("Stopping:" + application_name);
+        if(Object.keys(modules).includes(application_name)) {
+            modules[application_name].activated = false;
+            modules[application_name].selfCanvas.hide();
+            modules[application_name].pause();
+        }
+    } catch (e) {
+        catch_error(e, application_name, "Stop error", false);
+    }
 
-    modules[application_name].activated = false;
-    modules[application_name].selfCanvas.hide();
-    modules[application_name].pause();
 });
 
 socket.emit("window_loaded");

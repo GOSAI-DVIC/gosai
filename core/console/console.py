@@ -31,7 +31,12 @@ class Console(threading.Thread):
 
     def log(self, content, level=2):
         """Logs via the redis database"""
-        data = {"source": "console", "content": content, "level": level}
+        data = {
+            "service": "core",
+            "source": "console",
+            "content": content,
+            "level": level,
+        }
         self.db.set(f"log", pickle.dumps(data))
         self.db.publish(f"log", pickle.dumps(data))
 
@@ -49,7 +54,13 @@ def eval_command(console: Console, command: str) -> None:
             if len(arguments) == 1 and arguments[0] == "ls":
                 result = "\nAvailable applications:\n"
                 result += (
-                    "\n".join(["\t" + app["name"] for app in console.app_manager.list_applications()]) + "\n"
+                    "\n".join(
+                        [
+                            "\t" + app["name"]
+                            for app in console.app_manager.list_applications()
+                        ]
+                    )
+                    + "\n"
                 )
                 console.log(result)
                 return
@@ -61,7 +72,12 @@ def eval_command(console: Console, command: str) -> None:
             ):
                 result = "\nStarted applications:\n"
                 result += (
-                    "\n".join(["\t" + app["name"] for app in console.app_manager.list_started_applications()])
+                    "\n".join(
+                        [
+                            "\t" + app["name"]
+                            for app in console.app_manager.list_started_applications()
+                        ]
+                    )
                     + "\n"
                 )
                 console.log(result)
@@ -74,7 +90,12 @@ def eval_command(console: Console, command: str) -> None:
             ):
                 result = "\nStopped applications:\n"
                 result += (
-                    "\n".join(["\t" + app["name"] for app in console.app_manager.list_stopped_applications()])
+                    "\n".join(
+                        [
+                            "\t" + app["name"]
+                            for app in console.app_manager.list_stopped_applications()
+                        ]
+                    )
                     + "\n"
                 )
                 console.log(result)

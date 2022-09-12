@@ -85,6 +85,7 @@ class Monitor:
     def log(self, content, level=1):
         """Logs via the redis database"""
         data = {
+            "service": "core",
             "source": self.name,
             "content": content,
             "level": level
