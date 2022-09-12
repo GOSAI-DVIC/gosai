@@ -20,7 +20,9 @@ class AppManager:
             for f in os.scandir("home/apps")
             if f.is_dir() and f.name != "__pycache__" and f.name != "template"
         ]
+        self.apps_to_start = []
         self.started_apps = {}
+        self.first_start = True
 
         self.data = {}
 
@@ -66,9 +68,6 @@ class AppManager:
             if os.path.exists("home/config.json"):
                 with open("home/config.json", "r") as f:
                     config = json.load(f)
-                    if "applications" in config and "startup" in config["applications"]:
-                        for app_name in config["applications"]["startup"]:
-                            self.start(app_name)
 
                     if "applications" in config and "disabled" in config["applications"]:
                         for app_name in config["applications"]["disabled"]:
@@ -77,6 +76,10 @@ class AppManager:
 
                             if app_name in self.available_apps:
                                 self.available_apps.remove(app_name)
+
+                    if "applications" in config and "startup" in config["applications"]:
+                        for app_name in config["applications"]["startup"]:
+                            self.apps_to_start.append(app_name)
         except Exception as e:
             self.log(f"Failed to start up the applications: {e}", 4)
 
@@ -172,10 +175,16 @@ class AppManager:
 
         @self.server.sio.on("window_loaded")
         def _() -> None:
-            for app_name in self.started_apps.keys():
-                self.server.send_data(
-                    "start_application", {"application_name": app_name}
-                )
+            if self.first_start:
+                for app_name in self.apps_to_start:
+                    self.start(app_name)
+
+                self.first_start = False
+            else:
+                for app_name in self.started_apps:
+                    self.server.send_data(
+                        "start_application", {"application_name": app_name}
+                    )
 
         @self.server.sio.on("get_started_applications")
         def _() -> None:
