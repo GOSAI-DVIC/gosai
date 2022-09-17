@@ -34,9 +34,7 @@ class Driver(BaseDriver):
             with open("home/config.json", "r") as f:
                 config = json.load(f)
                 if (
-                    "camera" in config
-                    and "number" in config["camera"]
-                    and "type" in config["camera"]
+                    "type" in config["camera"]
                     and "width" in config["camera"]
                     and "height" in config["camera"]
                 ):
@@ -45,8 +43,11 @@ class Driver(BaseDriver):
                             config["camera"]["width"], config["camera"]["height"], config["camera"]["number"]
                         )
                     elif config["camera"]["type"] == "intel":
+
                         self.source = IntelCamera(
                             config["camera"]["width"], config["camera"]["height"], config["camera"]["number"]
+                        ) if "number" in config["camera"] else IntelCamera(
+                            config["camera"]["width"], config["camera"]["height"]
                         )
                 else:
                     self.source = StandardCamera(1920, 1080, 0)
