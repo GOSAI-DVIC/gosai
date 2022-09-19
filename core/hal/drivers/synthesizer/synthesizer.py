@@ -13,6 +13,7 @@ class Driver(BaseDriver):
         #create driver event
         self.create_event("synthesizing")
         self.create_callback("play_synth", self.play_synth)
+        self.blocksize = 2048
         
     # def pre_run(self):
         # runs to do at the start of the driver
@@ -30,7 +31,7 @@ class Driver(BaseDriver):
                 outdata[:] = data.reshape(-1,1)
         
         self.stream = sd.OutputStream(
-            samplerate=48000, blocksize=2048, callback=callback, channels=1)
+            samplerate=48000, blocksize = self.blocksize, callback=callback, channels=1)
         self.stream.start()
         self.phase = 0
 
@@ -38,8 +39,9 @@ class Driver(BaseDriver):
         bitrate = max(data["bitrate"], data["frequency"]+100)
         frequency = data["frequency"]
         amplitude = data["amplitude"]
-        numberofframes = int(data["bitrate"] * data["length"])
-        WAVEDATA = [amplitude * math.sin(2*math.pi*frequency*x/bitrate + self.phase) for x in range(2048)]
+        self.blocksize = 2048*data["note_duration"]
+
+        WAVEDATA = [amplitude * math.sin(2*math.pi*frequency*x/bitrate + self.phase) for x in range(self.blocksize)]
         try:
             self.buffer_queue.put_nowait(np.array(WAVEDATA, dtype=np.float32))
             self.phase = (2*math.pi*frequency*2047/bitrate + self.phase) % (2*math.pi)
