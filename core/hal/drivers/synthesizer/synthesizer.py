@@ -12,16 +12,35 @@ class Driver(BaseDriver):
 
         #create driver event
         self.create_event("synthesizing")
-        self.create_callback("play_synth", self.play_synth)
+        self.create_callback("play", self.play)
+        self.create_callback("add_to_queue", self.add_to_queue)
         self.blocksize = 2048
+        self.sample_rate = 48000
         
     # def pre_run(self):
         # runs to do at the start of the driver
-        self.buffer_queue = queue.Queue(3)
+        self.buffer = queue.Queue(3)
+        self.queue = queue.Queue()
 
-        def callback(outdata, frames, time, status):
+        def callback_live(outdata, frames, time, status):
             try:
-                data = self.buffer_queue.get_nowait()
+                data = self.buffer.get_nowait()
+            except queue.Empty:
+                data = np.zeros(frames, dtype=np.float32)
+            if len(data) < len(outdata):
+                outdata[:len(data)] = data
+                outdata[len(data):] = np.zeros(len(outdata) - len(data))
+            else:
+                outdata[:] = data.reshape(-1,1)
+        
+        self.live_stream = sd.OutputStream(
+            samplerate=48000, blocksize = self.blocksize, callback=callback_live, channels=1)
+        self.live_stream.start()
+        self.buffer_phase = 0
+
+        def callback_playback(outdata, frames, time, status):
+            try:
+                data = self.queue.get_nowait()
             except queue.Empty:
                 data = np.zeros(frames, dtype=np.float32)
             if len(data) < len(outdata):
@@ -31,20 +50,29 @@ class Driver(BaseDriver):
                 outdata[:] = data.reshape(-1,1)
         
         self.stream = sd.OutputStream(
-            samplerate=48000, blocksize = self.blocksize, callback=callback, channels=1)
+            samplerate=48000, blocksize = self.blocksize, callback=callback_playback, channels=1)
         self.stream.start()
-        self.phase = 0
+        self.queue_phase = 0
 
-    def play_synth(self, data):
-        bitrate = max(data["bitrate"], data["frequency"]+100)
+    def play(self, data):
+
         frequency = data["frequency"]
         amplitude = data["amplitude"]
-        self.blocksize = 2048*data["note_duration"]
 
-        WAVEDATA = [amplitude * math.sin(2*math.pi*frequency*x/bitrate + self.phase) for x in range(self.blocksize)]
+        WAVEDATA = [amplitude * math.sin(2*math.pi*frequency*x/self.sample_rate + self.buffer_phase) for x in range(self.blocksize)]
         try:
-            self.buffer_queue.put_nowait(np.array(WAVEDATA, dtype=np.float32))
-            self.phase = (2*math.pi*frequency*2047/bitrate + self.phase) % (2*math.pi)
+            self.buffer.put_nowait(np.array(WAVEDATA, dtype=np.float32))
+            self.buffer_phase = (2*math.pi*frequency*(self.blocksize-1)/self.sample_rate + self.buffer_phase) % (2*math.pi)
         except:
             pass
+        
+    def add_to_queue(self, data):
+        duration = data["duration"]
+        frequency = data["frequency"]
+        amplitude = data["amplitude"]
+
+        for _ in range(int(duration*self.sample_rate/self.blocksize)):
+            WAVEDATA = [amplitude * math.sin(2*math.pi*frequency*x/self.sample_rate + self.queue_phase) for x in range(self.blocksize)]
+            self.queue.put_nowait(np.array(WAVEDATA, dtype=np.float32))
+            self.queue_phase = (2*math.pi*frequency*(self.blocksize-1)/self.sample_rate + self.queue_phase) % (2*math.pi)
         
