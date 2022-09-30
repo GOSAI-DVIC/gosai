@@ -15,33 +15,33 @@ const socket = io.connect(window.location.origin, {
     query: "source=dashboard"
 });
 
-socket.on("log_history", (data) => {
+socket.on("core-logger-log_history", (data) => {
     history = data["history"];
     generate_console_logs();
 });
 
-socket.on("log", (log) => {
+socket.on("core-logger-log", (log) => {
     add_to_logs(log);
 });
 
-socket.on("available_applications", (data) => {
+socket.on("core-app_manager-available_applications", (data) => {
     let applications = data["applications"];
     generate_applications_table(applications)
 });
 
-socket.on("available_drivers", (data) => {
+socket.on("core-hal-available_drivers", (data) => {
     let drivers = data["drivers"];
     generate_drivers_table(drivers);
 });
 
-socket.on("connected_users", (data) => {
+socket.on("core-server-connected_users", (data) => {
     let clients = data["users"];
     generate_clients_table(clients);
     let display = document.getElementById("clients-stats-connected");
     display.innerText = Object.keys(clients).length;
 });
 
-socket.on("display_statistics", (data) => {
+socket.on("core-system_monitor-display_statistics", (data) => {
     update_fps_chart({
         x: data["time"],
         y: data["fps"]
@@ -52,7 +52,7 @@ socket.on("display_statistics", (data) => {
     });
 });
 
-socket.on("recent_performances", data => {
+socket.on("core-system_monitor-recent_performances", data => {
     // socket.emit("purge_recent_performances");
     let drivers_performances = data["performances"]["driver"];
     if (drivers_performances != undefined){
@@ -67,10 +67,10 @@ socket.on("recent_performances", data => {
     }
 })
 
-socket.emit("get_log_history");
-socket.emit("get_available_applications");
-socket.emit("get_available_drivers");
-socket.emit("get_users");
+socket.emit("core-logger-get_log_history");
+socket.emit("core-app_manager-get_available_applications");
+socket.emit("core-hal-get_available_drivers");
+socket.emit("core-server-get_users");
 setInterval(() => {
-    socket.emit("get_recent_performances");
+    socket.emit("core-logger-get_recent_performances");
 }, 500);

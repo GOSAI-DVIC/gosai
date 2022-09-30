@@ -10,6 +10,7 @@ class AppManager:
 
     def __init__(self, hal, server):
         """Initializes the app manager"""
+        self.service = "core"
         self.name = "app_manager"
         self.hal = hal
         self.server = server
@@ -31,6 +32,7 @@ class AppManager:
 
         self.apps_to_start = []
         self.started_apps = {}
+        self.first_start = True
 
         self.data = {}
 
@@ -76,9 +78,6 @@ class AppManager:
             if os.path.exists("home/config.json"):
                 with open("home/config.json", "r") as f:
                     config = json.load(f)
-                    if "applications" in config and "startup" in config["applications"]:
-                        for app_name in config["applications"]["startup"]:
-                            self.start(app_name)
 
                     if "applications" in config and "disabled" in config["applications"]:
                         for app_name in config["applications"]["disabled"]:
@@ -87,6 +86,10 @@ class AppManager:
 
                             if app_name in self.available_apps:
                                 self.available_apps.remove(app_name)
+
+                    if "applications" in config and "startup" in config["applications"]:
+                        for app_name in config["applications"]["startup"]:
+                            self.apps_to_start.append(app_name)
         except Exception as e:
             self.log(f"Failed to start up the applications: {e}", 4)
 
@@ -106,6 +109,16 @@ class AppManager:
             app = __import__(
                 f"home.apps.{app_name}.processing", fromlist=[None]
             ).Application(app_name, self.hal, self.server, self)
+            
+            # Stopping apps not required
+            if app.is_exclusive:
+                started_apps_list = list(self.started_apps.keys())
+                for started_app_name in started_apps_list:
+                    if started_app_name not in app.applications_allowed and started_app_name != app_name:
+                        self.stop(started_app_name)
+                for app_required in app.applications_required:
+                    if app_required in self.available_apps and app_required not in self.started_apps:
+                        self.start(app_required)
 
             self.server.send_data(
                 "core-app_manager-menu_add_option", 
@@ -122,7 +135,7 @@ class AppManager:
             app.start()
 
             # Start the js app
-            self.server.send_data("start_application", {"application_name": app_name})
+            self.server.send_data(f"{self.service}-{self.name}-start_application", {"application_name": app_name})
 
             # Store the app as a started app
             self.started_apps[app_name] = app
@@ -130,7 +143,9 @@ class AppManager:
             self.update_api_listeners()
 
         except Exception:
-            self.log(f"Failed to start application '{app_name}': {traceback.format_exc()}", 4)
+            self.log(
+                f"Failed to start application '{app_name}': {traceback.format_exc()}", 4
+            )
             return False
 
         return True
@@ -143,7 +158,7 @@ class AppManager:
             return False
 
         if app_name not in self.started_apps:
-            self.log(f"Application '{app_name}' not started", 3)
+            self.log(f"Application '{app_name}' not started, could not stop", 3)
             return False
 
         try:
@@ -156,7 +171,7 @@ class AppManager:
             app.stop()
 
             # Stop the js app
-            self.server.send_data("stop_application", {"application_name": app_name})
+            self.server.send_data(f"{self.service}-{self.name}-stop_application", {"application_name": app_name})
 
             del self.started_apps[app_name]
             self.log(f"Stopped application '{app_name}'", 2)
@@ -170,60 +185,90 @@ class AppManager:
 
     def log(self, content, level=1):
         """Logs via the redis database"""
-        data = {"source": self.name, "content": content, "level": level}
+        data = {
+            "service": "core",
+            "source": self.name,
+            "content": content,
+            "level": level,
+        }
+        self.db.set(f"log", pickle.dumps(data))
+        self.db.publish(f"log", pickle.dumps(data))
+
+    def log_for_application(self, source, content, level=1):
+        """Logs via the redis database"""
+        data = {
+            "service": "application",
+            "source": source,
+            "content": content,
+            "level": level,
+        }
         self.db.set(f"log", pickle.dumps(data))
         self.db.publish(f"log", pickle.dumps(data))
 
     def add_api(self):
         """Adds the App manager api to the server"""
 
-        @self.server.sio.on("start_application")
+        @self.server.sio.on(f"{self.service}-{self.name}-start_application")
         def _(data) -> None:
             self.start(data["application_name"])
 
-        @self.server.sio.on("stop_application")
+        @self.server.sio.on(f"{self.service}-{self.name}-stop_application")
         def _(data) -> None:
             self.stop(data["application_name"])
 
-        @self.server.sio.on("window_loaded")
+        @self.server.sio.on(f"{self.service}-{self.name}-window_loaded")
         def _() -> None:
-            for app_name in self.started_apps.keys():
-                self.server.send_data(
-                    "start_application", {"application_name": app_name}
-                )
+            if self.first_start:
+                for app_name in self.apps_to_start:
+                    self.start(app_name)
 
-        @self.server.sio.on("get_started_applications")
+                self.first_start = False
+            else:
+                for app_name in self.started_apps:
+                    self.server.send_data(
+                        f"{self.service}-{self.name}-start_application", {"application_name": app_name}
+                    )
+
+        @self.server.sio.on(f"{self.service}-{self.name}-get_started_applications")
         def _() -> None:
             self.server.send_data(
-                "started_applications",
+                f"{self.service}-{self.name}-started_applications",
                 {"applications": self.list_started_applications()},
             )
 
-        @self.server.sio.on("get_stopped_applications")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_stopped_applications")
         def _() -> None:
             self.server.send_data(
-                "stopped_applications",
+                f"{self.service}-{self.name}-stopped_applications",
                 {"applications": self.list_stopped_applications()},
             )
 
-        @self.server.sio.on("get_available_applications")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_available_applications")
         def _() -> None:
             self.server.send_data(
-                "available_applications", {"applications": self.list_applications()}
+                f"{self.service}-{self.name}-available_applications", {"applications": self.list_applications()}
             )
+
+        @self.server.sio.on(f"{self.service}-{self.name}-log_for_application_manager")
+        def _(data) -> None:
+            self.log(data["content"], data["level"])
+
+        @self.server.sio.on(f"{self.service}-{self.name}-log_for_application")
+        def _(data: dict):
+            self.log_for_application(data["source"], data["content"], data["level"])
 
     def update_api_listeners(self):
         """Updates the App manager api listeners"""
         self.server.send_data(
-            "started_applications",
+            f"{self.service}-{self.name}-started_applications",
             {"applications": self.list_started_applications()},
         )
 
         self.server.send_data(
-            "stopped_applications",
+            f"{self.service}-{self.name}-stopped_applications",
             {"applications": self.list_stopped_applications()},
         )
 
         self.server.send_data(
-            "available_applications", {"applications": self.list_applications()}
+            f"{self.service}-{self.name}-available_applications", {"applications": self.list_applications()}
         )

@@ -1,9 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
-
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap'); */
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200;300;400;500;600;700;800;900&display=swap');
 head, body {
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif;
+    /* font-family: 'Roboto Mono', sans-serif; */
+    font-family: 'Inconsolata', monospace;
     font-weight: 400;
     color: #fff;
     background-color: rgb(54, 54, 54);
@@ -63,15 +65,18 @@ head, body {
 }
 
 .level-info {
-    color: #95fff1;
+    color: #36a3d9;
+    /* color: #95fff1; */
 }
 
 .level-warning {
-    color: #ffd700;
+    color: #f7d674;
+    /* color: #ffd700; */
 }
 
 .level-error {
-    color: #ff0000;
+    color: #ff6b6b;
+    /* color: #ff0000; */
 }
 
 #console-command {
