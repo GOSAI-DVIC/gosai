@@ -20,6 +20,16 @@ class AppManager:
             for f in os.scandir("home/apps")
             if f.is_dir() and f.name != "__pycache__" and f.name != "template"
         ]
+
+        # Import the apps JSON sub-menus
+        self.sub_menu = {}
+        for app_name in self.available_apps:
+            if os.path.exists(f"home.apps.{app_name}.sub-menu.json"):
+                with open(f"home.apps.{app_name}.sub-menu.json", "r") as f:
+                    sub_menu_data = json.load(f)
+                    self.sub_menu[app_name] = sub_menu_data
+
+        self.apps_to_start = []
         self.started_apps = {}
 
         self.data = {}
@@ -96,6 +106,11 @@ class AppManager:
             app = __import__(
                 f"home.apps.{app_name}.processing", fromlist=[None]
             ).Application(app_name, self.hal, self.server, self)
+
+            self.server.send_data(
+                "core-app_manager-menu_add_option", 
+                {"app_name": app_name, "options": self.sub_menu[app_name]}
+            )
 
             # Start the required drivers and subscribe to the required events
             for driver_name in app.requires:
