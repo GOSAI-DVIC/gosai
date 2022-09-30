@@ -59,13 +59,13 @@ function catch_error(error, module_name, prefix = "", stop = true) {
     console.error(error);
     if (Object.keys(modules).includes(module_name))
         modules[module_name].activated = false;
-    socket_link.emit("log_for_application", {
+    socket_link.emit("core-app_manager-log_for_application", {
         source: module_name,
         content: prefix + ": " + error.toString(),
         level: 4,
     });
     if (!stop) return;
-    socket_link.emit("stop_application", {
+    socket_link.emit("core-app_manager-stop_application", {
         application_name: module_name,
     });
 }

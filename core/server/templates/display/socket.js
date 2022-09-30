@@ -17,7 +17,7 @@ export const socket = io.connect(window.location.origin, {
 
 socket_link = socket;
 
-socket.on("start_application", async (data) => {
+socket.on("core-app_manager-start_application", async (data) => {
     const application_name = data["application_name"];
 
     if (Object.keys(modules).includes(application_name)) {
@@ -42,10 +42,10 @@ socket.on("start_application", async (data) => {
         }
     }
 
-    socket.emit("started_" + application_name);
+    socket.emit("application-" + application_name + "-started");
 });
 
-socket.on("stop_application", async (data) => {
+socket.on("core-app_manager-stop_application", async (data) => {
     const application_name = data["application_name"];
 
     try {
@@ -61,7 +61,7 @@ socket.on("stop_application", async (data) => {
 
 });
 
-socket.emit("window_loaded");
+socket.emit("core-app_manager-window_loaded");
 
 let fps = 0;
 let fps_prev_millis = 0;

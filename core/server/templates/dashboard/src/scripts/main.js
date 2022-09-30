@@ -66,7 +66,7 @@ function ljust(str, filler, size) {
 
 function send_command() {
     let command = document.getElementById("console-input").value;
-    socket.emit("execute_command", {
+    socket.emit("core-console-execute_command", {
         command: command
     });
     command_history.push(command);

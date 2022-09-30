@@ -52,8 +52,8 @@ function setup() {
         document.getElementById("title").innerHTML = platform_name;
     }
 
-    socket.emit("get_available_applications");
-    socket.emit("get_started_applications");
+    socket.emit("core-app_manager-get_available_applications");
+    socket.emit("core-app_manager-get_started_applications");
 
     canvas = createCanvas(windowWidth * 0.9, min(windowWidth * 0.35, 750 * 0.35));
     canvas.parent("canvas-div");
@@ -218,7 +218,7 @@ function create_app_button(applications_list) {
         button.parent("buttons-div");
         button.class("app-button");
         button.mousePressed(() => {
-            socket.emit("start_application", {
+            socket.emit("core-app_manager-start_application", {
                 application_name: app_name,
             });
         });
@@ -230,13 +230,13 @@ function update_app_button(app_name, flag) {
     name_to_buttons[app_name].style("background-color", colors[flag]);
     if (flag == 1) {
         name_to_buttons[app_name].mousePressed(() => {
-            socket.emit("stop_application", {
+            socket.emit("core-app_manager-stop_application", {
                 application_name: app_name,
             });
         });
     } else {
         name_to_buttons[app_name].mousePressed(() => {
-            socket.emit("start_application", {
+            socket.emit("core-app_manager-start_application", {
                 application_name: app_name,
             });
         });
