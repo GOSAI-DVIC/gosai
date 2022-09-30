@@ -14,7 +14,10 @@ class BaseApplication(threading.Thread):
 
         self.requires = {} # Select what driver you want to use
         self.data = {} # data that is sent to the js script
+        self.is_exclusive = False # if true, close the other applications except the specified ones
         self.started = False
+        self.applications_allowed = []
+        self.applications_required = []
 
         self.db = redis.Redis(host='localhost', port=6379, db=0)
 

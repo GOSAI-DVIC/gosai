@@ -96,6 +96,17 @@ class AppManager:
             app = __import__(
                 f"home.apps.{app_name}.processing", fromlist=[None]
             ).Application(app_name, self.hal, self.server, self)
+            
+            # Stopping apps not required
+            if app.is_exclusive:
+                started_apps_list = list(self.started_apps.keys())
+                for started_app_name in started_apps_list:
+                    if started_app_name not in app.applications_allowed and started_app_name != app_name:
+                        self.stop(started_app_name)
+                for app_required in app.applications_required:
+                    if app_required in self.available_apps and app_required not in self.started_apps:
+                        self.start(app_required)
+
 
             # Start the required drivers and subscribe to the required events
             for driver_name in app.requires:
