@@ -11,6 +11,7 @@ def init():
         min_tracking_confidence=0.5,
         smooth_landmarks=True,
         model_complexity=0,
+        refine_face_landmarks = True,
     )
 
 def landmarks_to_array(landmarks,  min_width, width, height):
