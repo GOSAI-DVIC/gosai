@@ -80,6 +80,6 @@ class BaseApplication(threading.Thread):
 
     def log(self, content, level=1):
         """Logs via the redis database"""
-        data = {"source": self.name, "content": content, "level": level}
+        data = {"service": "application", "source": self.name, "content": content, "level": level}
         self.db.set("log", pickle.dumps(data))
         self.db.publish("log", pickle.dumps(data))

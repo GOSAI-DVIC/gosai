@@ -1,5 +1,4 @@
 import datetime
-import locale
 import os
 import pickle
 import threading
@@ -7,8 +6,6 @@ import threading
 import redis
 
 LOGS_PATH = "core/logs"
-locale.setlocale(locale.LC_ALL, "")
-
 
 class Logger:
     """
@@ -26,31 +23,44 @@ class Logger:
 
         @self.server.sio.on("get_log_history")
         def _():
-            self.server.send_data("log_history", {
-                "history": self.history
-            })
+            self.server.send_data("log_history", {"history": self.history})
 
-    def log(self, source, content, level=1):
-        """
-        Logs a message
-        """
+        self.log_colors = {1: "\033[0m", 2: "\033[36m", 3: "\033[33m", 4: "\033[31m"}
 
+    def log(self, service, source, content, level=1):
+        """
+        Logs a message. The message is displayed in the console,
+        added to the history and sent to the clients.
+
+        Parameters
+        ----------
+        service : str
+            The service that logs the message (e.g. core, application, ...)
+
+        source : str
+            The source of the message (e.g. app_manager, console, ...)
+
+        content : str
+            The content of the message, describing what happened
+
+        level : int
+            The level of the message (1: info, 2: debug, 3: warning, 4: error)
+        """
         log = {
-            "time": datetime.datetime.now().strftime('%b-%d-%G-%I:%M:%S%p'),
+            "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "service": service,
             "source": source,
             "content": content,
-            "level": level
+            "level": level,
         }
         if level >= int(os.environ["LOG_LEVEL"]):
-            print(f"{log['level']} : {log['source']} : {log['content']}")
+            print(self.log_to_string(log))
             self.history.append(log)
             self.server.send_data("log", log)
 
         if level >= 2:
             with open(f"{LOGS_PATH}/{source}.log", "a+") as log_file:
-                log_file.write(
-                    f"{log['level']} : {log['time']} : {log['content']}\n"
-                )
+                log_file.write(f"{log['level']} : {log['time']} : {log['content']}\n")
 
     def log_listenner(self):
         """
@@ -63,17 +73,36 @@ class Logger:
             for binary_data in ps.listen():
                 try:
                     data = pickle.loads(bytes(binary_data["data"]))
-                    self.log(data["source"], data["content"], data["level"])
-                except pickle.UnpicklingError as e:
+                    self.log(
+                        data["service"], data["source"], data["content"], data["level"]
+                    )
+                except pickle.UnpicklingError:
                     pass
                 except Exception as e:
-                    self.log("logger", f"Error while loading logged data: {e}", 3)
-                    pass
+                    self.log(
+                        "core", "logger", f"Error while loading logged data: {e}", 3
+                    )
 
         threading.Thread(target=_log_listenner, args=(self,)).start()
 
     def log_to_string(self, log):
         """
         Transforms a log to a string
+
+        Parameters
+        ----------
+
+        log : dict
+            The log to transform, should be a dict with the following keys:
+            - time: the time of the log
+            - service: the service that logs the message
+            - source: the source of the message
+            - content: the content of the message
+            - level: the level of the message
         """
-        return f"{log['source']}: {log['content']}"
+        # Fill the log with spaces to make it look nice
+        return (
+            f"{self.log_colors[log['level']]}{log['time']} : "
+            + f"{log['level']} : {log['service'].ljust(12)} : "
+            + f"{log['source'].ljust(15)}\033[0m : {log['content']}"
+        )

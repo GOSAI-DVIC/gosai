@@ -1,4 +1,5 @@
 let modules = {};
+let socket_link;
 
 let stats = {};
 let modules_consumptions = {};
@@ -12,7 +13,6 @@ const screenwidth = 392.85; //millimeters
 const screenheight = 698.4;
 
 let global_data = {};
-let recieved = false;
 
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight);
@@ -25,13 +25,20 @@ function draw() {
     for (const [name, module] of Object.entries(modules)) {
         let start = window.performance.now();
         if (module.activated) {
-            module.update();
-            module.show();
+            try {
+                module.update();
+            } catch (e) {
+                catch_error(e, module.name, "Update error", true);
+            }
+            try {
+                module.show();
+            } catch (e) {
+                catch_error(e, module.name, "Show error", true);
+            }
         }
         let end = window.performance.now();
         record_performance(name, end - start);
     }
-
 }
 
 function windowResized() {
@@ -46,4 +53,19 @@ function record_performance(module_name, time) {
     if (modules_consumptions[module_name].length > 100) {
         modules_consumptions[module_name].shift();
     }
+}
+
+function catch_error(error, module_name, prefix = "", stop = true) {
+    console.error(error);
+    if (Object.keys(modules).includes(module_name))
+        modules[module_name].activated = false;
+    socket_link.emit("log_for_application", {
+        source: module_name,
+        content: prefix + ": " + error.toString(),
+        level: 4,
+    });
+    if (!stop) return;
+    socket_link.emit("stop_application", {
+        application_name: module_name,
+    });
 }

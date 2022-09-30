@@ -13,7 +13,6 @@ from flask_socketio import SocketIO
 import redis
 
 
-
 def start_chrome(path):
     """Launch a chrome browser to display the platform"""
 
@@ -22,6 +21,7 @@ def start_chrome(path):
         options_line = " ".join(options)
         cmd = f"chromium http://127.0.0.1:8000/{path}/platform {options_line}"
         os.system(f'/bin/bash -c "{cmd} &> /dev/null"')
+
     threading.Thread(target=_start_chrome, args=(path,), daemon=True).start()
 
 
@@ -32,6 +32,7 @@ class Server:
         self.app = Flask(__name__)
         self.app.config["SECRET_KEY"] = "secret!"
         CORS(self.app)
+        self.db = redis.Redis(host="localhost", port=6379, db=0)
 
         load_dotenv("home/.env")
         platform_name = os.getenv("PLATFORM")
@@ -76,7 +77,7 @@ class Server:
             )
             delta = tomorrow - dt.datetime.now()
             return delta.seconds
-        
+
         threading.Thread(
             target=_daily_control_password_generator, args=(self,), daemon=True
         ).start()
@@ -87,7 +88,6 @@ class Server:
 
     def start(self, socket_port=8000):
         """Starts the server on the given port"""
-
 
         def _start_socket(self, port):
             self.sio.run(self.app, host="0.0.0.0", port=port)
@@ -122,23 +122,26 @@ class Server:
 
     def log(self, content, level=1):
         """Logs via the redis database"""
-        data = {"source": "server", "content": content, "level": level}
-        self.db.set(f"log", pickle.dumps(data))
-        self.db.publish(f"log", pickle.dumps(data))
+        data = {
+            "service": "core",
+            "source": "server",
+            "content": content,
+            "level": level,
+        }
+        self.db.set("log", pickle.dumps(data))
+        self.db.publish("log", pickle.dumps(data))
 
 
 def create_socket_api(server: Server):
+    """Create the socketio api."""
     @server.sio.on("connect")
-    def connect(*args):
+    def connect(*_):
         server.clients[request.sid] = {
             "address": request.remote_addr,
             "source": request.args.get("source"),
-            "time": dt.datetime.now().strftime('%b-%d-%G-%I:%M:%S%p')
-            }
-        server.sio.emit(
-            "connected_users",
-            {"users": server.clients}
-            )
+            "time": dt.datetime.now().strftime("%b-%d-%G-%I:%M:%S%p"),
+        }
+        server.sio.emit("connected_users", {"users": server.clients})
         if not server.background_thread_started:
             server.background_thread_started = True
             server.sio.start_background_task(server.send_queued_data)
@@ -146,17 +149,11 @@ def create_socket_api(server: Server):
     @server.sio.on("disconnect")
     def disconnect():
         del server.clients[request.sid]
-        server.sio.emit(
-            "connected_users",
-            {"users": server.clients}
-            )
+        server.sio.emit("connected_users", {"users": server.clients})
 
     @server.sio.on("get_users")
     def get_users():
-        server.sio.emit(
-            "connected_users",
-            {"users": server.clients}
-            )
+        server.sio.emit("connected_users", {"users": server.clients})
 
     @server.sio.on("get_control_password")
     def get_control_password():
@@ -189,6 +186,7 @@ def create_socket_api(server: Server):
         server.sio.emit("sound")
 
 def create_flask_api(server: Server):
+    """Create the flask api. This is used for the web interface"""
     @server.app.route("/gosai")
     def home():
         return "OK"

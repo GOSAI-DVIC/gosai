@@ -46,13 +46,22 @@ function log_to_str(data) {
         " : " +
         data["level"] +
         " : " +
-        data["source"] +
-        "</span> : " +
+        ljust(data["service"], "&nbsp;", 12) +
+        " : " +
+        ljust(data["source"], "&nbsp;", 13) +
+        ": </span>" +
         message +
         "<br>";
-
     result = result.replace(/\n/g, "<br />");
     return result;
+}
+
+function ljust(str, filler, size) {
+    let to_add = size - str.length;
+    for (let i = 0; i < to_add; i++) {
+        str += filler;
+    }
+    return str;
 }
 
 function send_command() {

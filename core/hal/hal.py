@@ -4,7 +4,6 @@ import os
 import pickle
 import threading
 from typing import Any, Dict, List
-from matplotlib.style import available
 
 import redis
 
@@ -337,7 +336,12 @@ class HardwareAbstractionLayer:
         level : int, optional
             The level of the log. (default is 1)
         """
-        data = {"source": self.name, "content": content, "level": level}
+        data = {
+            "service": "core",
+            "source": self.name,
+            "content": content,
+            "level": level,
+        }
         self.db.set(f"log", pickle.dumps(data))
         self.db.publish(f"log", pickle.dumps(data))
 
@@ -358,9 +362,7 @@ class HardwareAbstractionLayer:
 
         @self.server.sio.on("get_available_drivers")
         def _():
-            self.server.send_data(
-                "available_drivers", {"drivers": self.get_drivers()}
-            )
+            self.server.send_data("available_drivers", {"drivers": self.get_drivers()})
 
     def update_api_listeners(self):
         """Updates the Hal api listeners to match the current
@@ -374,6 +376,4 @@ class HardwareAbstractionLayer:
         self.server.send_data(
             "stopped_drivers", {"drivers": self.get_stopped_drivers()}
         )
-        self.server.send_data(
-            "available_drivers", {"drivers": self.get_drivers()}
-        )
+        self.server.send_data("available_drivers", {"drivers": self.get_drivers()})
