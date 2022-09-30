@@ -15,25 +15,25 @@ const socket = io.connect(window.location.origin, {
     query: "source=control"
 });
 
-socket.on("available_applications", async (data) => {
+socket.on("core-app_manager-available_applications", async (data) => {
     app = data["applications"]
     create_app_button(app)
 });
 
-socket.on("started_applications", async (data) => {
+socket.on("core-app_manager-started_applications", async (data) => {
     let started_apps = data["applications"];
     started_apps.forEach(app => {
         update_app_button(app["name"], 1)
     });
 });
 
-socket.on("stopped_applications", async (data) => {
+socket.on("core-app_manager-stopped_applications", async (data) => {
     let stopped_apps = data["applications"];
     stopped_apps.forEach(app => {
         update_app_button(app["name"], 0)
     });
 });
 
-socket.on("sound",() => {
+socket.on("core-server-sound",() => {
     speaker_request = true;
 })

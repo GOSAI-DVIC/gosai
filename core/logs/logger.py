@@ -16,14 +16,16 @@ class Logger:
         """
         Constructor and API for the logger
         """
+        self.service = "core"
+        self.name = "logger"
         self.server = server
         self.db = redis.Redis(host="localhost", port=6379, db=0)
 
         self.history = []
 
-        @self.server.sio.on("get_log_history")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_log_history")
         def _():
-            self.server.send_data("log_history", {"history": self.history})
+            self.server.send_data(f"{self.service}-{self.name}-log_history", {"history": self.history})
 
         self.log_colors = {1: "\033[0m", 2: "\033[36m", 3: "\033[33m", 4: "\033[31m"}
 
@@ -56,7 +58,7 @@ class Logger:
         if level >= int(os.environ["LOG_LEVEL"]):
             print(self.log_to_string(log))
             self.history.append(log)
-            self.server.send_data("log", log)
+            self.server.send_data(f"{self.service}-{self.name}-log", log)
 
         if level >= 2:
             with open(f"{LOGS_PATH}/{source}.log", "a+") as log_file:

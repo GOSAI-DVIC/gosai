@@ -12,12 +12,14 @@ class Console(threading.Thread):
 
     def __init__(self, hal, server, app_manager):
         threading.Thread.__init__(self)
+        self.service = "core"
+        self.name = "console"
         self.hal = hal
         self.server = server
         self.app_manager = app_manager
         self.db = redis.Redis(host="localhost", port=6379, db=0)
 
-        @self.server.sio.on("execute_command")
+        @self.server.sio.on(f"{self.service}-{self.name}-execute_command")
         def _(data) -> None:
             eval_command(self, data["command"])
 
