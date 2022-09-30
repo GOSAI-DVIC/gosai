@@ -10,6 +10,7 @@ class AppManager:
 
     def __init__(self, hal, server):
         """Initializes the app manager"""
+        self.service = "core"
         self.name = "app_manager"
         self.hal = hal
         self.server = server
@@ -121,7 +122,7 @@ class AppManager:
             app.start()
 
             # Start the js app
-            self.server.send_data("start_application", {"application_name": app_name})
+            self.server.send_data(f"{self.service}-{self.name}-start_application", {"application_name": app_name})
 
             # Store the app as a started app
             self.started_apps[app_name] = app
@@ -157,7 +158,7 @@ class AppManager:
             app.stop()
 
             # Stop the js app
-            self.server.send_data("stop_application", {"application_name": app_name})
+            self.server.send_data(f"{self.service}-{self.name}-stop_application", {"application_name": app_name})
 
             del self.started_apps[app_name]
             self.log(f"Stopped application '{app_name}'", 2)
@@ -194,15 +195,15 @@ class AppManager:
     def add_api(self):
         """Adds the App manager api to the server"""
 
-        @self.server.sio.on("start_application")
+        @self.server.sio.on(f"{self.service}-{self.name}-start_application")
         def _(data) -> None:
             self.start(data["application_name"])
 
-        @self.server.sio.on("stop_application")
+        @self.server.sio.on(f"{self.service}-{self.name}-stop_application")
         def _(data) -> None:
             self.stop(data["application_name"])
 
-        @self.server.sio.on("window_loaded")
+        @self.server.sio.on(f"{self.service}-{self.name}-window_loaded")
         def _() -> None:
             if self.first_start:
                 for app_name in self.apps_to_start:
@@ -212,49 +213,49 @@ class AppManager:
             else:
                 for app_name in self.started_apps:
                     self.server.send_data(
-                        "start_application", {"application_name": app_name}
+                        f"{self.service}-{self.name}-start_application", {"application_name": app_name}
                     )
 
-        @self.server.sio.on("get_started_applications")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_started_applications")
         def _() -> None:
             self.server.send_data(
-                "started_applications",
+                f"{self.service}-{self.name}-started_applications",
                 {"applications": self.list_started_applications()},
             )
 
-        @self.server.sio.on("get_stopped_applications")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_stopped_applications")
         def _() -> None:
             self.server.send_data(
-                "stopped_applications",
+                f"{self.service}-{self.name}-stopped_applications",
                 {"applications": self.list_stopped_applications()},
             )
 
-        @self.server.sio.on("get_available_applications")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_available_applications")
         def _() -> None:
             self.server.send_data(
-                "available_applications", {"applications": self.list_applications()}
+                f"{self.service}-{self.name}-available_applications", {"applications": self.list_applications()}
             )
 
-        @self.server.sio.on("log_for_application_manager")
+        @self.server.sio.on(f"{self.service}-{self.name}-log_for_application_manager")
         def _(data) -> None:
             self.log(data["content"], data["level"])
 
-        @self.server.sio.on("log_for_application")
+        @self.server.sio.on(f"{self.service}-{self.name}-log_for_application")
         def _(data: dict):
             self.log_for_application(data["source"], data["content"], data["level"])
 
     def update_api_listeners(self):
         """Updates the App manager api listeners"""
         self.server.send_data(
-            "started_applications",
+            f"{self.service}-{self.name}-started_applications",
             {"applications": self.list_started_applications()},
         )
 
         self.server.send_data(
-            "stopped_applications",
+            f"{self.service}-{self.name}-stopped_applications",
             {"applications": self.list_stopped_applications()},
         )
 
         self.server.send_data(
-            "available_applications", {"applications": self.list_applications()}
+            f"{self.service}-{self.name}-available_applications", {"applications": self.list_applications()}
         )

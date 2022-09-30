@@ -21,6 +21,7 @@ class Monitor:
         """
         Constructor and API for the system monitor
         """
+        self.service = "core"
         self.name = "system_monitor"
         self.server = server
         self.db = redis.Redis(host="localhost", port=6379, db=0)
@@ -28,24 +29,24 @@ class Monitor:
         self.recent_performances = {}
         self.display_stats = {}
 
-        @self.server.sio.on("get_recent_performances")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_recent_performances")
         def _():
-            self.server.send_data("recent_performances", {
+            self.server.send_data(f"{self.service}-{self.name}-recent_performances", {
                 "performances": self.recent_performances
             })
 
-        @self.server.sio.on("purge_recent_performances")
+        @self.server.sio.on(f"{self.service}-{self.name}-purge_recent_performances")
         def _():
             self.recent_performances = {}
 
-        @self.server.sio.on("set_display_statistics")
+        @self.server.sio.on(f"{self.service}-{self.name}-set_display_statistics")
         def set_display_statistics(data):
             self.display_stats = data
-            self.server.sio.emit("display_statistics", data)
+            self.server.sio.emit(f"{self.service}-{self.name}-display_statistics", data)
 
-        @self.server.sio.on("get_display_statistics")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_display_statistics")
         def get_display_statistics():
-            self.server.sio.emit("display_statistics", self.display_stats)
+            self.server.sio.emit(f"{self.service}-{self.name}-display_statistics", self.display_stats)
 
 
 

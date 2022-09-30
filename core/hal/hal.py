@@ -62,6 +62,7 @@ class HardwareAbstractionLayer:
     """
 
     def __init__(self, server):
+        self.service = "core"
         self.name = "hal"
         self.server = server
         self.db = redis.Redis(host="localhost", port=6379, db=0)
@@ -348,21 +349,21 @@ class HardwareAbstractionLayer:
     def add_api(self):
         """Adds the Hal api to the server"""
 
-        @self.server.sio.on("get_started_drivers")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_started_drivers")
         def _():
             self.server.send_data(
-                "started_drivers", {"drivers": self.get_started_drivers()}
+                f"{self.service}-{self.name}-started_drivers", {"drivers": self.get_started_drivers()}
             )
 
-        @self.server.sio.on("get_stopped_drivers")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_stopped_drivers")
         def _():
             self.server.send_data(
-                "stopped_drivers", {"drivers": self.get_stopped_drivers()}
+                f"{self.service}-{self.name}-stopped_drivers", {"drivers": self.get_stopped_drivers()}
             )
 
-        @self.server.sio.on("get_available_drivers")
+        @self.server.sio.on(f"{self.service}-{self.name}-get_available_drivers")
         def _():
-            self.server.send_data("available_drivers", {"drivers": self.get_drivers()})
+            self.server.send_data(f"{self.service}-{self.name}-available_drivers", {"drivers": self.get_drivers()})
 
     def update_api_listeners(self):
         """Updates the Hal api listeners to match the current
@@ -371,9 +372,9 @@ class HardwareAbstractionLayer:
         This is called when a driver is started or stopped.
         """
         self.server.send_data(
-            "started_drivers", {"drivers": self.get_started_drivers()}
+            f"{self.service}-{self.name}-started_drivers", {"drivers": self.get_started_drivers()}
         )
         self.server.send_data(
-            "stopped_drivers", {"drivers": self.get_stopped_drivers()}
+            f"{self.service}-{self.name}-stopped_drivers", {"drivers": self.get_stopped_drivers()}
         )
-        self.server.send_data("available_drivers", {"drivers": self.get_drivers()})
+        self.server.send_data(f"{self.service}-{self.name}-available_drivers", {"drivers": self.get_drivers()})
