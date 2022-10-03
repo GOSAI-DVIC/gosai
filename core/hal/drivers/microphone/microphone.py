@@ -1,51 +1,73 @@
 import speech_recognition as sr
 from core.hal.drivers.driver import BaseDriver
+import argparse
 
+import sounddevice as sd
+import numpy  # Make sure NumPy is loaded before it is used in the callback
+assert numpy  # avoid "imported but unused" message (W0611)
 
 class Driver(BaseDriver):
 
     def __init__(self, name: str, parent, fps: int = 30):
         super().__init__(name, parent)
-        self.fps = fps
-
-        self.recognizer = sr.Recognizer()
-
-        print('-'*40)
-        self.source = sr.Microphone()
-        print('-'*40)
-        print('Don\'t consider the output from ALSA lib to JackShm : there are just informatives')
-        print('-'*40, end='\n\n')
 
         #create driver event
-        self.create_event("audio_recorded")
+        self.create_event("core_driver_get_audio_stream")
+        self.create_callback("get_audio_stream", self.play_synth)
+        
+        self.parser = argparse.ArgumentParser(add_help=False)
+        self.parser.add_argument(
+            '-l', '--list-devices', action='store_true',
+            help='show list of audio devices and exit')
+        self.args, remaining = self.parser.parse_known_args()
+        if self.args.list_devices:
+            print(sd.query_devices())
+            self.parser.exit(0)
+        self.parser = argparse.ArgumentParser(
+            description=__doc__,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            parents=[self.parser])
 
-    def pre_run(self):
-        # runs to do at the start of the driver
-        pass
+        def int_or_str(text):
+            """Helper function for argument parsing."""
+            try:
+                return int(text)
+            except ValueError:
+                return text
 
-    def listen(self):
-        print("Speak : ")
-        self.recognizer.adjust_for_ambient_noise(self.source)
-        return self.recognizer.listen(self.source)
+        self.parser.add_argument(
+            '-i', '--input-device', type=int_or_str,
+            help='input device (numeric ID or substring)')
+        self.parser.add_argument(
+            '-o', '--output-device', type=int_or_str,
+            help='output device (numeric ID or substring)')
+        self.parser.add_argument(
+            '-c', '--channels', type=int, default=2,
+            help='number of channels')
+        self.parser.add_argument('--dtype', help='audio data type')
+        self.parser.add_argument('--samplerate', type=float, help='sampling rate')
+        self.parser.add_argument('--blocksize', type=int, help='block size')
+        self.parser.add_argument('--latency', type=float, help='latency in seconds')
+        self.args = self.parser.parse_args(remaining)
 
-    def save_audio(self):
-        print("Speak : ")
-        self.recognizer.adjust_for_ambient_noise(self.source)
-        audio = self.recognizer.listen(self.source)
-        with open("audio_file.wav", "wb") as file:
-            file.write(audio.get_wav_data())
 
-    # def loop(self):
-    #     start_t = time.time()
+    def callback(indata, outdata, frames, time, status):
+        if status:
+            print(status)
+        outdata[:] = indata
 
-    #     # update event
-    #     # driver_event_1 = an_update_function_1()
-    #     # driver_event_2 = an_update_function_2()
 
-    #     #set module event
-    #     # if driver_event_1 is not None:
-    #         # self.set_event_data("driver_event_1", driver_event_1)
-    #     # if driver_event_2 is not None:
-    #         # self.set_event_data("driver_event_2", driver_event_2)
-
-    #     time.sleep(1 / self.fps) #to temporize
+    def get_audio_stream(self):
+        try:
+            with sd.Stream(device=(self.args.input_device, self.args.output_device),
+                        samplerate=self.args.samplerate, blocksize=self.args.blocksize,
+                        dtype=self.args.dtype, latency=self.args.latency,
+                        channels=self.args.channels, callback=self.callback):
+                print('#' * 80)
+                print('press Return to quit')
+                print('#' * 80)
+                input()
+        except KeyboardInterrupt:
+            self.parser.exit('')
+        except Exception as e:
+            self.parser.exit(type(e).__name__ + ': ' + str(e))

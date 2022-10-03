@@ -159,6 +159,13 @@ class AppManager:
             self.log(f"Unknown application '{app_name}'", 3)
             return False
 
+        # Disactivating the specified sub-menu
+        if app_name in self.sub_menu:
+            self.server.send_data(
+                "core-app_manager-remove_sub_menu",
+                {"element_name": app_name}
+            )
+
         if app_name not in self.started_apps:
             self.log(f"Application '{app_name}' not started, could not stop", 3)
             return False
