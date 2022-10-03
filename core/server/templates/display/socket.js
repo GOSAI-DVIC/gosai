@@ -76,7 +76,7 @@ setInterval(() => {
         "time": Date.now(),
         "modules_consumptions": modules_consumptions
     }
-    socket.emit("set_display_statistics", stats);
+    socket.emit("core-system_monitor-set_display_statistics", stats);
     fps_prev_millis = window.performance.now();
     fps_prev_frameCount = frameCount;
     modules_consumptions = {};
