@@ -18,7 +18,7 @@ class Driver(BaseDriver):
         BLOCKSIZE = 1024  # TODO:read these parameters from config.json
         SAMPLERATE = 48000
         CHANNELS = 1
-        DEVICE = 8
+        DEVICE = 6
 
         def callback(indata, frames, time, status):
             self.set_event_data(
