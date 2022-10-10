@@ -41,6 +41,8 @@ class Driver(BaseDriver):
                     if config["camera"]["type"] == "standard":
                         self.source = StandardCamera(
                             config["camera"]["width"], config["camera"]["height"], config["camera"]["number"]
+                        ) if "number" in config["camera"] else StandardCamera(
+                            config["camera"]["width"], config["camera"]["height"]
                         )
                     elif config["camera"]["type"] == "intel":
 

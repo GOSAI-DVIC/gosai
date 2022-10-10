@@ -72,5 +72,5 @@ socket.emit("core-app_manager-get_available_applications");
 socket.emit("core-hal-get_available_drivers");
 socket.emit("core-server-get_users");
 setInterval(() => {
-    socket.emit("core-logger-get_recent_performances");
+    socket.emit("core-system_monitor-get_recent_performances");
 }, 500);
