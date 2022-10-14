@@ -5,10 +5,14 @@ import queue
 import numpy as np
 
 
+import sounddevice as sd
+import numpy  # Make sure NumPy is loaded before it is used in the callback
+assert numpy  # avoid "imported but unused" message (W0611)
+
 class Driver(BaseDriver):
     def __init__(self, name: str, parent):
         super().__init__(name, parent)
-
+        
         # create driver event
         self.create_event("get_audio_stream")
 
