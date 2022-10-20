@@ -1,3 +1,4 @@
+from cmath import isnan
 import math
 from core.hal.drivers.driver import BaseDriver
 import sounddevice as sd
@@ -14,6 +15,7 @@ class Driver(BaseDriver):
         self.create_event("synthesizing")
         self.create_callback("play", self.play)
         self.create_callback("add_to_queue", self.add_to_queue)
+        self.create_callback("empty_queue", self.empty_queue)
         self.blocksize = 2048
         self.sample_rate = 48000
         
@@ -25,7 +27,7 @@ class Driver(BaseDriver):
         def callback_live(outdata, frames, time, status):
             try:
                 data = self.buffer.get_nowait()
-            except queue.Empty:
+            except queue.Empty: 
                 data = np.zeros(frames, dtype=np.float32)
             if len(data) < len(outdata):
                 outdata[:len(data)] = data
@@ -58,7 +60,6 @@ class Driver(BaseDriver):
 
         frequency = data["frequency"]
         amplitude = data["amplitude"]
-
         WAVEDATA = [amplitude * math.sin(2*math.pi*frequency*x/self.sample_rate + self.buffer_phase) for x in range(self.blocksize)]
         try:
             self.buffer.put_nowait(np.array(WAVEDATA, dtype=np.float32))
@@ -71,8 +72,12 @@ class Driver(BaseDriver):
         frequency = data["frequency"]
         amplitude = data["amplitude"]
 
-        for _ in range(int(duration*self.sample_rate/self.blocksize)):
-            WAVEDATA = [amplitude * math.sin(2*math.pi*frequency*x/self.sample_rate + self.queue_phase) for x in range(self.blocksize)]
-            self.queue.put_nowait(np.array(WAVEDATA, dtype=np.float32))
-            self.queue_phase = (2*math.pi*frequency*(self.blocksize-1)/self.sample_rate + self.queue_phase) % (2*math.pi)
+        if(frequency is not None):
+            for _ in range(int(duration*self.sample_rate/self.blocksize)):
+                WAVEDATA = [amplitude * math.sin(2*math.pi*frequency*x/self.sample_rate + self.queue_phase) for x in range(self.blocksize)]
+                self.queue.put_nowait(np.array(WAVEDATA, dtype=np.float32))
+                self.queue_phase = (2*math.pi*frequency*(self.blocksize-1)/self.sample_rate + self.queue_phase) % (2*math.pi)
+    
+    def empty_queue(self, data):
+        self.queue = queue.Queue()
         
