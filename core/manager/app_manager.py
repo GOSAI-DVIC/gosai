@@ -123,7 +123,7 @@ class AppManager:
             # Activating the specified sub-menu
             if app_name in self.sub_menu:
                 self.server.send_data(
-                    "core-app_manager-add_sub_menu",
+                    f"{self.service}-{self.name}-add_sub_menu",
                     {"app_name": app_name, "options": self.sub_menu[app_name]}
                 )
 
