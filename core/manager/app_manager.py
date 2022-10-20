@@ -232,6 +232,10 @@ class AppManager:
         @self.server.sio.on(f"{self.service}-{self.name}-stop_option")
         def _(data) -> None:
             self.server.sio.emit(self.sub_menu[data["app_name"]][data["option_name"]]["event_name"], False)
+        
+        @self.server.sio.on(f"{self.service}-{self.name}-trigger_option")
+        def _(data) -> None:
+            self.server.sio.emit(self.sub_menu[data["app_name"]][data["option_name"]]["event_name"])
 
         @self.server.sio.on(f"{self.service}-{self.name}-window_loaded")
         def _() -> None:
