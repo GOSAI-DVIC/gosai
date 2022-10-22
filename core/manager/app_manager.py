@@ -29,7 +29,7 @@ class AppManager:
                 with open(f"home/apps/{app_name}/sub-menu.json", "r") as f:
                     sub_menu_data = json.load(f)
                     self.sub_menu[app_name] = sub_menu_data
-        
+
         self.apps_to_start = []
         self.started_apps = {}
         self.first_start = True
@@ -120,13 +120,6 @@ class AppManager:
                     if app_required in self.available_apps and app_required not in self.started_apps:
                         self.start(app_required)
             
-            # Activating the specified sub-menu
-            if app_name in self.sub_menu:
-                self.server.send_data(
-                    f"{self.service}-{self.name}-add_sub_menu",
-                    {"app_name": app_name, "options": self.sub_menu[app_name]}
-                )
-
             # Start the required drivers and subscribe to the required events
             for driver_name in app.requires:
                 self.hal.start_driver(driver_name)
@@ -136,6 +129,13 @@ class AppManager:
             # Start the python app
             app.start()
 
+            # Activating the specified sub-menu
+            if app_name in self.sub_menu:
+                self.server.send_data(
+                    f"{self.service}-{self.name}-add_sub_menu",
+                    {"app_name": app_name, "options": self.sub_menu[app_name]}
+                )
+
             # Start the js app
             self.server.send_data(f"{self.service}-{self.name}-start_application", {"application_name": app_name})
 
@@ -143,6 +143,7 @@ class AppManager:
             self.started_apps[app_name] = app
             self.log(f"Started application '{app_name}'", 2)
             self.update_api_listeners()
+
 
         except Exception:
             self.log(
