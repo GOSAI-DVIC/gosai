@@ -129,13 +129,6 @@ class AppManager:
             # Start the python app
             app.start()
 
-            # Activating the specified sub-menu
-            if app_name in self.sub_menu:
-                self.server.send_data(
-                    f"{self.service}-{self.name}-add_sub_menu",
-                    {"app_name": app_name, "options": self.sub_menu[app_name]}
-                )
-
             # Start the js app
             self.server.send_data(f"{self.service}-{self.name}-start_application", {"application_name": app_name})
 
@@ -143,6 +136,13 @@ class AppManager:
             self.started_apps[app_name] = app
             self.log(f"Started application '{app_name}'", 2)
             self.update_api_listeners()
+
+            # Activating the specified sub-menu
+            if app_name in self.sub_menu:
+                self.server.send_data(
+                    f"{self.service}-{self.name}-add_sub_menu",
+                    {"app_name": app_name, "options": self.sub_menu[app_name]}
+                )
 
 
         except Exception:
