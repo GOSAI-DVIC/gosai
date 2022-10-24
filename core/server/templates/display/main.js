@@ -15,7 +15,7 @@ const screenheight = 698.4;
 let global_data = {};
 
 function setup() {
-    canvas = createCanvas(window.innerWidth, window.innerHeight);
+    canvas = createCanvas(window.innerWidth, window.innerHeight, WEBGL);
     frameRate(120);
 }
 

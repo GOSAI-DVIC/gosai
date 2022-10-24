@@ -13,16 +13,16 @@ sleeping_time = 300
 
 ############### Getting ancient calibration data ###############
 
-try:
-    with open('core/calibration/calibration_data.json', 'r') as f:
-        data = json.load(f)
+# try:
+#     with open('core/calibration/calibration_data.json', 'r') as f:
+#         data = json.load(f)
 
-    for k,v in data.items():
-        globals()[k]=np.array(v)
+#     for k,v in data.items():
+#         globals()[k]=np.array(v)
     
-except:
-    pool_coords = screen_coords
-    detected_coords = projected_coords
+# except:
+pool_coords = screen_coords
+detected_coords = projected_coords
     
 
 ############### Window Configuration ###############
@@ -32,7 +32,7 @@ cv2.setWindowProperty("Pool", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 ############### Camera Configuration ###############
 
-CAM_NUMBER = 0
+CAM_NUMBER = 2
 with open("home/config.json", "r") as f:
                 config = json.load(f)
                 if ("camera" in config and "number" in config["camera"]):
@@ -60,7 +60,7 @@ def get_frame():
 ############### place circle with mouseCallBack event ###############
 
 def draw_circle(event,x,y,flags,param):
-    
+    # print('x',x,'y',y)
     global l_circle, background
     
     if event in [cv2.EVENT_RBUTTONDOWN, cv2.EVENT_LBUTTONDOWN]:
@@ -69,7 +69,7 @@ def draw_circle(event,x,y,flags,param):
             l_circle[min(enumerate([(xC-x)**2+(yC-y)**2 for xC,yC in l_circle]), key=lambda x: x[1])[0]]=[x,y]
         else:
             l_circle+=[[x,y]]
-        
+        # print(l_circle)
         frame=background.copy()
         
         for i,p1 in enumerate(l_circle):
@@ -137,9 +137,10 @@ class Line:
 
 
 fld = cv2.ximgproc.createFastLineDetector().detect(dilate)
-for line in fld:
-    new_line = Line(line[0][0],line[0][1], line[0][2], line[0][3])
-    lines.append(new_line)
+if fld is not None:
+    for line in fld:
+        new_line = Line(line[0][0],line[0][1], line[0][2], line[0][3])
+        lines.append(new_line)
 
 lines.sort(key = lambda x: x.length, reverse=True) #sort lines by length
 
@@ -276,7 +277,7 @@ def findArucoMarkers(img, markerSize=4, totalMarkers=250,draw=True):
         tuples = zip(*sorted_pairs)
         ids, coords = [ list(tuple) for tuple in  tuples]
         # print(ids)
-        # print(coords)
+    # print("coords : ", coords)
     return coords
 
 background = drawArucoFrame()
@@ -358,6 +359,15 @@ pool_coords = ordering(detected_coords, pool_coords)
 screen_coords = ordering(pool_coords, screen_coords)
 projected_coords =  ordering(pool_coords, projected_coords)
 
+screen_coords = [[i[0],i[1]] for i in screen_coords]
+pool_coords = [[i[0],i[1]] for i in pool_coords]
+projected_coords = [[i[0],i[1]] for i in projected_coords]
+detected_coords = [[i[0],i[1]] for i in detected_coords]
+# screen_coords = [[i[0]-960,i[1]-540] for i in screen_coords]
+# pool_coords = [[i[0]-960,i[1]-540] for i in pool_coords]
+# projected_coords = [[i[0]-960,i[1]-540] for i in projected_coords]
+# detected_coords = [[i[0]-960,i[1]-540] for i in detected_coords]
+
 detected_coords=np.float32(detected_coords)
 pool_coords=np.float32(pool_coords)
 screen_coords=np.float32(screen_coords)
@@ -370,7 +380,7 @@ projected_coords=np.float32(projected_coords)
 # print("projected_coords : ",projected_coords)
 
 ############### Set projection matrix ###############
-
+#                                           IN              OUT
 tMat1_0 = cv2.getPerspectiveTransform(screen_coords, projected_coords)
 tMat1_1 = cv2.getPerspectiveTransform(detected_coords, projected_coords)
 tMat1_2 = cv2.getPerspectiveTransform(projected_coords, pool_coords)
@@ -429,7 +439,11 @@ d_information={"projection_matrix": projection_matrix,
                "poolFocus_matrix": poolFocus_matrix,
                "detected_coords": detected_coords.astype('int'),
                "pool_coords": pool_coords.astype('int'),
-               "screen_coords": screen_coords.astype('int')
+               "screen_coords": screen_coords.astype('int'),
+               "projected_coords": projected_coords.astype('int'),
+               "test": (projection_matrix @ poolFocus_matrix),
+               "test2": (poolFocus_matrix @ projection_matrix)
+
         }
 
 d_information={k:v.tolist() for k,v in d_information.items()}
