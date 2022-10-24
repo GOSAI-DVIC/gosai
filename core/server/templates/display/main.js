@@ -14,10 +14,37 @@ const screenheight = 698.4;
 
 let global_data = {};
 
-function setup() {
-    canvas = createCanvas(window.innerWidth, window.innerHeight, WEBGL);
-    frameRate(120);
+let config;
+let doCalibration = false;
+let calibrationData;
+let calibrationMatrix;
+
+function preload() {
+    let url = getURLPath();
+    url.splice(-1);
+    url = url.join("/");
+    config = loadJSON("/" + url + "/platform/home/config.json",
+        (data) => {
+            if (data.calibrate) {
+                calibrationData = loadJSON("/" + url + "/core/calibration/calibration_data.json");
+                doCalibration = true;
+            }
+    });
 }
+
+function setup() {
+    canvas = createCanvas(window.innerWidth, window.innerHeight);
+    frameRate(120);
+
+    if(doCalibration) {
+        calibrationMatrix = new ProjectionMatrix(
+            calibrationData.outpts,
+            calibrationData.screen_coords
+        );
+        calibrationMatrix.edit = true;
+    }
+}
+
 
 function draw() {
     background(0);
@@ -31,7 +58,10 @@ function draw() {
                 catch_error(e, module.name, "Update error", true);
             }
             try {
+                module.push();
+                if(doCalibration) calibrationMatrix.apply(module, 2);
                 module.show();
+                module.pop();
             } catch (e) {
                 catch_error(e, module.name, "Show error", true);
             }

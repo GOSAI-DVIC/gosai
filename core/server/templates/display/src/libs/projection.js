@@ -4,7 +4,7 @@
  * Inspired by OpenCV perspectiveTransform()
  * https://docs.opencv.org/3.4/d2/de8/group__core__array.html#gad327659ac03e5fd6894b90025e6900a7
  */
-export class ProjectionMatrix
+class ProjectionMatrix
 {
 constructor(outPts=null, inPts=null, name=null)
 {
@@ -120,74 +120,71 @@ projectionMatrix(inPts, outPts)
 }
 
 
-drawCorner(n)
+drawCorner(sketch, n)
 {
 	let r = 20;
-	fill(12,25,12);
+	sketch.fill(12,25,12);
 
 	if (this.hit == n)
 	{
-		translate(0,0,1)
-		fill(255,0,0);
+		sketch.translate(0,0,1)
+		sketch.fill(255,0,0);
 		r *= 2;
 	}
 
-	rect(this.inPts[n][0]-r/2, this.inPts[n][1]-r/2, r, r);
+	sketch.rect(this.inPts[n][0]-r/2, this.inPts[n][1]-r/2, r, r);
 }
 
-drawBorder()
+drawBorder(sketch)
 {
-	push();
+	sketch.push();
 
 	// draw the border in a thick line
-	strokeWeight(5);
-	stroke(12,12,12);
-	noFill();
-	beginShape();
-	vertex(this.inPts[0][0], this.inPts[0][1]);
-	vertex(this.inPts[1][0], this.inPts[1][1]);
-	vertex(this.inPts[3][0], this.inPts[3][1]);
-	vertex(this.inPts[2][0], this.inPts[2][1]);
-	vertex(this.inPts[0][0], this.inPts[0][1]);
-	endShape();
+	sketch.strokeWeight(5);
+	sketch.stroke(12,12,12);
+	sketch.line(this.inPts[0][0], this.inPts[0][1], this.inPts[1][0], this.inPts[1][1]);
+	sketch.line(this.inPts[1][0], this.inPts[1][1], this.inPts[3][0], this.inPts[3][1]);
+	sketch.line(this.inPts[3][0], this.inPts[3][1], this.inPts[2][0], this.inPts[2][1]);
+	sketch.line(this.inPts[2][0], this.inPts[2][1], this.inPts[0][0], this.inPts[0][1]);
 
 	// draw the corners slightly larger and highlighted if the mouse
 	// is over them.
-	noStroke();
-	this.drawCorner(0);
-	this.drawCorner(1);
-	this.drawCorner(2);
-	this.drawCorner(3);
+	sketch.noStroke();
+	this.drawCorner(sketch, 0);
+	this.drawCorner(sketch, 1);
+	this.drawCorner(sketch, 2);
+	this.drawCorner(sketch, 3);
 
-	pop();
+	sketch.pop();
 }
 
-drawMouse()
+drawMouse(sketch)
 {
 	// draw the mouse cross hairs in red and blue
-	const uv = this.project(mouseX - width/2, mouseY - height/2);
+	const uv = this.project(sketch.mouseX - sketch.width/2, sketch.mouseY - sketch.height/2);
 
-	push();
-	strokeWeight(1);
-	noFill();
+	sketch.push();
+	sketch.strokeWeight(1);
+	sketch.noFill();
 
-	stroke(0,0,255);
-	line(-500, uv[1], 1920 + 500, uv[1]);
+	sketch.stroke(0,0,255);
+	sketch.line(-500, uv[1], 1920 + 500, uv[1]);
+	// console.log(uv);
 
-	stroke(255,0,0);
-	line(uv[0], -500, uv[0], 1080 + 500);
+	sketch.stroke(255,0,0);
+	sketch.line(uv[0], -500, uv[0], 1080 + 500);
 
-	pop();
+	sketch.pop();
 }
 
-mouseMoved()
+mouseMoved(sketch)
 {
-	const mx = mouseX - width/2;
-	const my = mouseY - height/2;
+	const mx = sketch.mouseX - sketch.width/2;
+	const my = sketch.mouseY - sketch.height/2;
 
 	if (this.dragging)
 	{
-		if (!mouseIsPressed)
+		if (!sketch.mouseIsPressed)
 		{
 			// end of drag
 			this.dragging = false;
@@ -219,7 +216,7 @@ mouseMoved()
 		}
 
 		// if they have pressed the mouse, then select the point
-		if (mouseIsPressed && this.hit >= 0)
+		if (sketch.mouseIsPressed && this.hit >= 0)
 			this.dragging = true;
 	}
 }
@@ -231,26 +228,27 @@ mouseMoved()
  * vi = c10*xi + c11*yi + c12
  * zi = c20*xi + c21*yi + c22
  */
-apply(debug=false)
+apply(sketch, debug=false)
 {
 	const mat = this.mat;
 
-	applyMatrix(
+	sketch.applyMatrix(
 		mat[0], mat[3], 0, mat[6],
 		mat[1], mat[4], 0, mat[7],
 		0,      0,      1, 0,
-		mat[2], mat[5], 0, mat[8]);
-
+		mat[2], mat[5], 0, mat[8]
+		);
 
 	// if edit mode is enabled, handle mouse movement and border drawing
 	if (this.edit)
 	{
-		this.mouseMoved();
-		this.drawBorder();
+		this.mouseMoved(sketch);
+		this.drawBorder(sketch);
 	}
 
-	if (debug >= 2)
-		this.drawMouse();
+	if (debug >= 2){
+		this.drawMouse(sketch);
+	}
 
 	// should check if mouse is inside the matrix
 }
