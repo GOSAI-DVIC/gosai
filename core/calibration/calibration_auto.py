@@ -32,12 +32,19 @@ cv2.setWindowProperty("Pool", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 ############### Camera Configuration ###############
 
-CAM_NUMBER = 2
-with open("home/config.json", "r") as f:
-                config = json.load(f)
-                if ("camera" in config and "number" in config["camera"]):
-                    CAM_NUMBER = config["camera"]["number"]
+CAM_NUMBER = 2 #default
+try:
+    with open("home/config.json", "r") as f:
+                    config = json.load(f)
+                    if ("camera" in config and "number" in config["camera"]):
+                        CAM_NUMBER = config["camera"]["number"]
+except:
+    print("No config file found, using default camera number")
 
+with open("core/calibration/calibration_data.json", "r") as f:
+    data = json.load(f)
+
+camera_distortion = np.float32(data["camera_distortion"])
 
 def get_frame():
 
@@ -431,19 +438,31 @@ cv2.putText(test_2,
             1,
             cv2.LINE_AA)
 cv2.imshow('Pool',test_2)
-# cv2.waitKey(0)
+
+# camera_distortion = np.float32([[ 9.84936576e-01, -3.66695373e-03, -2.30536946e+00],
+#        [ 4.03649320e-03,  9.86309813e-01,  1.12314735e+01],
+#        [-1.58822878e-06,  7.31531798e-07,  1.00000000e+00]])
+
+outpts = []
+for x,y in screen_coords:
+    x = (projection_matrix[0][0] * x + projection_matrix[0][1] * y + projection_matrix[0][2]) / (projection_matrix[2][0] * x + projection_matrix[2][1] * y + projection_matrix[2][2])
+    y = (projection_matrix[1][0] * x + projection_matrix[1][1] * y + projection_matrix[1][2]) / (projection_matrix[2][0] * x + projection_matrix[2][1] * y + projection_matrix[2][2])
+    x -= 960
+    y -= 540
+    x = (camera_distortion[0][0] * x + camera_distortion[0][1] * y + camera_distortion[0][2]) / (camera_distortion[2][0] * x + camera_distortion[2][1] * y + camera_distortion[2][2])
+    y = (camera_distortion[1][0] * x + camera_distortion[1][1] * y + camera_distortion[1][2]) / (camera_distortion[2][0] * x + camera_distortion[2][1] * y + camera_distortion[2][2])
+    outpts.append([int(x),int(y)])
+outpts = np.float32(outpts)    
 
 ############### Export Data in json file ###############
-
 d_information={"projection_matrix": projection_matrix,
                "poolFocus_matrix": poolFocus_matrix,
                "detected_coords": detected_coords.astype('int'),
                "pool_coords": pool_coords.astype('int'),
                "screen_coords": screen_coords.astype('int'),
                "projected_coords": projected_coords.astype('int'),
-               "test": (projection_matrix @ poolFocus_matrix),
-               "test2": (poolFocus_matrix @ projection_matrix)
-
+               "camera_distortion": camera_distortion,
+               "outpts": outpts
         }
 
 d_information={k:v.tolist() for k,v in d_information.items()}
@@ -451,7 +470,7 @@ d_information={k:v.tolist() for k,v in d_information.items()}
 with open('core/calibration/calibration_data.json', 'w') as f:
     json.dump(d_information, f, indent=4)
 
-print("calibration terminée")
+print("Calibration terminée avec succès!")
 
 cv2.destroyAllWindows()
 exit()
