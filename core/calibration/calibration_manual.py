@@ -10,7 +10,7 @@ screen_coords=[[0,0], [0,1080],[1920,0],[1920,1080]]
 ############### Setting Importation ###############
 
 try:
-    with open('core/calibration/calibration_data.json', 'r') as f:
+    with open('home/calibration_data.json', 'r') as f:
         data = json.load(f)
 
     camera_distortion = np.float32(data["camera_distortion"])
@@ -345,7 +345,7 @@ with open('data.pkl', 'wb') as f:
 
 d_information={k:v.tolist() for k,v in d_information.items()}
 
-with open('core/calibration/calibration_data.json', 'w') as f:
+with open('home/calibration_data.json', 'w') as f:
     json.dump(d_information, f, indent=4)
 
 print("Calibration terminée avec succès!")

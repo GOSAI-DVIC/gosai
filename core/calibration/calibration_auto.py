@@ -41,7 +41,7 @@ try:
 except:
     print("No config file found, using default camera number")
 
-with open("core/calibration/calibration_data.json", "r") as f:
+with open("home/calibration_data.json", "r") as f:
     data = json.load(f)
 
 camera_distortion = np.float32(data["camera_distortion"])
@@ -467,7 +467,7 @@ d_information={"projection_matrix": projection_matrix,
 
 d_information={k:v.tolist() for k,v in d_information.items()}
 
-with open('core/calibration/calibration_data.json', 'w') as f:
+with open('home/calibration_data.json', 'w') as f:
     json.dump(d_information, f, indent=4)
 
 print("Calibration terminée avec succès!")

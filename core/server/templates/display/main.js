@@ -26,7 +26,7 @@ function preload() {
     config = loadJSON("/" + url + "/platform/home/config.json",
         (data) => {
             if (data.calibrate) {
-                calibrationData = loadJSON("/" + url + "/core/calibration/calibration_data.json");
+                calibrationData = loadJSON("/" + url + "/platform/home/calibration_data.json");
                 doCalibration = true;
             }
     });
