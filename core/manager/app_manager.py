@@ -265,6 +265,13 @@ class AppManager:
                 {"applications": self.list_stopped_applications()},
             )
 
+        @self.server.sio.on(f"{self.service}-{self.name}-get_sub_menu")
+        def _() -> None:
+            self.server.send_data(
+                f"{self.service}-{self.name}-sub_menu",
+                {"sub_menu": self.sub_menu, "applications": self.list_started_applications()},
+            )
+
         @self.server.sio.on(f"{self.service}-{self.name}-get_available_applications")
         def _() -> None:
             self.server.send_data(
