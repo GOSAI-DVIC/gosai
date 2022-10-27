@@ -29,7 +29,7 @@ class AppManager:
                 with open(f"home/apps/{app_name}/sub-menu.json", "r") as f:
                     sub_menu_data = json.load(f)
                     self.sub_menu[app_name] = sub_menu_data
-        
+
         self.apps_to_start = []
         self.started_apps = {}
         self.first_start = True
@@ -120,13 +120,6 @@ class AppManager:
                     if app_required in self.available_apps and app_required not in self.started_apps:
                         self.start(app_required)
             
-            # Activating the specified sub-menu
-            if app_name in self.sub_menu:
-                self.server.send_data(
-                    "core-app_manager-add_sub_menu",
-                    {"app_name": app_name, "options": self.sub_menu[app_name]}
-                )
-
             # Start the required drivers and subscribe to the required events
             for driver_name in app.requires:
                 self.hal.start_driver(driver_name)
@@ -143,6 +136,14 @@ class AppManager:
             self.started_apps[app_name] = app
             self.log(f"Started application '{app_name}'", 2)
             self.update_api_listeners()
+
+            # Activating the specified sub-menu
+            if app_name in self.sub_menu:
+                self.server.send_data(
+                    f"{self.service}-{self.name}-add_sub_menu",
+                    {"app_name": app_name, "options": self.sub_menu[app_name]}
+                )
+
 
         except Exception:
             self.log(
@@ -232,6 +233,10 @@ class AppManager:
         @self.server.sio.on(f"{self.service}-{self.name}-stop_option")
         def _(data) -> None:
             self.server.sio.emit(self.sub_menu[data["app_name"]][data["option_name"]]["event_name"], False)
+        
+        @self.server.sio.on(f"{self.service}-{self.name}-trigger_option")
+        def _(data) -> None:
+            self.server.sio.emit(self.sub_menu[data["app_name"]][data["option_name"]]["event_name"])
 
         @self.server.sio.on(f"{self.service}-{self.name}-window_loaded")
         def _() -> None:
