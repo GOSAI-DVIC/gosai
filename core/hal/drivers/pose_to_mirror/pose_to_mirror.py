@@ -1,7 +1,7 @@
 # Pose to mirror Driver
 
 import time
-
+import numpy as np
 import pyrealsense2 as rs
 
 import core.hal.drivers.pose_to_mirror.utils.hands_signs as hs
@@ -65,6 +65,8 @@ class Driver(BaseDriver):
 
         raw_data = self.parent.get_driver_event_data("pose", "raw_data")
         depth = self.parent.get_driver_event_data("camera", "depth")
+        if depth is None :
+            depth = np.ones((480, 640))*600
 
         if raw_data is not None and bool(raw_data["body_pose"]) and depth is not None:
             flag_1 = time.time()
