@@ -10,14 +10,14 @@ screen_coords=[[0,0], [0,1080],[1920,0],[1920,1080]]
 ############### Setting Importation ###############
 
 try:
-    with open('core/calibration/calibration_data.json', 'r') as f:
+    with open('home/calibration_data.json', 'r') as f:
         data = json.load(f)
 
+    camera_distortion = np.float32(data["camera_distortion"])
     for k,v in data.items():
         globals()[k]=np.array(v)
+    # print("Calibraton Data:", data)
 
-    print("Calibraton Data:", data)
-    
 except:
     screen_coords=[[0,0],
                  [0,1080],
@@ -26,7 +26,14 @@ except:
     pool_coords = screen_coords
     detected_coords = l_point_test
     
-
+CAM_NUMBER = 2 #default
+try:
+    with open("home/config.json", "r") as f:
+        config = json.load(f)
+        if ("camera" in config and "number" in config["camera"]):
+            CAM_NUMBER = config["camera"]["number"]
+except:
+    print("No config file found, using default camera number")
 
 
 ############### Configuration Fenetre ###############
@@ -40,7 +47,7 @@ cv2.setWindowProperty("Billard", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 def get_frame():
 
     global camera_number
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(CAM_NUMBER)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
     
@@ -242,10 +249,10 @@ pool_coords=np.float32(pool_coords)
 screen_coords=np.float32(screen_coords)
 projected_coords=np.float32(l_point_test)
 
-print("detected_coords : ",detected_coords)
-print("pool_coords    : ",pool_coords)
-print("screen_coords    : ",screen_coords)
-print("projected_coords      : ",projected_coords)
+# print("detected_coords : ",detected_coords)
+# print("pool_coords    : ",pool_coords)
+# print("screen_coords    : ",screen_coords)
+# print("projected_coords      : ",projected_coords)
 
 calibration_test2=np.zeros((1080,1920,3), np.uint8)
 for i,p1 in enumerate(screen_coords):
@@ -273,15 +280,15 @@ tMat1_2 = cv2.getPerspectiveTransform(projected_coords, pool_coords)
 
 projection_matrix = tMat1_1.dot(tMat1_2).dot(tMat1_0)
 
-print("tMat1_0 = cv2.getPerspectiveTransform(screen_coords, projected_coords)")
-print(">> %s\n" % tMat1_0)
-print("tMat1_1 = cv2.getPerspectiveTransform(detected_coords, projected_coords)")
-print(">> %s\n" % tMat1_1)
-print("tMat1_2 = cv2.getPerspectiveTransform(projected_coords, pool_coords)")
-print(">> %s\n" % tMat1_2)
+# print("tMat1_0 = cv2.getPerspectiveTransform(screen_coords, projected_coords)")
+# print(">> %s\n" % tMat1_0)
+# print("tMat1_1 = cv2.getPerspectiveTransform(detected_coords, projected_coords)")
+# print(">> %s\n" % tMat1_1)
+# print("tMat1_2 = cv2.getPerspectiveTransform(projected_coords, pool_coords)")
+# print(">> %s\n" % tMat1_2)
 
-print("tMat1 = tMat1_1.dot(tMat1_2).dot(tMat1_0)")
-print(">> tMat1 (m_projector2camera) : ", projection_matrix)
+# print("tMat1 = tMat1_1.dot(tMat1_2).dot(tMat1_0)")
+# print(">> tMat1 (m_projector2camera) : ", projection_matrix)
 
 test_1 = cv2.warpPerspective(calibration_test2, projection_matrix, (1920,1080), flags=cv2.INTER_LINEAR)
 cv2.putText(test_1,
@@ -298,7 +305,7 @@ cv2.waitKey(0)
 
 
 poolFocus_matrix = cv2.getPerspectiveTransform(pool_coords, screen_coords)
-print("tMat2 (m_camera2screen) : ", poolFocus_matrix)
+# print("tMat2 (m_camera2screen) : ", poolFocus_matrix)
 test_2 = cv2.warpPerspective(frame_camera, poolFocus_matrix, (1920,1080), flags=cv2.INTER_LINEAR)
 cv2.putText(test_2,
             "Image 3D du billard déformer pour passer dans l'espace 2D de l'écran, auppuyez sur une touche pour continuer",
@@ -309,13 +316,27 @@ cv2.putText(test_2,
             1,
             cv2.LINE_AA)
 cv2.imshow('Billard',test_2)
-cv2.waitKey(0)
+# cv2.waitKey(0)
+
+outpts = []
+for x,y in screen_coords:
+    x = (projection_matrix[0][0] * x + projection_matrix[0][1] * y + projection_matrix[0][2]) / (projection_matrix[2][0] * x + projection_matrix[2][1] * y + projection_matrix[2][2])
+    y = (projection_matrix[1][0] * x + projection_matrix[1][1] * y + projection_matrix[1][2]) / (projection_matrix[2][0] * x + projection_matrix[2][1] * y + projection_matrix[2][2])
+    x -= 960
+    y -= 540
+    x = (camera_distortion[0][0] * x + camera_distortion[0][1] * y + camera_distortion[0][2]) / (camera_distortion[2][0] * x + camera_distortion[2][1] * y + camera_distortion[2][2])
+    y = (camera_distortion[1][0] * x + camera_distortion[1][1] * y + camera_distortion[1][2]) / (camera_distortion[2][0] * x + camera_distortion[2][1] * y + camera_distortion[2][2])
+    outpts.append([int(x),int(y)])
+outpts = np.float32(outpts)
 
 d_information={"projection_matrix": projection_matrix,
                "poolFocus_matrix": poolFocus_matrix,
                "detected_coords": detected_coords.astype('int'),
                "pool_coords": pool_coords.astype('int'),
                "screen_coords": screen_coords.astype('int'),
+               "projected_coords": projected_coords.astype('int'),
+               "camera_distortion": camera_distortion,
+               "outpts": outpts
         }
 """
 with open('data.pkl', 'wb') as f:
@@ -324,8 +345,10 @@ with open('data.pkl', 'wb') as f:
 
 d_information={k:v.tolist() for k,v in d_information.items()}
 
-with open('core/calibration/calibration_data.json', 'w') as f:
+with open('home/calibration_data.json', 'w') as f:
     json.dump(d_information, f, indent=4)
+
+print("Calibration terminée avec succès!")
 
 cv2.destroyAllWindows()
 exit()

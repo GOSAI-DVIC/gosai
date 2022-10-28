@@ -13,16 +13,16 @@ sleeping_time = 300
 
 ############### Getting ancient calibration data ###############
 
-try:
-    with open('core/calibration/calibration_data.json', 'r') as f:
-        data = json.load(f)
+# try:
+#     with open('core/calibration/calibration_data.json', 'r') as f:
+#         data = json.load(f)
 
-    for k,v in data.items():
-        globals()[k]=np.array(v)
+#     for k,v in data.items():
+#         globals()[k]=np.array(v)
     
-except:
-    pool_coords = screen_coords
-    detected_coords = projected_coords
+# except:
+pool_coords = screen_coords
+detected_coords = projected_coords
     
 
 ############### Window Configuration ###############
@@ -32,12 +32,19 @@ cv2.setWindowProperty("Pool", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 ############### Camera Configuration ###############
 
-CAM_NUMBER = 0
-with open("home/config.json", "r") as f:
-                config = json.load(f)
-                if ("camera" in config and "number" in config["camera"]):
-                    CAM_NUMBER = config["camera"]["number"]
+CAM_NUMBER = 2 #default
+try:
+    with open("home/config.json", "r") as f:
+                    config = json.load(f)
+                    if ("camera" in config and "number" in config["camera"]):
+                        CAM_NUMBER = config["camera"]["number"]
+except:
+    print("No config file found, using default camera number")
 
+with open("home/calibration_data.json", "r") as f:
+    data = json.load(f)
+
+camera_distortion = np.float32(data["camera_distortion"])
 
 def get_frame():
 
@@ -60,7 +67,7 @@ def get_frame():
 ############### place circle with mouseCallBack event ###############
 
 def draw_circle(event,x,y,flags,param):
-    
+    # print('x',x,'y',y)
     global l_circle, background
     
     if event in [cv2.EVENT_RBUTTONDOWN, cv2.EVENT_LBUTTONDOWN]:
@@ -69,7 +76,7 @@ def draw_circle(event,x,y,flags,param):
             l_circle[min(enumerate([(xC-x)**2+(yC-y)**2 for xC,yC in l_circle]), key=lambda x: x[1])[0]]=[x,y]
         else:
             l_circle+=[[x,y]]
-        
+        # print(l_circle)
         frame=background.copy()
         
         for i,p1 in enumerate(l_circle):
@@ -137,9 +144,10 @@ class Line:
 
 
 fld = cv2.ximgproc.createFastLineDetector().detect(dilate)
-for line in fld:
-    new_line = Line(line[0][0],line[0][1], line[0][2], line[0][3])
-    lines.append(new_line)
+if fld is not None:
+    for line in fld:
+        new_line = Line(line[0][0],line[0][1], line[0][2], line[0][3])
+        lines.append(new_line)
 
 lines.sort(key = lambda x: x.length, reverse=True) #sort lines by length
 
@@ -276,7 +284,7 @@ def findArucoMarkers(img, markerSize=4, totalMarkers=250,draw=True):
         tuples = zip(*sorted_pairs)
         ids, coords = [ list(tuple) for tuple in  tuples]
         # print(ids)
-        # print(coords)
+    # print("coords : ", coords)
     return coords
 
 background = drawArucoFrame()
@@ -358,6 +366,15 @@ pool_coords = ordering(detected_coords, pool_coords)
 screen_coords = ordering(pool_coords, screen_coords)
 projected_coords =  ordering(pool_coords, projected_coords)
 
+screen_coords = [[i[0],i[1]] for i in screen_coords]
+pool_coords = [[i[0],i[1]] for i in pool_coords]
+projected_coords = [[i[0],i[1]] for i in projected_coords]
+detected_coords = [[i[0],i[1]] for i in detected_coords]
+# screen_coords = [[i[0]-960,i[1]-540] for i in screen_coords]
+# pool_coords = [[i[0]-960,i[1]-540] for i in pool_coords]
+# projected_coords = [[i[0]-960,i[1]-540] for i in projected_coords]
+# detected_coords = [[i[0]-960,i[1]-540] for i in detected_coords]
+
 detected_coords=np.float32(detected_coords)
 pool_coords=np.float32(pool_coords)
 screen_coords=np.float32(screen_coords)
@@ -370,7 +387,7 @@ projected_coords=np.float32(projected_coords)
 # print("projected_coords : ",projected_coords)
 
 ############### Set projection matrix ###############
-
+#                                           IN              OUT
 tMat1_0 = cv2.getPerspectiveTransform(screen_coords, projected_coords)
 tMat1_1 = cv2.getPerspectiveTransform(detected_coords, projected_coords)
 tMat1_2 = cv2.getPerspectiveTransform(projected_coords, pool_coords)
@@ -421,23 +438,39 @@ cv2.putText(test_2,
             1,
             cv2.LINE_AA)
 cv2.imshow('Pool',test_2)
-# cv2.waitKey(0)
+
+# camera_distortion = np.float32([[ 9.84936576e-01, -3.66695373e-03, -2.30536946e+00],
+#        [ 4.03649320e-03,  9.86309813e-01,  1.12314735e+01],
+#        [-1.58822878e-06,  7.31531798e-07,  1.00000000e+00]])
+
+outpts = []
+for x,y in screen_coords:
+    x = (projection_matrix[0][0] * x + projection_matrix[0][1] * y + projection_matrix[0][2]) / (projection_matrix[2][0] * x + projection_matrix[2][1] * y + projection_matrix[2][2])
+    y = (projection_matrix[1][0] * x + projection_matrix[1][1] * y + projection_matrix[1][2]) / (projection_matrix[2][0] * x + projection_matrix[2][1] * y + projection_matrix[2][2])
+    x -= 960
+    y -= 540
+    x = (camera_distortion[0][0] * x + camera_distortion[0][1] * y + camera_distortion[0][2]) / (camera_distortion[2][0] * x + camera_distortion[2][1] * y + camera_distortion[2][2])
+    y = (camera_distortion[1][0] * x + camera_distortion[1][1] * y + camera_distortion[1][2]) / (camera_distortion[2][0] * x + camera_distortion[2][1] * y + camera_distortion[2][2])
+    outpts.append([int(x),int(y)])
+outpts = np.float32(outpts)    
 
 ############### Export Data in json file ###############
-
 d_information={"projection_matrix": projection_matrix,
                "poolFocus_matrix": poolFocus_matrix,
                "detected_coords": detected_coords.astype('int'),
                "pool_coords": pool_coords.astype('int'),
-               "screen_coords": screen_coords.astype('int')
+               "screen_coords": screen_coords.astype('int'),
+               "projected_coords": projected_coords.astype('int'),
+               "camera_distortion": camera_distortion,
+               "outpts": outpts
         }
 
 d_information={k:v.tolist() for k,v in d_information.items()}
 
-with open('core/calibration/calibration_data.json', 'w') as f:
+with open('home/calibration_data.json', 'w') as f:
     json.dump(d_information, f, indent=4)
 
-print("calibration terminée")
+print("Calibration terminée avec succès!")
 
 cv2.destroyAllWindows()
 exit()

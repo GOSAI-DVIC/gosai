@@ -205,6 +205,10 @@ def create_flask_api(server: Server):
     def platform_home_path(path):
         return send_from_directory("../../home", path)
 
+    @server.app.route(f"/{server.base_path}/core/<path:path>")
+    def platform_core_server_path(path):
+        return send_from_directory("../../core/", path)
+
     @server.app.route(f"/{server.base_path}/control")
     def control():
         return render_template("control/index.html")
