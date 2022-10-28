@@ -14,7 +14,7 @@ import time
 
 DEFAULT_MIN_SLEEP = 1e-4  # In seconds ~ 0.1ms
 
-DEFAULT_JSON_PATH = "core/calibration/calibration_data.json"
+DEFAULT_JSON_PATH = "home/calibration_data.json"
 DEFAULT_BKG_PATH = "home/background.jpg"
 
 DEFAULT_SIZE = 1920, 1080
@@ -32,8 +32,9 @@ class Camera:
         return cv2.warpPerspective(blue_chan, self.pool_focus_matrix, size, flags=cv2.INTER_LINEAR)
 
     def project(self, point: np.ndarray) -> np.ndarray:
-        point = self.projection_matrix @ point
-        point = point / point[-1]
+        # point = self.projection_matrix @ point
+        # point = point / point[-1]
+        
         return point
 
     @classmethod
@@ -42,10 +43,13 @@ class Camera:
         poolFocus_matrix = np.array(data["poolFocus_matrix"])
         return cls(projection_matrix, poolFocus_matrix)
 
-
 def detect_balls(bkg: np.ndarray, frame: np.ndarray, camera: Camera) -> list(tuple(int, int)):
+    # cv2.imwrite("home/bkg.jpg", bkg)
+    # cv2.imwrite("home/frame.jpg", frame)
     frame = cv2.absdiff(bkg, frame)
+    # cv2.imwrite("home/absdiff.jpg", frame)
     frame = camera.warp_projection(frame, DEFAULT_SIZE)
+    # cv2.imwrite("home/warped.jpg", frame) #check calibration_data.json if looks wrong
     frame = cv2.GaussianBlur(frame, (5, 5), 0)
     _, frame = cv2.threshold(frame, 100, 255, cv2.THRESH_BINARY)
 
@@ -66,7 +70,8 @@ def detect_balls(bkg: np.ndarray, frame: np.ndarray, camera: Camera) -> list(tup
 
         distances = np.sqrt(((position[None, :2] - contour) ** 2).sum(axis=1))
         if np.std(distances) < DEFAULT_MIN_DISTANCE:
-            x, y, _ = camera.project(position)
+            # x, y, _ = camera.project(position)
+            x, y, _ = position[0], position[1], 0 #- 960, position[1] - 540, 0
             balls.append((int(x), int(y)))
 
     return balls
@@ -113,6 +118,8 @@ class Driver(BaseDriver):
             if self.bkg.shape != frame.shape:
                 self.bkg = cv2.resize(self.bkg, (frame.shape[1], frame.shape[0]))
             balls = detect_balls(self.bkg, frame, self.camera)
+
+            # print(balls)
             self.set_event_data("balls", balls)
 
         dt = time.time() - start_t
