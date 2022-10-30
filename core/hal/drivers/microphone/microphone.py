@@ -1,14 +1,20 @@
+import json
 import math
 from core.hal.drivers.driver import BaseDriver
 import sounddevice as sd
 import queue
 import numpy as np
+from os import path
 
+
+import sounddevice as sd
+import numpy  # Make sure NumPy is loaded before it is used in the callback
+assert numpy  # avoid "imported but unused" message (W0611)
 
 class Driver(BaseDriver):
     def __init__(self, name: str, parent):
         super().__init__(name, parent)
-
+        
         # create driver event
         self.create_event("get_audio_stream")
 
@@ -17,8 +23,19 @@ class Driver(BaseDriver):
         # runs to do at the start of the driver
         BLOCKSIZE = 1024  # TODO:read these parameters from config.json
         SAMPLERATE = 48000
-        CHANNELS = 1
-        DEVICE = 6
+
+        if path.exists("home/config.json"):
+            with open("home/config.json", "r") as f:
+                config = json.load(f)
+                if ("channels_nb" in config["microphone"]):
+                    CHANNELS = config["microphone"]["channels_nb"]
+        
+                if ("number" in config["microphone"]):
+                    DEVICE = config["microphone"]["number"]
+        
+        else: 
+            CHANNELS = 1
+            DEVICE = 6
 
         if path.exists("home/config.json"):
             with open("home/config.json", "r") as f:
@@ -40,7 +57,6 @@ class Driver(BaseDriver):
                     "samplerate": SAMPLERATE,
                 },
             )
-
         stream = sd.InputStream(
             samplerate=SAMPLERATE,
             blocksize=BLOCKSIZE,
