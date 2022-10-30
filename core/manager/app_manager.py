@@ -139,9 +139,10 @@ class AppManager:
 
             # Activating the specified sub-menu
             if app_name in self.sub_menu:
+                # print(f"{self.service}-{self.name}-start_option", app_name)
                 self.server.send_data(
                     f"{self.service}-{self.name}-add_sub_menu",
-                    {"app_name": app_name, "options": self.sub_menu[app_name]}
+                    {"app_name": app_name, "sub_menu": self.sub_menu[app_name], "avaible_applications": self.available_apps},
                 )
 
 
@@ -263,6 +264,13 @@ class AppManager:
             self.server.send_data(
                 f"{self.service}-{self.name}-stopped_applications",
                 {"applications": self.list_stopped_applications()},
+            )
+
+        @self.server.sio.on(f"{self.service}-{self.name}-get_init_sub_menu")
+        def _() -> None:
+            self.server.send_data(
+                f"{self.service}-{self.name}-init_sub_menu",
+                {"sub_menu": self.sub_menu, "available_applications": self.list_started_applications()},
             )
 
         @self.server.sio.on(f"{self.service}-{self.name}-get_available_applications")
