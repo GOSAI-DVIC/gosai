@@ -20,6 +20,18 @@ class Driver(BaseDriver):
         CHANNELS = 1
         DEVICE = 6
 
+        if path.exists("home/config.json"):
+            with open("home/config.json", "r") as f:
+                config = json.load(f)
+                CHANNELS = config["microphone"]["channels_nb"] if ("channels_nb" in config["microphone"]) else 1
+
+                if ("number" in config["microphone"]):
+                    DEVICE = config["microphone"]["number"]
+        
+        else: 
+            CHANNELS = 1
+            DEVICE = 6
+
         def callback(indata, frames, time, status):
             self.set_event_data(
                 "get_audio_stream",
