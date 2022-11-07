@@ -1,16 +1,13 @@
 # Base driver template
 
-import datetime
-import os
 import pickle
 import threading
 import time
 from multiprocessing import Process, Value
+from typing import Any
 
-import numpy as np
 import redis
 
-LOGS_PATH = "core/hal/logs"
 
 class BaseDriver(Process):
     """Base class for all drivers"""
@@ -21,6 +18,7 @@ class BaseDriver(Process):
         self.name = name
         self.parent = parent
         self.commands = {}
+        self.type = "loop"
         self.started = Value("i", 0)  # False
         self.paused = Value("i", 0)  # False
         self.registered = {}  # Lists of entities registered to each events
@@ -48,16 +46,33 @@ class BaseDriver(Process):
 
     def run(self):
         """Runs when the thread is started"""
-
-        self.pre_run()
+        try:
+            self.pre_run()
+        except Exception as e:
+            self.log(f"Error when starting the driver: {e}", 4)
+            return
         # Starts the required drivers
         self.log("Driver running", 2)
-
+        loop_times = []
         while 1:
-            if not self.paused.value:
-                self.loop()
-            else:
-                time.sleep(0.5)
+            try:
+                if not self.paused.value and self.type != "no_loop":
+                    start_t = time.time()
+                    self.loop()
+                    end_t = time.time()
+                    loop_times.append(1000 * (end_t - start_t))
+                    if len(loop_times) == 5:
+                        if not self.paused.value:
+                            self.record_performance(
+                                "loop_time", sum(loop_times) / len(loop_times)
+                            )
+                        loop_times = []
+                else:
+                    time.sleep(0.5)
+
+            except Exception as e:
+                self.log(f"Error when running the driver: {e}", 4)
+                return
 
     def loop(self):
         """
@@ -86,6 +101,10 @@ class BaseDriver(Process):
                 self.parent.unregister_from_driver(driver_name, self, event)
 
         self.paused.value = 1
+        # Notify the parent that the driver is stopped
+        self.db.publish("driver_stopped", pickle.dumps({"driver_name": self.name}))
+        self.record_performance("loop_time", 0)
+        # self.record_performance("loop_time", 0)
 
     def create_event(self, event) -> bool:
         """Adds an event to the driver"""
@@ -121,7 +140,7 @@ class BaseDriver(Process):
         data = self.db.get(f"{self.name}_{event}")
         try:
             return pickle.loads(data)
-        except:
+        except Exception as _:
             return None
 
     def register_to_driver(self, driver_name, event):
@@ -156,7 +175,7 @@ class BaseDriver(Process):
         for event in self.registered:
             if len(self.registered[event]) > 0:
                 return True
-        self.log(f"Pausing driver: no one is subscribed to it anymore", 2)
+        self.log("Pausing driver: no one is subscribed to it anymore", 2)
         self.stop()
 
         return True
@@ -179,7 +198,7 @@ class BaseDriver(Process):
         of a driver ("source") is updated
         """
         if source not in self.requires:
-            self.log(f"subscribed to an unrequested event.", 3)
+            self.log("Subscribed to an unrequested event.", 3)
             return False
         if event not in self.requires[source]:
             self.log(f"not subscrbed to {event} from {source}", 3)
@@ -207,10 +226,25 @@ class BaseDriver(Process):
                     return
                 try:
                     data = pickle.loads(bytes(binary_data["data"]))
-                    callback(self, data)
+
+                    def _execute_callback(callback: callable, data) -> None:
+                        start_t = time.time()
+                        exec_time = callback(data)
+                        if not self.paused.value:
+                            exec_time = (
+                                1000 * (time.time() - start_t)
+                                if exec_time is None
+                                else exec_time
+                            )
+                            self.record_performance(action, exec_time)
+
+                    threading.Thread(
+                        target=_execute_callback, args=(callback, data)
+                    ).start()
+                except pickle.UnpicklingError as e:
+                    continue
                 except Exception as e:
                     self.log(f"Error while loading callback data: {e}", 3)
-                    pass
 
         sub = threading.Thread(
             target=_subscriber,
@@ -254,11 +288,27 @@ class BaseDriver(Process):
                     self.log(f"Callback for action '{action}' not needed anymore", 3)
                     return
                 try:
-                    data = pickle.loads(bytes(binary_data["data"]))
-                    callback(self, data)
+                    if not self.paused.value:
+                        data = pickle.loads(bytes(binary_data["data"]))
+
+                        def _execute_callback(callback: callable, data) -> None:
+                            start_t = time.time()
+                            exec_time = callback(data)
+                            if not self.paused.value:
+                                exec_time = (
+                                    1000 * (time.time() - start_t)
+                                    if exec_time is None
+                                    else exec_time
+                                )
+                                self.record_performance(action, exec_time)
+
+                        threading.Thread(
+                            target=_execute_callback, args=(callback, data)
+                        ).start()
+                except pickle.UnpicklingError as e:
+                    continue
                 except Exception as e:
                     self.log(f"Error while loading callback data: {e}", 3)
-                    pass
 
         sub = threading.Thread(
             target=_subscriber,
@@ -286,17 +336,37 @@ class BaseDriver(Process):
         del self.callbacks[action]
         return True
 
-    def log(self, message, level=1):
-        """Save logs. TODO: Temporary file"""
+    def record_performance(self, record_name: str, data: Any) -> None:
+        """
+        Records performance data for this driver.
+        """
+        performance_record = {
+            "source": {
+                "name": self.name,
+                "type": "driver",
+            },
+            "type": record_name,
+            "data": data,
+        }
+        self.db.set(
+            "performance_record",
+            pickle.dumps(performance_record),
+        )
+        self.db.publish(
+            "performance_record",
+            pickle.dumps(performance_record),
+        )
 
-        if level >= int(os.environ["LOG_LEVEL"]):
-            print(f"{self.name}: {message}")
-
-        if level >= 2:
-            with open(f"{LOGS_PATH}/{self.name}.log", "a+") as log:
-                log.write(
-                    f"{datetime.datetime.now().strftime('%b-%d-%G-%I:%M:%S%p')} : {message}\n"
-                )
+    def log(self, content, level=1):
+        """Logs via the redis database"""
+        data = {
+            "service": "driver",
+            "source": self.name,
+            "content": content,
+            "level": level,
+        }
+        self.db.set("log", pickle.dumps(data))
+        self.db.publish("log", pickle.dumps(data))
 
     def __str__(self):
         return str(f"driver_{self.name}")

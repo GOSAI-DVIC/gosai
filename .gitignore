@@ -2,3 +2,7 @@
 __pycache__/
 .venv/
 home/
+home
+venv/
+lib64/
+lib/

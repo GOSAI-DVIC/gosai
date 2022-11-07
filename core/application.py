@@ -14,7 +14,10 @@ class BaseApplication(threading.Thread):
 
         self.requires = {} # Select what driver you want to use
         self.data = {} # data that is sent to the js script
+        self.is_exclusive = False # if true, close the other applications except the specified ones
         self.started = False
+        self.applications_allowed = []
+        self.applications_required = []
 
         self.db = redis.Redis(host='localhost', port=6379, db=0)
 
@@ -25,8 +28,10 @@ class BaseApplication(threading.Thread):
         for binary_data in ps.listen():
             try:
                 self.listener(source, event, pickle.loads(bytes(binary_data['data'])))
+            except pickle.UnpicklingError as e:
+                continue
             except Exception as e:
-                pass
+                self.log("Error in listener: " + str(e), 4)
             if not self.started:
                 break
 
@@ -36,11 +41,14 @@ class BaseApplication(threading.Thread):
         Gets notified when some data (named "data")
         of a driver's event ("source" and "event") is updated
         """
+        if not self.started:
+            return
+
         if source not in self.requires:
-            self.hal.log(f"{self.name}: subscribed to an unrequested event.")
+            self.log(f"Subscribed to an unrequested source: {source}", 3)
             return
         if event not in self.requires[source]:
-            self.hal.log(f"{self.name}: not subscrbed to {event} from {source}")
+            self.log(f"Subscribed to an unrequested event: {event} from {source} but gett", 3)
             return
 
         if not self.started:
@@ -52,7 +60,7 @@ class BaseApplication(threading.Thread):
         Executes an action of a driver
         - 'driver' is the name of the driver
         - 'action' is the name of the action
-        - 'data' is the data that will be sent to the drvier's callback
+        - 'data' is the data that will be sent to the driver's callback
         """
         self.db.publish(f"{driver}_exec_{action}", pickle.dumps(data))
 
@@ -69,3 +77,9 @@ class BaseApplication(threading.Thread):
 
     def __str__(self):
         return str(self.name)
+
+    def log(self, content, level=1):
+        """Logs via the redis database"""
+        data = {"service": "application", "source": self.name, "content": content, "level": level}
+        self.db.set("log", pickle.dumps(data))
+        self.db.publish("log", pickle.dumps(data))

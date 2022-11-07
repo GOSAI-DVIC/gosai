@@ -13,7 +13,7 @@ class Driver(BaseDriver):
     def __init__(self, name: str, parent, max_fps: int = 60):
         super().__init__(name, parent)
 
-        self.register_to_driver("video", "color")
+        self.register_to_driver("camera", "color")
 
         self.create_event("raw_data")
 
@@ -32,7 +32,7 @@ class Driver(BaseDriver):
         """Main loop"""
         start_t = time.time()
 
-        color = self.parent.get_driver_event_data("video", "color")
+        color = self.parent.get_driver_event_data("camera", "color")
 
         if color is not None:
             raw_data = hpe.find_all_hands(self.hands, color, self.window)
@@ -47,15 +47,11 @@ class Driver(BaseDriver):
                 self.log(f"Inference: {(flag_1 - start_t)*1000} ms")
                 # self.log(f"Data: {(flag_1 - start_t)*1000} ms")
 
-        else:
-            self.log("No color data", 1)
-
         end_t = time.time()
 
         if self.debug_time:
             self.log(f"Total time: {(end_t - start_t)*1000}ms")
             self.log(f"FPS: {int(1/(end_t - start_t))}")
 
-        dt = max((1 / self.fps) - (end_t - start_t), 0.0001)
-
-        time.sleep(dt)
+        # dt = max((1 / self.fps) - (end_t - start_t), 0.0001)
+        # time.sleep(dt)

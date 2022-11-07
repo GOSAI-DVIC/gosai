@@ -25,7 +25,7 @@ def get_depth(point: list, depth_frame, depth_radius: int) -> float:
                 ]
             )
         )
-    except:
+    except Exception as e:
         return np.float64(depth_frame[x, y])
 
 
