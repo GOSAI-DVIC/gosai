@@ -5,8 +5,17 @@ import mediapipe as mp
 from os import path
 import json
 
+flip = False
+
 def init():
+    global flip
     mp_holistic = mp.solutions.holistic
+    if path.exists("home/config.json"):
+            with open("home/config.json", "r") as f:
+                config = json.load(f)
+                if ("flip" in config["camera"]): 
+                    if config["camera"]["flip"] == True:
+                        flip = True
     return mp_holistic.Holistic(
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5,
@@ -48,12 +57,9 @@ def find_all_poses(holistic, frame, window):
     min_width, max_width = int((0.5 - window / 2) * frame.shape[1]), int(
         (0.5 + window / 2) * frame.shape[1]
     )
-    if path.exists("home/config.json"):
-            with open("home/config.json", "r") as f:
-                config = json.load(f)
-                if ("flip" in config["camera"]): 
-                    if config["camera"]["flip"] == True:
-                        image = cv2.flip(image, 1)
+    
+    if flip:
+        image = cv2.flip(image, 1)
                 
     image = image[:, min_width:max_width]
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

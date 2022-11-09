@@ -1,13 +1,22 @@
 # Source : https://google.github.io/mediapipe/solutions/hands.html
+import cv2
+import json
+from google.protobuf.json_format import MessageToDict
+import mediapipe as mp
+from os import path
 import time
 
-import cv2
-import mediapipe as mp
-from google.protobuf.json_format import MessageToDict
-
+flip = False
 
 def init():
+    global flip
     mp_hands = mp.solutions.hands
+    if path.exists("home/config.json"):
+            with open("home/config.json", "r") as f:
+                config = json.load(f)
+                if ("flip" in config["camera"]): 
+                    if config["camera"]["flip"] == True:
+                        flip = True
     return mp_hands.Hands(
         min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=0, max_num_hands=2
     )
@@ -24,7 +33,8 @@ def find_all_hands(hands, frame, window):
     image = image[:, min_width:max_width]
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.flip(image, 1)
+    if flip:
+        image = cv2.flip(image, 1)
 
     # e1 = time.time()
     # print(f"    Convert image: {(e1 - start)*1000} ms")
