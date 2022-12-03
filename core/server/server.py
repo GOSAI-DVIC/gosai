@@ -120,7 +120,12 @@ class Server:
             self.sio.sleep(0.0001)
             if not self.queue.empty():
                 name, data = self.queue.get()
-                self.sio.emit(name, data)
+                try:
+                    self.sio.emit(name, data)
+                except:
+                    print("Error while sending data, passing error")
+                    pass
+                    
 
     def log(self, content, level=1):
         """Logs via the redis database"""

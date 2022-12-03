@@ -58,10 +58,16 @@ function draw() {
                 catch_error(e, module.name, "Update error", true);
             }
             try {
-                module.push();
-                if(doCalibration) calibrationMatrix.apply(module, 2);
-                module.show();
-                module.pop();
+                if(doCalibration) {
+                    module.push();
+                    calibrationMatrix.apply(module, 2);
+                    // module.clear();
+                    module.show();
+                    module.pop();
+                }
+                else {
+                    module.show();
+                }
             } catch (e) {
                 catch_error(e, module.name, "Show error", true);
             }

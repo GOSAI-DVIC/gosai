@@ -1,13 +1,36 @@
 # Source : https://google.github.io/mediapipe/solutions/hands.html
+import cv2
+import json
+from google.protobuf.json_format import MessageToDict
+import mediapipe as mp
+from os import path
+import numpy as np
 import time
 
-import cv2
-import mediapipe as mp
-from google.protobuf.json_format import MessageToDict
-
+flip = False
+poolFocus_matrix = None
 
 def init():
+    global flip
+    global poolFocus_matrix
     mp_hands = mp.solutions.hands
+    if path.exists("home/config.json"):
+            with open("home/config.json", "r") as f:
+                config = json.load(f)
+                if ("flip" in config["camera"]): 
+                    if config["camera"]["flip"] == True:
+                        flip = True
+                if ("calibrate" in config):
+                    if config["calibrate"] == True:
+                        # Search for calibration file and load poolFocus_matrix :
+                        if path.exists("home/calibration_data.json"):
+                            with open("home/calibration_data.json", "r") as f:
+                                calibration = json.load(f)
+                                if ("poolFocus_matrix" in calibration):
+                                    poolFocus_matrix = np.array(calibration["poolFocus_matrix"])
+                                    # print(poolFocus_matrix)
+                                else:
+                                    print("No poolFocus_matrix in calibration file")
     return mp_hands.Hands(
         min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=0, max_num_hands=2
     )
@@ -18,13 +41,17 @@ def find_all_hands(hands, frame, window):
 
     image = frame.copy()
 
+    if poolFocus_matrix is not None:
+        image = cv2.warpPerspective(image, poolFocus_matrix, (image.shape[1], image.shape[0]), flags=cv2.INTER_LINEAR)
+
     min_width, max_width = int((0.5 - window / 2) * frame.shape[1]), int(
         (0.5 + window / 2) * frame.shape[1]
     )
     image = image[:, min_width:max_width]
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.flip(image, 1)
+    if flip:
+        image = cv2.flip(image, 1)
 
     # e1 = time.time()
     # print(f"    Convert image: {(e1 - start)*1000} ms")
