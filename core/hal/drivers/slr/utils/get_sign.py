@@ -12,7 +12,6 @@ def adapt_data(frame: list) -> list:
     image shape[0] = 480
     frape.shape[1] = 640
     """
-    
 
     pose = np.array([[res[0], res[1]] for res in frame["body_pose"]]).flatten(
         ) if frame["body_pose"] else np.zeros(33*2)
@@ -38,8 +37,6 @@ def get_sign(model, sequence, actions) -> list:
     """
     Get sign from frames
     """
-    #print("input shape: ", np.array([sequence], dtype=np.float32).shape)
-    #ort_inputs = {'input': np.array(
     ort_inputs = {'input': np.array(
     [sequence], dtype=np.float32)}
     out = model.run(None, ort_inputs)[-1]
