@@ -12,14 +12,42 @@ def adapt_data(frame: list) -> list:
     image shape[0] = 480
     frape.shape[1] = 640
     """
-    
 
-    pose = np.array([[res[0], res[1]] for res in frame["body_pose"]]).flatten(
-        ) if frame["body_pose"] else np.zeros(33*2)
-    lh = np.array([[res[0], res[1]] for res in frame["left_hand_pose"]]).flatten(
-    ) if frame["left_hand_pose"] else np.zeros(21*2)
-    rh = np.array([[res[0], res[1]] for res in frame["right_hand_pose"]]).flatten(
-    ) if frame["right_hand_pose"] else np.zeros(21*2)  
+    # pose = np.array([[res[0], res[1]] for res in frame["body_pose"]]).flatten(
+    #     ) if frame["body_pose"] else np.zeros(33*2)
+    # lh = np.array([[res[0], res[1]] for res in frame["left_hand_pose"]]).flatten(
+    # ) if frame["left_hand_pose"] else np.zeros(21*2)
+    # rh = np.array([[res[0], res[1]] for res in frame["right_hand_pose"]]).flatten(
+    # ) if frame["right_hand_pose"] else np.zeros(21*2)  
+    # return np.concatenate([pose, lh, rh])
+
+    pose = []
+    lh = []
+    rh = []
+    # pose
+    if frame["body_pose"]:
+        for i, _ in enumerate(frame["body_pose"]):
+            pose.append(frame["body_pose"][i][0])
+            pose.append(frame["body_pose"][i][1])
+    else:
+        pose = np.zeros(33*2)
+
+    # left hand
+    if frame["left_hand_pose"]:
+        for i, _ in enumerate(frame["left_hand_pose"]):
+            lh.append(frame["left_hand_pose"][i][0])
+            lh.append(frame["left_hand_pose"][i][1])
+    else:
+        lh = np.zeros(21*2)
+
+    # right hand
+    if frame["right_hand_pose"]:
+        for i, _ in enumerate(frame["right_hand_pose"]):
+            rh.append(frame["right_hand_pose"][i][0])
+            rh.append(frame["right_hand_pose"][i][1])
+    else:
+        rh = np.zeros(21*2)
+
     return np.concatenate([pose, lh, rh])
 
 def init(output_size):
@@ -38,8 +66,6 @@ def get_sign(model, sequence, actions) -> list:
     """
     Get sign from frames
     """
-    #print("input shape: ", np.array([sequence], dtype=np.float32).shape)
-    #ort_inputs = {'input': np.array(
     ort_inputs = {'input': np.array(
     [sequence], dtype=np.float32)}
     out = model.run(None, ort_inputs)[-1]
