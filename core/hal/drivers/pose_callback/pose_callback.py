@@ -27,8 +27,8 @@ class Driver(BaseDriver):
         if path.exists("home/config.json"):
             with open("home/config.json", "r") as f:
                 config = json.load(f)
-                if ("pose_window" in config["screen"]): 
-                    self.window = config["screen"]["pose_window"]
+                if ("window" in config["screen"]): 
+                    self.window = config["screen"]["window"]
                 else :
                     self.window = 0.7
 
