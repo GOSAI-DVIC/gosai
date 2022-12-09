@@ -1,11 +1,11 @@
 # Pose estimation Driver
 
 import time
-
 import numpy as np
-
 import core.hal.drivers.pose.utils.pose_estimation as pe
 from core.hal.drivers.driver import BaseDriver
+from os import path
+import json
 
 
 class Driver(BaseDriver):
@@ -24,7 +24,13 @@ class Driver(BaseDriver):
         self.debug_time = False
         self.debug_data = False
         self.fps = max_fps
-        self.window = 0.7
+        if path.exists("home/config.json"):
+            with open("home/config.json", "r") as f:
+                config = json.load(f)
+                if ("window" in config["screen"]): 
+                    self.window = config["screen"]["window"]
+                else :
+                    self.window = 0.7
 
     def pre_run(self):
         super().pre_run()
