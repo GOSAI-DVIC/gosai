@@ -24,7 +24,15 @@ def init():
         refine_face_landmarks = True,
     )
 
-def landmarks_to_array(landmarks,  min_width, width, height):
+def landmarks_to_array(landmarks):
+    landmark_array = []
+    for landmark in landmarks:
+        landmark_array.append(landmark.x)
+        landmark_array.append(landmark.y)
+        landmark_array.append(landmark.z)
+    return landmark_array
+
+def landmarks_to_array_mirror(landmarks,  min_width, width, height):
     landmark_array = [
         [
             min_width + int(landmark.x * width),
@@ -35,54 +43,51 @@ def landmarks_to_array(landmarks,  min_width, width, height):
     ]
     return landmark_array
 
-
-def world_landmarks_to_array(landmarks, window=1):
-    landmark_array = [
-        [
-            landmark.x,
-            landmark.y,
-            landmark.z,
-            round(landmark.visibility, 2),
-        ]
-        for landmark in landmarks
-    ]
-    return landmark_array
-
-
 def find_all_poses(holistic, frame, window):
-    # start = time.time()
-
     image = frame.copy()
 
     min_width, max_width = int((0.5 - window / 2) * frame.shape[1]), int(
         (0.5 + window / 2) * frame.shape[1]
     )
-    
+
     if flip:
         image = cv2.flip(image, 1)
                 
-    image = image[:, min_width:max_width]
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
     # e1 = time.time()
     # print(f"    Convert image: {(e1 - start)*1000} ms")
 
     image.flags.writeable = False
 
     results = holistic.process(image)
-    # e2 = time.time()
-    # print(f"    Infer image: {(e2 - e1)*1000} ms")
-
-    face_landmarks = landmarks_to_array(results.face_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.face_landmarks else []
-    body_landmarks = landmarks_to_array(results.pose_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.pose_landmarks else []
-    left_hand_landmarks = landmarks_to_array(results.left_hand_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.left_hand_landmarks else []
-    right_hand_landmarks = landmarks_to_array(results.right_hand_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.right_hand_landmarks else []
-    body_wolrd_landmarks = world_landmarks_to_array(results.pose_world_landmarks.landmark, window) if results.pose_world_landmarks else []
-
+    
+    body_landmarks = landmarks_to_array_mirror(results.pose_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.pose_landmarks else []
+    left_hand_landmarks = landmarks_to_array_mirror(results.left_hand_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.left_hand_landmarks else []
+    right_hand_landmarks = landmarks_to_array_mirror(results.right_hand_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.right_hand_landmarks else []
+    
+    # print(len(body_landmarks))
     return {
-        "face_mesh": face_landmarks, # [[x, y, visibility]]
         "body_pose": body_landmarks, # [[x, y, visibility]]
         "right_hand_pose": left_hand_landmarks, # [[x, y, visibility]]
         "left_hand_pose": right_hand_landmarks, # [[x, y, visibility]]
-        "body_world_pose": body_wolrd_landmarks, # [[x, y, z, visibility]]
+    }
+
+def find_all_poses_cables(holistic, frame):
+    image = frame.copy()
+
+    if flip:
+        image = cv2.flip(image, 1)
+                
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    image.flags.writeable = False
+
+    results = holistic.process(image)
+    
+    body_landmarks_cables = landmarks_to_array(results.pose_landmarks.landmark) if results.pose_landmarks else []
+    # left_hand_landmarks = landmarks_to_array(results.left_hand_landmarks.landmark) if results.left_hand_landmarks else []
+    # right_hand_landmarks = landmarks_to_array(results.right_hand_landmarks.landmark) if results.right_hand_landmarks else []
+    
+    return {
+        "body_pose_cables": body_landmarks_cables, # [x, y, z, x, y, z, ...]
     }
