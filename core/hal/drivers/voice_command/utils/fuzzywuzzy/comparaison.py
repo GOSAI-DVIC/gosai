@@ -5,7 +5,7 @@ import time
 class Commands():
     def __init__(self):
         self.commandsdic = dict()
-        with open("command.txt",'r') as f:
+        with open("core/hal/drivers/voice_command/utils/command.txt",'r') as f:
             lines = f.readlines()
             for line in lines :
                 self.commandsdic[line.split("/")[0]] = line.split("/")[1]

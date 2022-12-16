@@ -6,7 +6,7 @@ class VocalFeedback():
     def __init__(self):
         
         self.feedbacks = dict()
-        with open("command.txt",'r') as f:
+        with open("core/hal/drivers/voice_command/utils/command.txt",'r') as f:
             lines = f.readlines()
             for line in lines :
                 self.feedbacks[line.split("/")[1]] = line.split("/")[2]

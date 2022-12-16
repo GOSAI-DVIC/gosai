@@ -4,7 +4,7 @@ import torchaudio.functional as F
 import time
 
 #from dataset import WakeWordDataset
-from core.hal.drivers.voice_command.utils.CNN.model.model import CNNetwork
+from core.hal.drivers.voice_command.utils.cnn.model.model import CNNetwork
 from typing import Tuple
 
 import torchaudio
@@ -19,7 +19,7 @@ def predict(model, input:torch.Tensor, class_mapping:Tuple[int])->int:
 class CNNInference:
     def __init__(self,class_mapping:Tuple[int]=[0, 1]) -> None:
         self.model_cnn = CNNetwork()
-        self.state_dict = torch.load("CNN/model/state_dict_model.pt",map_location=torch.device('cpu'))
+        self.state_dict = torch.load("core/hal/drivers/voice_command/utils/cnn/model/state_dict_model.pt",map_location=torch.device('cpu'))
         self.model_cnn.load_state_dict(self.state_dict)
         self.class_mapping=class_mapping
 

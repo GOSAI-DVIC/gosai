@@ -4,9 +4,9 @@ import pyaudio
 import time
 import torch
 from core.hal.drivers.driver import BaseDriver
-from core.hal.drivers.voice_command.utils.CNN.inference import CNNInference
-from core.hal.drivers.voice_command.utils.Fuzzywuzzy.comparaison import Commands
-from core.hal.drivers.voice_command.utils.TTS.pytts import VocalFeedback
+from core.hal.drivers.voice_command.utils.cnn.inference import CNNInference
+from core.hal.drivers.voice_command.utils.fuzzywuzzy.comparaison import Commands
+from core.hal.drivers.voice_command.utils.tts.pytts import VocalFeedback
 from queue import Queue
 import whisper
 import librosa
@@ -21,7 +21,7 @@ model = whisper.load_model("base.en")
 LANGUAGE = "English"
 
 #import GOSAI commands
-GOSAIcommands = Commands.Commands()
+GOSAIcommands = Commands()
 #import Vocal feedbacks
 VocalReturn = VocalFeedback()
 
@@ -59,7 +59,8 @@ def get_audio_input_stream(callback)->pyaudio.PyAudio:
         rate=SAMPLE_RATE,
         input=True,
         frames_per_buffer=CHUNK,
-        input_device_index=6,
+        # input_device_index=0,
+        input_device_index=18,
         stream_callback=callback)
     return stream
 
@@ -69,11 +70,12 @@ data = np.zeros(WUWfeed_samples, dtype=np.float32)
 wuwq = Queue()
 sttq = Queue()
 
-
 def callback(in_data:np.array, frame_count, time_info, flag)->Tuple[np.array,pyaudio.PyAudio]:
+    # print(9)
     global data, RUN, wuwq, sttq, STTRun      
     data0 = np.frombuffer(in_data, dtype=np.float32)
     data = np.append(data,data0)  
+    # print(10)
     
     if STTRun == True:
         if len(data) > STTfeed_samples:
@@ -84,7 +86,11 @@ def callback(in_data:np.array, frame_count, time_info, flag)->Tuple[np.array,pya
     else : 
         if len(data) > WUWfeed_samples:
             data = data[-WUWfeed_samples:]
+            # print(11)
+            # print(data)
             wuwq.put(data)
+            print("Q-Size call back", wuwq.qsize())
+            
 
     return (in_data, pyaudio.paContinue)
 
@@ -98,13 +104,19 @@ class Driver(BaseDriver):
         self.create_event("command")
         
         self.stream = get_audio_input_stream(callback)
+        print("driver voice_command well initialised")
 
     def pre_run(self) -> None:
         super().pre_run()
 
     def loop(self) -> None:
         global RUN, STTRun
+        print("1")
+        time.sleep(3)
+        print("Q-Size loop", wuwq.qsize())
+        print("2")
         datarecup = wuwq.get()
+        print("3")
         noiseValue = np.abs(datarecup).mean()
         print("noise value -> ",noiseValue)      
         if noiseValue>silence_threshold:       
