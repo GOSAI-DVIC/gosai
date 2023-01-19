@@ -15,12 +15,13 @@ class Driver(BaseDriver):
         self.debug_data = False
         self.fps = max_fps
         self.window = 1
+        self.sensors = []
 
     def pre_run(self):
         """Runs once at the start of the driver"""
         super().pre_run()
         s = socket.socket()
-        s.bind(('172.21.72.142', 8090))
+        s.bind(('172.21.72.173', 8091))
         s.listen(0)
 
         try:
@@ -32,12 +33,21 @@ class Driver(BaseDriver):
 
     def loop(self):
         """Main loop"""
-        content = self.client.recv(32)
-        print(content)
-        self.set_event_data("movements", int(content))
+        content = (self.client.recv(64))
+        
+        content = content.decode()
+        
+        # content = str(content[2:-1])
+        sensors = content.split("|")
+        print(sensors)
+        print("sensors", sensors)
+        sensors_dict = {}
+        for sensor in sensors:
+            name, value = sensor.split("=")
+            sensors_dict[name[6]] = int(value)
+        # TO DISPALY THE SENSOR VALUES : 
+        # print(sensors_dict)
 
         if self.debug_data:
                 self.log(content)
-        
-
         
