@@ -1,5 +1,6 @@
 import os
-
+from os import path
+import json
 import numpy as np
 # pip install onnx
 import onnxruntime
@@ -12,12 +13,19 @@ def adapt_data(frame: list) -> list:
     image shape[0] = 480
     frape.shape[1] = 640
     """
+    if path.exists("home/config.json"):
+        with open("home/config.json", "r") as f:
+            config = json.load(f)
+            if ("width" in config["camera"]):
+                width = config["camera"]["width"]
+            else: 
+                width = 640
 
     pose = np.array([[res[0], res[1]] for res in frame["body_pose"]]).flatten(
         ) if frame["body_pose"] else np.zeros(33*2)
-    lh = np.array([[res[0], res[1]] for res in frame["left_hand_pose"]]).flatten(
+    rh = np.array([[res[0], res[1]] for res in frame["left_hand_pose"]]).flatten(
     ) if frame["left_hand_pose"] else np.zeros(21*2)
-    rh = np.array([[res[0], res[1]] for res in frame["right_hand_pose"]]).flatten(
+    lh = np.array([[res[0], res[1]] for res in frame["right_hand_pose"]]).flatten(
     ) if frame["right_hand_pose"] else np.zeros(21*2)  
     return np.concatenate([pose, lh, rh])
 
