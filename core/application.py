@@ -35,7 +35,6 @@ class BaseApplication(threading.Thread):
             if not self.started:
                 break
 
-
     def listener(self, source, event, data) -> None:
         """
         Gets notified when some data (named "data")
