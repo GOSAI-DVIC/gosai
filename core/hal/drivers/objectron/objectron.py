@@ -1,13 +1,11 @@
 # Pose estimation Driver
 
-import time
-import numpy as np
-import core.hal.drivers.object_detection.utils.find_obj as find_obj
 from core.hal.drivers.driver import BaseDriver
 from os import path
 import json
 import cv2
 import mediapipe as mp
+
 mp_drawing = mp.solutions.drawing_utils
 mp_objectron = mp.solutions.objectron
 
@@ -42,8 +40,7 @@ class Driver(BaseDriver):
             image = frame.copy()
             min_width, max_width = int((0.5 - self.window / 2) * frame.shape[1]), int(
                 (0.5 + self.window / 2) * frame.shape[1]
-            )
-                        
+            )   
             image = image[:, min_width:max_width]
 
             with mp_objectron.Objectron(static_image_mode=False,
