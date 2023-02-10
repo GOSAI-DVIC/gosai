@@ -51,7 +51,7 @@ class Driver(BaseDriver):
                         self.frames = self.frames[-30:]
                         guessed_sign, probability = gs.get_sign(
                                 self.model, self.frames, self.SLR_ACTIONS)
-                        if(self.count_update >= 60):
+                        if(self.count_update >= 120):
                             self.count_update = 0
 
                             guessed_sign, probability = gs.get_sign(
