@@ -69,5 +69,3 @@ class Driver(BaseDriver):
         dt = max((1 / self.fps) - (end_t - start_t), 0.0001)
 
         time.sleep(dt)
-
-
