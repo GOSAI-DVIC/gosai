@@ -18,9 +18,9 @@ def adapt_data(frame: list) -> list:
         ) if frame["body_pose"] else np.zeros(33*2)
     face = np.array([[res[0], res[1]] for res in [frame["face_mesh"][i] for i in face_lm_ind]]).flatten(
         ) if frame["face_mesh"] else np.zeros(4*2)
-    lh = np.array([[res[0], res[1]] for res in frame["left_hand_pose"]]).flatten(
+    rh = np.array([[res[0], res[1]] for res in frame["left_hand_pose"]]).flatten(
         ) if frame["left_hand_pose"] else np.zeros(21*2)
-    rh = np.array([[res[0], res[1]] for res in frame["right_hand_pose"]]).flatten(
+    lh = np.array([[res[0], res[1]] for res in frame["right_hand_pose"]]).flatten(
         ) if frame["right_hand_pose"] else np.zeros(21*2)  
     return np.concatenate([face, pose, lh, rh])
 
