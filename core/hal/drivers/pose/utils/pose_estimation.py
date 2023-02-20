@@ -24,7 +24,7 @@ def init():
         refine_face_landmarks = True,
     )
 
-def landmarks_to_array(landmarks,  min_width, width, height):
+def landmarks_to_array(landmarks, min_width, width, height):
     landmark_array = [
         [
             min_width + int(landmark.x * width),
@@ -72,6 +72,9 @@ def find_all_poses(holistic, frame, window):
     results = holistic.process(image)
     # e2 = time.time()
     # print(f"    Infer image: {(e2 - e1)*1000} ms")
+    # image.shape[1] = 448, image.shape[0] = 480
+
+    # print(image.shape[1], image.shape[0])
 
     face_landmarks = landmarks_to_array(results.face_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.face_landmarks else []
     body_landmarks = landmarks_to_array(results.pose_landmarks.landmark, min_width, image.shape[1], image.shape[0]) if results.pose_landmarks else []
