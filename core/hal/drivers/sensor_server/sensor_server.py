@@ -17,36 +17,34 @@ class Driver(BaseDriver):
         self.window = 1
         self.sensors = []
 
+    #connect to client using IP address
     def pre_run(self):
         """Runs once at the start of the driver"""
         super().pre_run()
         s = socket.socket()
-        s.bind(('172.21.72.173', 8091))
+        #s.bind(('192.168.1.31', 8091))
+        s.bind(('172.21.72.197', 8091))
+        #s.bind(('127.0.0.1', 8091))
         s.listen(0)
-
         try:
             self.client, self.addr = s.accept()
             print('Got connection from', self.addr)
         except:
             print('Connection failed')
 
-
+    #traite les donnés et les stock dans un dictionnaire
     def loop(self):
         """Main loop"""
         content = (self.client.recv(64))
-        
         content = content.decode()
-        
-        # content = str(content[2:-1])
         sensors = content.split("|")
-        print(sensors)
-        print("sensors", sensors)
         sensors_dict = {}
         for sensor in sensors:
             name, value = sensor.split("=")
             sensors_dict[name[6]] = int(value)
-        # TO DISPALY THE SENSOR VALUES : 
-        # print(sensors_dict)
+
+        #send the datato the processing.py of the application
+        self.set_event_data("movements", sensors_dict)
 
         if self.debug_data:
                 self.log(content)
