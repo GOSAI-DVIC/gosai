@@ -1,0 +1,165 @@
+2 : 2023-03-17 21:50:59 : Creating event 'sign'
+2 : 2023-03-17 21:50:59 : Registering entity 'show_hands' to 'sign'
+4 : 2023-03-17 21:50:59 : Error when starting the driver: [ONNXRuntimeError] : 7 : INVALID_PROTOBUF : Load model from /home/hugo/Bureau/PythonProject/GOSAI/gosai/core/hal/drivers/hand_sign/utils/models/handsign.onnx failed:Protobuf parsing failed.
+2 : 2023-03-17 22:03:31 : Creating event 'sign'
+2 : 2023-03-17 22:03:31 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-17 22:03:31 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-17 22:03:31 : Driver running
+2 : 2023-03-18 18:10:20 : Creating event 'sign'
+2 : 2023-03-18 18:10:20 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-18 18:10:20 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-18 18:10:20 : Driver running
+2 : 2023-03-18 18:21:47 : Creating event 'sign'
+2 : 2023-03-18 18:21:47 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-18 18:21:47 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-18 18:21:47 : Driver running
+2 : 2023-03-20 15:06:47 : Creating event 'sign'
+2 : 2023-03-20 15:06:47 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-20 15:06:47 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-20 15:06:47 : Driver running
+2 : 2023-03-20 22:22:27 : Creating event 'sign'
+2 : 2023-03-20 22:22:27 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-20 22:22:27 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-20 22:22:27 : Driver running
+2 : 2023-03-20 22:26:51 : Creating event 'sign'
+2 : 2023-03-20 22:26:51 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-20 22:26:51 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-20 22:26:51 : Driver running
+2 : 2023-03-20 22:51:46 : Creating event 'sign'
+2 : 2023-03-20 22:51:46 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-20 22:51:46 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-20 22:51:46 : Driver running
+2 : 2023-03-21 02:08:11 : Creating event 'sign'
+2 : 2023-03-21 02:08:11 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-21 02:08:11 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-21 02:08:11 : Driver running
+2 : 2023-03-21 02:08:34 : Registering entity 'interpolated_show_hands' to 'sign'
+2 : 2023-03-21 02:10:07 : Creating event 'sign'
+2 : 2023-03-21 02:10:07 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-21 02:10:07 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-21 02:10:07 : Driver running
+2 : 2023-03-22 17:28:17 : Creating event 'sign'
+2 : 2023-03-22 17:28:17 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-22 17:28:17 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-22 17:28:17 : Driver running
+2 : 2023-03-22 17:28:57 : Registering entity 'interpolated_show_hands' to 'sign'
+2 : 2023-03-22 17:28:57 : Unregistering entity 'interpolated_show_hands' from 'sign'
+2 : 2023-03-22 23:47:33 : Creating event 'sign'
+2 : 2023-03-22 23:47:33 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-22 23:47:33 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-22 23:47:33 : Driver running
+2 : 2023-03-23 14:19:49 : Creating event 'sign'
+2 : 2023-03-23 14:19:49 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 14:19:49 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 14:19:49 : Driver running
+2 : 2023-03-23 14:21:11 : Creating event 'sign'
+2 : 2023-03-23 14:21:11 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 14:21:11 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 14:21:11 : Driver running
+2 : 2023-03-23 16:06:06 : Creating event 'sign'
+2 : 2023-03-23 16:06:06 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 16:06:06 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 16:06:06 : Driver running
+2 : 2023-03-23 16:07:30 : Creating event 'sign'
+2 : 2023-03-23 16:07:30 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 16:07:30 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 16:07:30 : Driver running
+2 : 2023-03-23 16:19:51 : Creating event 'sign'
+2 : 2023-03-23 16:19:51 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 16:19:51 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 16:19:51 : Driver running
+2 : 2023-03-23 16:22:17 : Creating event 'sign'
+2 : 2023-03-23 16:22:17 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 16:22:17 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 16:22:17 : Driver running
+2 : 2023-03-23 16:27:40 : Creating event 'sign'
+2 : 2023-03-23 16:27:40 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 16:27:40 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 16:27:40 : Driver running
+2 : 2023-03-23 18:04:31 : Creating event 'sign'
+2 : 2023-03-23 18:04:31 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 18:04:31 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 18:04:31 : Driver running
+2 : 2023-03-23 18:11:49 : Creating event 'sign'
+2 : 2023-03-23 18:11:49 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 18:11:49 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 18:11:49 : Driver running
+2 : 2023-03-23 18:13:42 : Creating event 'sign'
+2 : 2023-03-23 18:13:42 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 18:13:42 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 18:13:42 : Driver running
+2 : 2023-03-23 19:33:26 : Creating event 'sign'
+2 : 2023-03-23 19:33:26 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 19:33:26 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 19:33:26 : Driver running
+2 : 2023-03-23 19:37:45 : Creating event 'sign'
+2 : 2023-03-23 19:37:45 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 19:37:45 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 19:37:45 : Driver running
+2 : 2023-03-23 21:27:40 : Creating event 'sign'
+2 : 2023-03-23 21:27:40 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 21:27:40 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 21:27:40 : Driver running
+2 : 2023-03-23 21:28:38 : Creating event 'sign'
+2 : 2023-03-23 21:28:38 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 21:28:39 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 21:28:39 : Driver running
+2 : 2023-03-23 22:23:34 : Creating event 'sign'
+2 : 2023-03-23 22:23:34 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 22:23:34 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 22:23:34 : Driver running
+2 : 2023-03-23 22:29:01 : Creating event 'sign'
+2 : 2023-03-23 22:29:01 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 22:29:01 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 22:29:01 : Driver running
+2 : 2023-03-23 22:34:39 : Creating event 'sign'
+2 : 2023-03-23 22:34:39 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 22:34:39 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 22:34:39 : Driver running
+2 : 2023-03-23 22:45:54 : Creating event 'sign'
+2 : 2023-03-23 22:45:54 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 22:45:54 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 22:45:54 : Driver running
+2 : 2023-03-23 22:58:07 : Creating event 'sign'
+2 : 2023-03-23 22:58:07 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 22:58:07 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 22:58:07 : Driver running
+2 : 2023-03-23 23:05:08 : Creating event 'sign'
+2 : 2023-03-23 23:05:08 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 23:05:08 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 23:05:08 : Driver running
+2 : 2023-03-23 23:08:18 : Creating event 'sign'
+2 : 2023-03-23 23:08:18 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 23:08:18 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 23:08:18 : Driver running
+2 : 2023-03-23 23:09:23 : Creating event 'sign'
+2 : 2023-03-23 23:09:23 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 23:09:23 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 23:09:23 : Driver running
+2 : 2023-03-23 23:17:54 : Creating event 'sign'
+2 : 2023-03-23 23:17:54 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-23 23:17:54 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-23 23:17:54 : Driver running
+2 : 2023-03-24 12:47:48 : Creating event 'sign'
+2 : 2023-03-24 12:47:48 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-24 12:47:48 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-24 12:47:48 : Driver running
+2 : 2023-03-24 12:56:57 : Creating event 'sign'
+2 : 2023-03-24 12:56:57 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-24 12:56:57 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-24 12:56:57 : Driver running
+2 : 2023-03-24 13:02:16 : Creating event 'sign'
+2 : 2023-03-24 13:02:16 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-24 13:02:16 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-24 13:02:16 : Driver running
+2 : 2023-03-24 13:02:56 : Registering entity 'interpolated_show_hands' to 'sign'
+2 : 2023-03-24 13:02:58 : Unregistering entity 'interpolated_show_hands' from 'sign'
+2 : 2023-03-24 13:02:59 : Unregistering entity 'show_hands' from 'sign'
+2 : 2023-03-24 13:02:59 : Pausing driver: no one is subscribed to it anymore
+2 : 2023-03-24 13:03:00 : Driver paused
+2 : 2023-03-24 13:19:02 : Creating event 'sign'
+2 : 2023-03-24 13:19:02 : Registering entity 'show_hands' to 'sign'
+2 : 2023-03-24 13:19:02 : Creating callback for action 'detect' on event 'raw_data'
+2 : 2023-03-24 13:19:02 : Driver running
+2 : 2023-03-24 13:19:18 : Registering entity 'interpolated_show_hands' to 'sign'
+2 : 2023-03-24 13:19:20 : Unregistering entity 'interpolated_show_hands' from 'sign'

@@ -27,6 +27,8 @@ socket.on("core-app_manager-started_applications", async (data) => {
     });
 });
 
+
+
 socket.on("core-app_manager-stopped_applications", async (data) => {
     let stopped_apps = data["applications"];
     stopped_apps.forEach(app => {
@@ -36,4 +38,4 @@ socket.on("core-app_manager-stopped_applications", async (data) => {
 
 socket.on("core-server-sound",() => {
     speaker_request = true;
-})
+});

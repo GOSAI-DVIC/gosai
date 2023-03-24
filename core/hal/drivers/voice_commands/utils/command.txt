@@ -1,0 +1,4 @@
+"triangles"/mode=triangles/triangles 
+"sleep mode"/mode=sleepmode/sleep mode   
+"affine"/mode=affine/affine mode 
+"balls"/mode=balls/mode balls 
