@@ -7,7 +7,7 @@ onnxruntime==1.10.0
 mediapipe==0.9.0.1
 pyrealsense2
 pyaudio>=0.2.11
-scipy==1.9.1
+scipy==1.7.3
 sounddevice>=0.4.5
 SpeechRecognition>=3.8.1
 pyglet>=1.5.21

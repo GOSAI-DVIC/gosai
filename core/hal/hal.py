@@ -73,6 +73,7 @@ class HardwareAbstractionLayer:
             for f in os.scandir(DRIVERS_PATH)
             if f.is_dir() and f.path.split("/")[-1] != "__pycache__"
         ]
+        print("available drivers : ",self.available_drivers)
 
         self.drivers = {}
 
