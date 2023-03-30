@@ -130,7 +130,7 @@ class HardwareAbstractionLayer:
 
         if driver_name not in self.drivers:
             self.init_driver(driver_name)
-
+        print(self.drivers)
         driver = self.drivers[driver_name]
 
         if not driver.started.value or driver.paused.value:
