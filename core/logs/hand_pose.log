@@ -166,3 +166,19 @@
 2 : 2023-03-24 13:19:02 : Registering entity 'driver_hand_sign' to 'raw_data'
 2 : 2023-03-24 13:19:18 : Registering entity 'interpolated_show_hands' to 'raw_data'
 2 : 2023-03-24 13:19:20 : Unregistering entity 'interpolated_show_hands' from 'raw_data'
+2 : 2023-03-24 16:54:04 : Creating event 'raw_data'
+2 : 2023-03-24 16:54:04 : Registering entity 'show_hands' to 'raw_data'
+2 : 2023-03-24 16:54:04 : Driver running
+2 : 2023-03-24 16:54:04 : Registering entity 'driver_hand_sign' to 'raw_data'
+2 : 2023-03-24 16:57:10 : Creating event 'raw_data'
+2 : 2023-03-24 16:57:10 : Registering entity 'show_hands' to 'raw_data'
+2 : 2023-03-24 16:57:10 : Driver running
+2 : 2023-03-24 16:57:10 : Registering entity 'driver_hand_sign' to 'raw_data'
+2 : 2023-03-24 17:02:47 : Creating event 'raw_data'
+2 : 2023-03-24 17:02:47 : Registering entity 'show_hands' to 'raw_data'
+2 : 2023-03-24 17:02:47 : Driver running
+2 : 2023-03-24 17:02:47 : Registering entity 'driver_hand_sign' to 'raw_data'
+2 : 2023-03-24 17:09:06 : Creating event 'raw_data'
+2 : 2023-03-24 17:09:06 : Registering entity 'show_hands' to 'raw_data'
+2 : 2023-03-24 17:09:06 : Driver running
+2 : 2023-03-24 17:09:06 : Registering entity 'driver_hand_sign' to 'raw_data'

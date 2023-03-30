@@ -1,4 +1,3 @@
-# Video driver
 import json
 import os
 import sys
@@ -23,23 +22,20 @@ class Driver(BaseDriver):
         self.create_event("web_audio_1sec")
         self.create_callback("audio_conversion", self.audio_conversion)
         self.log("pre_run", 3)
+        self.databuffer = np.zeros(self.samplerate, dtype=np.float32) 
       
        
     def audio_conversion(self, data):  
 
         audio_data = data["data"]      
-        bytes = audio_data['bytes']
-        
-        self.log("audio_conversion", 3)
-        float32buffer = np.frombuffer(bytes, dtype=np.float32)
-        databuffer = np.append(databuffer,float32buffer)
+        float32buffer = np.frombuffer(audio_data, dtype=np.float32)
+        self.databuffer = np.append(self.databuffer,float32buffer)
    
-        if databuffer.size > self.samplerate:
+        if self.databuffer.size > self.samplerate:
 
-            datafor1sec = databuffer[:self.samplerate]
+            datafor1sec = self.databuffer[:self.samplerate]
             
-            print(datafor1sec)
             self.set_event_data("web_audio_1sec", datafor1sec)
           
-            databuffer = databuffer[self.samplerate:]
+            self.databuffer = self.databuffer[self.samplerate:]
        

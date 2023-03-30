@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 
-import core.hal.drivers.hand_pose.utils.hand_pose_estimation as hpe
+
 from core.hal.drivers.driver import BaseDriver
 from core.hal.drivers.voice_commands.utils.wakeupword.wakeupword_detection import LSTMInference
 from core.hal.drivers.voice_commands.utils.voice_recognition import SpeechToText
@@ -19,13 +19,13 @@ class Driver(BaseDriver):
     def __init__(self, name: str, parent, max_fps: int = 60):
         super().__init__(name, parent)
 
-        self.register_to_driver("web_audio_stream", "web_audio_float32")
+        self.register_to_driver("web_audio_stream", "web_audio_1sec")
 
         self.debug_time = False
         self.debug_data = False
         self.fps = max_fps
         self.window = 1
-        self.register_to_driver("VoiceCommands", "transcript")
+        #self.register_to_driver("VoiceCommands", "transcript")
 
     def pre_run(self):
         """Runs once at the start of the driver"""
@@ -46,7 +46,7 @@ class Driver(BaseDriver):
         """Main loop"""
         start_t = time.time()
 
-        audio = self.parent.get_driver_event_data("web_audio_stream", "web_audio_float32")
+        audio = self.parent.get_driver_event_data("web_audio_stream", "web_audio_1sec")
 
         if audio is not None and (sum(audio)!=0):
             self.audio_buffer = np.append(self.audio_buffer, audio)

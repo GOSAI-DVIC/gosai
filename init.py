@@ -15,6 +15,8 @@ server.start()
 
 hal = HardwareAbstractionLayer(server)
 
+hal.start_driver("web_audio_stream")
+hal.start_driver("voice_commands")
 logger = Logger(server)
 logger.log_listenner()
 
