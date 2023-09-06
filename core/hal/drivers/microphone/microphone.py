@@ -16,7 +16,7 @@ class Driver(BaseDriver):
         super().__init__(name, parent)
         
         # create driver event
-        self.create_event("get_audio_stream")
+        self.create_event("audio_stream")
 
 
     def pre_run(self):
@@ -51,7 +51,7 @@ class Driver(BaseDriver):
 
         def callback(indata, frames, time, status):
             self.set_event_data(
-                "get_audio_stream",
+                "audio_stream",
                 {
                     "block": indata,
                     "samplerate": SAMPLERATE,
