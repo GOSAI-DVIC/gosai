@@ -8,7 +8,7 @@ class Driver(BaseDriver):
         super().__init__(name, parent)
 
         #create driver event
-        self.register_to_driver("microphone", "get_audio_stream")
+        self.register_to_driver("microphone", "audio_stream")
 
         self.create_event("frequency")
 
@@ -20,7 +20,7 @@ class Driver(BaseDriver):
 
         self.blocks = []
 
-        self.create_callback_on_event("estimate_frequency", self.estimate_frequency, "microphone", "get_audio_stream")
+        self.create_callback_on_event("estimate_frequency", self.estimate_frequency, "microphone", "audio_stream")
 
     def estimate_frequency(self, data):
         """Estimates the frequency of the input data"""
