@@ -38,7 +38,7 @@ else
 endif
 
 stop:
-	-pkill -9 -f "chrome --password-store=basic --start-fullscreen --incognito --disable-logging http://127.0.0.1:8000"
+	-pkill -9 -f "start-fullscreen --incognito --disable-logging http://127.0.0.1:8000/gosai"
 	-pkill -9 -f "python3 init.py"
 	-docker stop $(REPO)
 	-docker stop $(REPO)-$(REDIS_REPO)
