@@ -1,5 +1,6 @@
 # Hardware Abstraction Layer
 
+import json
 import os
 import pickle
 import threading
@@ -67,6 +68,12 @@ class HardwareAbstractionLayer:
         self.name = "hal"
         self.server = server
         self.db = redis.Redis(host="localhost", port=6379, db=0)
+
+        if os.path.exists("home/config.json"):
+            with open("home/config.json", "r") as f:
+                self.config = json.load(f)
+        else:
+            self.config = {}
 
         self.log(f"Starting {self.name}")
         self.available_drivers = [
