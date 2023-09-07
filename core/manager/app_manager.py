@@ -4,11 +4,12 @@ import pickle
 import traceback
 import redis
 
+from core.hal.hal import HardwareAbstractionLayer
 
 class AppManager:
     """Manages the apps"""
 
-    def __init__(self, hal, server):
+    def __init__(self, hal: HardwareAbstractionLayer, server):
         """Initializes the app manager"""
         self.service = "core"
         self.name = "app_manager"
@@ -161,7 +162,7 @@ class AppManager:
             self.log(f"Unknown application '{app_name}'", 3)
             return False
 
-        # Disactivating the specified sub-menu
+        # Desactivating the specified sub-menu
         if app_name in self.sub_menu:
             self.server.send_data(
                 "core-app_manager-remove_sub_menu",
@@ -234,7 +235,7 @@ class AppManager:
         @self.server.sio.on(f"{self.service}-{self.name}-stop_option")
         def _(data) -> None:
             self.server.sio.emit(self.sub_menu[data["app_name"]][data["option_name"]]["event_name"], False)
-        
+
         @self.server.sio.on(f"{self.service}-{self.name}-trigger_option")
         def _(data) -> None:
             self.server.sio.emit(self.sub_menu[data["app_name"]][data["option_name"]]["event_name"])
