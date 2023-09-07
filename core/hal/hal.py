@@ -81,7 +81,7 @@ class HardwareAbstractionLayer:
             for f in os.scandir(DRIVERS_PATH)
             if f.is_dir() and f.path.split("/")[-1] != "__pycache__"
         ]
-        print("available drivers : ",self.available_drivers)
+        self.log(f"Available drivers : {self.available_drivers}", 2)
 
         self.drivers = {}
 
@@ -346,6 +346,10 @@ class HardwareAbstractionLayer:
 
         level : int, optional
             The level of the log. (default is 1)
+            1: Debug
+            2: Info
+            3: Warning
+            4: Error
         """
         data = {
             "service": "core",
