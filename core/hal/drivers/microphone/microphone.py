@@ -1,14 +1,9 @@
-import json
-import math
-from core.hal.drivers.driver import BaseDriver
+import numpy  # Make sure NumPy is loaded before it is used in the callback
 import sounddevice as sd
-import queue
-import numpy as np
-from os import path
+
+from core.hal.drivers.driver import BaseDriver
 from core.hal.drivers.microphone.utils.microphone_finder import get_microphone_configuration
 
-import sounddevice as sd
-import numpy  # Make sure NumPy is loaded before it is used in the callback
 assert numpy  # avoid "imported but unused" message (W0611)
 
 class Driver(BaseDriver):
