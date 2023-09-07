@@ -3,6 +3,7 @@
 import pickle
 import threading
 import time
+import traceback
 from multiprocessing import Process, Value
 from typing import Any
 
@@ -48,8 +49,8 @@ class BaseDriver(Process):
         """Runs when the thread is started"""
         try:
             self.pre_run()
-        except Exception as e:
-            self.log(f"Error when starting the driver: {e}", 4)
+        except Exception:
+            self.log(f"Error when starting the driver: {traceback.format_exc()}", 4)
             return
         # Starts the required drivers
         self.log("Driver running", 2)
@@ -70,8 +71,8 @@ class BaseDriver(Process):
                 else:
                     time.sleep(0.5)
 
-            except Exception as e:
-                self.log(f"Error when running the driver: {e}", 4)
+            except Exception:
+                self.log(f"Error when running the driver: {traceback.format_exc()}", 4)
                 return
 
     def loop(self):
@@ -86,8 +87,8 @@ class BaseDriver(Process):
 
         self.log("Driver resumed", 2)
 
-        for driver_name in self.requires:
-            for event in self.requires[driver_name]:
+        for driver_name, event_list in self.requires.items():
+            for event in event_list:
                 self.parent.register_to_driver(driver_name, self, event)
         self.paused.value = 0
 
@@ -96,15 +97,14 @@ class BaseDriver(Process):
 
         self.log("Driver paused", 2)
 
-        for driver_name in self.requires:
-            for event in self.requires[driver_name]:
+        for driver_name, event_list in self.requires.items():
+            for event in event_list:
                 self.parent.unregister_from_driver(driver_name, self, event)
 
         self.paused.value = 1
         # Notify the parent that the driver is stopped
         self.db.publish("driver_stopped", pickle.dumps({"driver_name": self.name}))
         self.record_performance("loop_time", 0)
-        # self.record_performance("loop_time", 0)
 
     def create_event(self, event) -> bool:
         """Adds an event to the driver"""
@@ -122,25 +122,33 @@ class BaseDriver(Process):
     def set_event_data(self, event, data):
         """Adds data to the driver and notifies the listeners"""
 
-        if event not in self.registered.keys():
+        if event not in self.registered:
             self.log(f"Tried to add data for an unknown event '{event}'", 3)
             return False
 
-        self.db.set(f"{self.name}_{event}", pickle.dumps(data))
-        self.db.publish(f"{self.name}_{event}", pickle.dumps(data))
+        payload = pickle.dumps({
+            "data": data,
+            "emit_time": time.time(),
+        })
+
+        self.db.set(f"{self.name}_{event}", payload)
+        self.db.publish(f"{self.name}_{event}", payload)
         return True
 
     def get_event_data(self, event):
         """Returns the data of an event"""
 
-        if event not in self.registered.keys():
+        if event not in self.registered:
             self.log(f"Tried to get data for an unknown event '{event}'", 3)
             return None
 
-        data = self.db.get(f"{self.name}_{event}")
         try:
-            return pickle.loads(data)
-        except Exception as _:
+            payload = pickle.loads(self.db.get(f"{self.name}_{event}"))
+            data = payload["data"]
+            # delta_time = time.time() - payload["emit_time"]
+            # print(f"From: {self.name} {event} Delta time: {delta_time}")
+            return data
+        except Exception:
             return None
 
     def register_to_driver(self, driver_name, event):
@@ -241,10 +249,10 @@ class BaseDriver(Process):
                     threading.Thread(
                         target=_execute_callback, args=(callback, data)
                     ).start()
-                except pickle.UnpicklingError as e:
+                except pickle.UnpicklingError:
                     continue
-                except Exception as e:
-                    self.log(f"Error while loading callback data: {e}", 3)
+                except Exception:
+                    self.log(f"Error while loading callback data: {traceback.format_exc()}", 3)
 
         sub = threading.Thread(
             target=_subscriber,
@@ -289,7 +297,10 @@ class BaseDriver(Process):
                     return
                 try:
                     if not self.paused.value:
-                        data = pickle.loads(bytes(binary_data["data"]))
+                        payload = pickle.loads(bytes(binary_data["data"]))
+                        data = payload["data"]
+                        delta_time = time.time() - payload["emit_time"]
+                        # print(f"From: {source} {event} Delta time: {delta_time}")
 
                         def _execute_callback(callback: callable, data) -> None:
                             start_t = time.time()
@@ -305,10 +316,10 @@ class BaseDriver(Process):
                         threading.Thread(
                             target=_execute_callback, args=(callback, data)
                         ).start()
-                except pickle.UnpicklingError as e:
+                except pickle.UnpicklingError:
                     continue
-                except Exception as e:
-                    self.log(f"Error while loading callback data: {e}", 3)
+                except Exception:
+                    self.log(f"Error while loading callback data: {traceback.format_exc()}", 3)
 
         sub = threading.Thread(
             target=_subscriber,

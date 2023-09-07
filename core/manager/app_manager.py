@@ -4,11 +4,12 @@ import pickle
 import traceback
 import redis
 
+from core.hal.hal import HardwareAbstractionLayer
 
 class AppManager:
     """Manages the apps"""
 
-    def __init__(self, hal, server):
+    def __init__(self, hal: HardwareAbstractionLayer, server):
         """Initializes the app manager"""
         self.service = "core"
         self.name = "app_manager"
@@ -90,8 +91,8 @@ class AppManager:
                     if "applications" in config and "startup" in config["applications"]:
                         for app_name in config["applications"]["startup"]:
                             self.apps_to_start.append(app_name)
-        except Exception as e:
-            self.log(f"Failed to start up the applications: {e}", 4)
+        except Exception:
+            self.log(f"Failed to start up the applications: {traceback.format_exc()}", 4)
 
     def start(self, app_name: str) -> bool:
         """Starts an application"""
@@ -109,7 +110,7 @@ class AppManager:
             app = __import__(
                 f"home.apps.{app_name}.processing", fromlist=[None]
             ).Application(app_name, self.hal, self.server, self)
-            
+
             # Stopping apps not required
             if app.is_exclusive:
                 started_apps_list = list(self.started_apps.keys())
@@ -119,7 +120,7 @@ class AppManager:
                 for app_required in app.applications_required:
                     if app_required in self.available_apps and app_required not in self.started_apps:
                         self.start(app_required)
-            
+
             # Start the required drivers and subscribe to the required events
             for driver_name in app.requires:
                 self.hal.start_driver(driver_name)
@@ -161,7 +162,7 @@ class AppManager:
             self.log(f"Unknown application '{app_name}'", 3)
             return False
 
-        # Disactivating the specified sub-menu
+        # Desactivating the specified sub-menu
         if app_name in self.sub_menu:
             self.server.send_data(
                 "core-app_manager-remove_sub_menu",
@@ -188,8 +189,8 @@ class AppManager:
             self.log(f"Stopped application '{app_name}'", 2)
             self.update_api_listeners()
 
-        except Exception as e:
-            self.log(f"Failed to stop application '{app_name}': {e}", 4)
+        except Exception:
+            self.log(f"Failed to stop application '{app_name}': {traceback.format_exc()}", 4)
             return False
 
         return True
@@ -234,7 +235,7 @@ class AppManager:
         @self.server.sio.on(f"{self.service}-{self.name}-stop_option")
         def _(data) -> None:
             self.server.sio.emit(self.sub_menu[data["app_name"]][data["option_name"]]["event_name"], False)
-        
+
         @self.server.sio.on(f"{self.service}-{self.name}-trigger_option")
         def _(data) -> None:
             self.server.sio.emit(self.sub_menu[data["app_name"]][data["option_name"]]["event_name"])

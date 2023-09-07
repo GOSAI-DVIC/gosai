@@ -4,6 +4,7 @@ import pickle
 import random
 import threading
 import time
+import traceback
 from queue import Queue
 
 from dotenv import load_dotenv
@@ -32,7 +33,7 @@ class Server:
         self.app = Flask(__name__)
         self.app.config["SECRET_KEY"] = "secret!"
         CORS(self.app)
-        self.db = redis.Redis(host="localhost", port=6379, db=0)
+        self.db = redis.Redis(host="127.0.0.1", port=6379, db=0)
         self.name = "server"
         self.service = "core"
 
@@ -122,10 +123,10 @@ class Server:
                 name, data = self.queue.get()
                 try:
                     self.sio.emit(name, data)
-                except:
-                    print("Error while sending data, passing error")
+                except Exception:
+                    self.log(f"Error while sending data: {traceback.format_exc()}", 3)
                     pass
-                    
+
 
     def log(self, content, level=1):
         """Logs via the redis database"""
@@ -187,6 +188,31 @@ def create_socket_api(server: Server):
         server.sio.emit(
             f"{server.service}-{server.name}-checked_control_password", {"checked": check}, room=request.sid
         )
+
+    #receive audio from client and put it in the redis database
+    @server.sio.on("web_audio")
+    def audio(data):
+
+        audio_data = {
+            "name": "audio_bytes",
+            "channel": 1,
+            "data": []
+
+        }
+
+        audio_data["data"] = data
+
+        driver = "web_audio_stream"
+        action = "audio_conversion"
+
+        server.db.publish(f"{driver}_exec_{action}", pickle.dumps(audio_data))
+
+
+        #print(data)
+
+    # @server.sio.on(f"{server.service}-{server.name}-audio", {"audio": server.audio})
+    # def _():
+    #     server.log(server.audio)
 
     @server.sio.on(f"{server.service}-{server.name}-sound")
     def _():

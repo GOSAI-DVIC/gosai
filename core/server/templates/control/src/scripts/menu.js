@@ -1,3 +1,9 @@
+//import streamaudio method and stopAudioStream method from audiostream.js
+
+
+// for voice commands
+const sampleRate = 44100
+
 let modules = {};
 let canvas;
 
@@ -137,15 +143,14 @@ function draw() {
     }
     pop();
 
-    // if (micro && !micro_start) {
-    //     recorder.record(soundFile)
-    //     micro_start = true
-    // }
-    // if (!micro && micro_start) {
-    //     recorder.stop();
-    //     saveSound(soundFile,'mySound.wav');
-    //     micro_start = false;
-    // }
+    if (micro && !micro_start) {
+        streamaudio();
+        micro_start = true
+    }
+    if (!micro && micro_start) {
+        stopAudioStream();
+        micro_start = false;
+    }
 
     //SPEAKER
     push();
@@ -250,3 +255,130 @@ function speaker_button() {
 function stop_audio() {
     audio.pause();
 }
+
+
+
+// VOICE COMMANDS PART 
+
+
+function streamaudio(){
+  
+  let stream
+  let audioContext;
+  let source;
+  let pcmWorker;
+  let conn; 
+
+
+  if (navigator.mediaDevices) {
+  console.log("getUserMedia supported.");}
+  navigator.mediaDevices.getUserMedia_ = ( navigator.mediaDevices.getUserMedia ||
+  navigator.mediaDevices.webkitGetUserMedia ||
+  navigator.mediaDevices.mozGetUserMedia ||
+  navigator.mediaDevices.msGetUserMedia);
+
+
+  stream = navigator.mediaDevices.getUserMedia_({
+  audio: {
+    deviceId: "default",
+    sampleRate: sampleRate,
+    //sampleSize: 512,
+    channelCount: 1
+  },
+  video: false
+}).then( (stream) => {
+
+  console.log(stream) 
+
+  console.log("Stream created")
+
+  audioContext = new window.AudioContext({sampleRate: sampleRate})
+  console.log(audioContext)
+  source  = audioContext.createMediaStreamSource(stream)
+  console.log("source")
+  console.log("audio context created")
+  
+
+
+
+  audioContext.audioWorklet.addModule("core/server/templates/control/src/scripts/audiostream.js").then( () => {
+  console.log(audioContext)
+  pcmWorker = new AudioWorkletNode(audioContext, "audio-buffer.worklet" ,{outputChannelCount: [1]})
+    source.connect(pcmWorker)
+    // const mode =  document.getElementById('mode').value;
+    // if (mode == 'Saving') {
+    //   let username = document.getElementById('username').value;
+    //   conn = new WebSocket("wss://172.21.72.141:8000/wss/save/"+username)}
+    // else if (mode == 'VoiceCommands') {
+
+    //create socketIO connection
+    
+
+    console.log(conn)
+    window.audioContext = audioContext;
+    window.source = source;
+    window.pcmWorker = pcmWorker;
+    window.conn = conn;
+
+
+     // Listen for messages from the server
+    //  conn.addEventListener('message', (event) => {
+    //   console.log('Message from server: ', event.data);
+    //   const message = JSON.parse(event.data);
+    //   const listening = message.Listening ; 
+    //   const mode = message.Mode ; 
+    //   console.log(listening);
+    //   document.getElementById('status').innerHTML = `Listening : ${listening}`;
+    //   document.getElementById('trigger').innerHTML = `Mode : ${mode}`;
+    // });
+
+
+    pcmWorker.port.onmessage = event => {
+      audio = event.data
+      console.log(event.data)
+      socket.emit("web_audio", audio)}
+     // socket.emit("core-app_manager-audio", {"audio" : audio})}
+    
+    pcmWorker.port.start()
+  })
+
+
+
+});  
+
+}
+
+
+
+function stopAudioStream(stream) {
+
+  console.log(window.source)
+  if (window.source) {
+    console.log('disconnecting source')
+    source.disconnect();
+  }
+  console.log(window.pcmWorker)
+  if (window.pcmWorker) {
+    console.log('disconnecting pcmWorker')
+    pcmWorker.port.close();
+  }
+  console.log(window.conn)
+  if (window.conn) {
+    console.log('closing connection')
+    conn.close();
+  }
+  
+}
+
+
+  // document.getElementById('stop').addEventListener('click', function () {
+  //   console.log('stop');
+  //   stopAudioStream();
+  // });
+
+  // document.getElementById('record').addEventListener('click', function () {
+  //   var mode = document.getElementById('mode').value;
+  //   console.log('record');
+  //   streamaudio()  
+  // });
+

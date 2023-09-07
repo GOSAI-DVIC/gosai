@@ -3,6 +3,7 @@ import pickle
 import sys
 import threading
 import time
+import traceback
 
 import redis
 
@@ -198,9 +199,9 @@ def eval_command(console: Console, command: str) -> None:
             helper(console, "drivers")
             return
 
-        # elif execute == "exit":
-        #     console.log("Exiting...")
-        #     exit()
+        elif execute == "exit":
+            console.log("Exiting...")
+            os.system('/bin/bash -c "make stop &> /dev/null"')
 
         elif execute == "help":
             if len(arguments) == 0:
@@ -249,9 +250,13 @@ def eval_command(console: Console, command: str) -> None:
             helper(console, "password")
             return
 
+        # elif execute == "reboot":
+        #     console.log("Rebooting...")
+        #     os.system('/bin/bash -c "make stop &> /dev/null" && make boot')
+
         console.log("Unknown command: " + command, 3)
-    except Exception as e:
-        console.log("Error: " + str(e), 3)
+    except Exception:
+        console.log(f"Error: {traceback.format_exc()}", 3)
 
 
 def helper(console: Console, exec_name: str = "") -> None:

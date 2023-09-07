@@ -1,8 +1,10 @@
 # Hardware Abstraction Layer
 
+import json
 import os
 import pickle
 import threading
+import traceback
 from typing import Any, Dict, List
 
 import redis
@@ -67,12 +69,19 @@ class HardwareAbstractionLayer:
         self.server = server
         self.db = redis.Redis(host="localhost", port=6379, db=0)
 
+        if os.path.exists("home/config.json"):
+            with open("home/config.json", "r") as f:
+                self.config = json.load(f)
+        else:
+            self.config = {}
+
         self.log(f"Starting {self.name}")
         self.available_drivers = [
             f.path.split("/")[-1]
             for f in os.scandir(DRIVERS_PATH)
             if f.is_dir() and f.path.split("/")[-1] != "__pycache__"
         ]
+        print("available drivers : ",self.available_drivers)
 
         self.drivers = {}
 
@@ -104,8 +113,8 @@ class HardwareAbstractionLayer:
                 fromlist=[None],
             ).Driver(driver_name, self)
             self.drivers[driver_name] = driver
-        except Exception as e:
-            self.log(f"Cannot init {driver_name}: {e}", 4)
+        except Exception:
+            self.log(f"Cannot init {driver_name}: {traceback.format_exc()}", 4)
             return False
 
         return True
@@ -128,8 +137,9 @@ class HardwareAbstractionLayer:
             return False
 
         if driver_name not in self.drivers:
-            self.init_driver(driver_name)
-
+            success = self.init_driver(driver_name)
+            if not success:
+                return False
         driver = self.drivers[driver_name]
 
         if not driver.started.value or driver.paused.value:
