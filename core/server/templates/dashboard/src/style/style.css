@@ -242,6 +242,7 @@ table > tbody > tr > td {
 
 #drivers-looptime-chart{
     width: 100%;
+    margin-bottom: 50px;
 }
 
 #drivers-not-looptime-stats{
