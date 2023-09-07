@@ -237,7 +237,11 @@ class BaseDriver(Process):
 
                     def _execute_callback(callback: callable, data) -> None:
                         start_t = time.time()
-                        exec_time = callback(data)
+                        try:
+                            exec_time = callback(data)
+                        except Exception:
+                            self.log(f"Error in callback: {traceback.format_exc()}", 4)
+                            return
                         if not self.paused.value:
                             exec_time = (
                                 1000 * (time.time() - start_t)
