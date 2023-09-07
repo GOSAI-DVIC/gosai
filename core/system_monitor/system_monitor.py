@@ -1,12 +1,7 @@
-# record : {"source": {"name": str, "type": str}, "type": str, "data": Any }
-
-
-import datetime
 import locale
-import os
 import pickle
 import threading
-import time
+import traceback
 
 import redis
 
@@ -72,12 +67,10 @@ class Monitor:
                         self.recent_performances[rec_src_type][rec_src_name] = {}
                     self.recent_performances[rec_src_type][rec_src_name][rec_type] = rec_data
 
-                except pickle.UnpicklingError as e:
+                except pickle.UnpicklingError:
                     pass
-                except Exception as e:
-                    self.log(f"Error while loading performance data: {e}", 3)
-                    pass
-
+                except Exception:
+                    self.log(f"Error while loading performance data: {traceback.format_exc()}", 3)
 
         thread = threading.Thread(target=_record_listenner, args=(self,))
         thread.start()

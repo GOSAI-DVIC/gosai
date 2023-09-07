@@ -3,6 +3,7 @@
 import pickle
 import threading
 import time
+import traceback
 from multiprocessing import Process, Value
 from typing import Any
 
@@ -48,8 +49,8 @@ class BaseDriver(Process):
         """Runs when the thread is started"""
         try:
             self.pre_run()
-        except Exception as e:
-            self.log(f"Error when starting the driver: {e}", 4)
+        except Exception:
+            self.log(f"Error when starting the driver: {traceback.format_exc()}", 4)
             return
         # Starts the required drivers
         self.log("Driver running", 2)
@@ -70,8 +71,8 @@ class BaseDriver(Process):
                 else:
                     time.sleep(0.5)
 
-            except Exception as e:
-                self.log(f"Error when running the driver: {e}", 4)
+            except Exception:
+                self.log(f"Error when running the driver: {traceback.format_exc()}", 4)
                 return
 
     def loop(self):
@@ -241,10 +242,10 @@ class BaseDriver(Process):
                     threading.Thread(
                         target=_execute_callback, args=(callback, data)
                     ).start()
-                except pickle.UnpicklingError as e:
+                except pickle.UnpicklingError:
                     continue
-                except Exception as e:
-                    self.log(f"Error while loading callback data: {e}", 3)
+                except Exception:
+                    self.log(f"Error while loading callback data: {traceback.format_exc()}", 3)
 
         sub = threading.Thread(
             target=_subscriber,
@@ -305,10 +306,10 @@ class BaseDriver(Process):
                         threading.Thread(
                             target=_execute_callback, args=(callback, data)
                         ).start()
-                except pickle.UnpicklingError as e:
+                except pickle.UnpicklingError:
                     continue
-                except Exception as e:
-                    self.log(f"Error while loading callback data: {e}", 3)
+                except Exception:
+                    self.log(f"Error while loading callback data: {traceback.format_exc()}", 3)
 
         sub = threading.Thread(
             target=_subscriber,
