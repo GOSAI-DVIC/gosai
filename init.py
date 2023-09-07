@@ -13,12 +13,13 @@ os.environ["LOG_LEVEL"] = "2"
 server = Server()
 server.start()
 
+logger = Logger(server)
+logger.log_listenner()
+
 hal = HardwareAbstractionLayer(server)
 
 hal.start_driver("web_audio_stream")
 hal.start_driver("voice_commands")
-logger = Logger(server)
-logger.log_listenner()
 
 monitor = Monitor(server)
 monitor.record_listenner()

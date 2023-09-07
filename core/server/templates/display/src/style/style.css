@@ -1,9 +1,11 @@
 html, body {
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 canvas {
   display: block;
+  max-width: 100%;
+  max-height: 100%;
 }
 button {
   /* -webkit-user-select: none;

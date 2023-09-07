@@ -8,3 +8,4 @@ lib64/
 lib/
 .venv10/
 *.pyc
+*.log
