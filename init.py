@@ -18,9 +18,6 @@ logger.log_listenner()
 
 hal = HardwareAbstractionLayer(server)
 
-hal.start_driver("web_audio_stream")
-hal.start_driver("voice_commands")
-
 monitor = Monitor(server)
 monitor.record_listenner()
 
