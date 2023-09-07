@@ -4,6 +4,7 @@ import pickle
 import random
 import threading
 import time
+import traceback
 from queue import Queue
 
 from dotenv import load_dotenv
@@ -122,10 +123,10 @@ class Server:
                 name, data = self.queue.get()
                 try:
                     self.sio.emit(name, data)
-                except:
-                    print("Error while sending data, passing error")
+                except Exception:
+                    self.log(f"Error while sending data: {traceback.format_exc()}", 3)
                     pass
-                    
+
 
     def log(self, content, level=1):
         """Logs via the redis database"""
@@ -191,12 +192,12 @@ def create_socket_api(server: Server):
     #receive audio from client and put it in the redis database
     @server.sio.on("web_audio")
     def audio(data):
-        
+
         audio_data = {
             "name": "audio_bytes",
             "channel": 1,
             "data": []
-            
+
         }
 
         audio_data["data"] = data
@@ -205,8 +206,8 @@ def create_socket_api(server: Server):
         action = "audio_conversion"
 
         server.db.publish(f"{driver}_exec_{action}", pickle.dumps(audio_data))
-  
-    
+
+
         #print(data)
 
     # @server.sio.on(f"{server.service}-{server.name}-audio", {"audio": server.audio})

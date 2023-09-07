@@ -3,6 +3,7 @@
 import os
 import pickle
 import threading
+import traceback
 from typing import Any, Dict, List
 
 import redis
@@ -105,8 +106,8 @@ class HardwareAbstractionLayer:
                 fromlist=[None],
             ).Driver(driver_name, self)
             self.drivers[driver_name] = driver
-        except Exception as e:
-            self.log(f"Cannot init {driver_name}: {e}", 4)
+        except Exception:
+            self.log(f"Cannot init {driver_name}: {traceback.format_exc()}", 4)
             return False
 
         return True
