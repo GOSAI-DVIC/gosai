@@ -26,44 +26,40 @@ class Driver(BaseDriver):
 
         self.create_event("color")
         self.create_event("depth")
-        self.create_event("source")
 
     def pre_run(self):
-        # self.source = IntelCamera(640, 480)
-        if path.exists("home/config.json"):
-            with open("home/config.json", "r") as f:
-                config = json.load(f)
-                if (
-                    "type" in config["camera"]
-                    and "width" in config["camera"]
-                    and "height" in config["camera"]
-                ):
-                    if config["camera"]["type"] == "standard":
-                        self.source = StandardCamera(
-                            config["camera"]["width"], config["camera"]["height"], config["camera"]["number"]
-                        ) if "number" in config["camera"] else StandardCamera(
-                            config["camera"]["width"], config["camera"]["height"]
-                        )
-                    elif config["camera"]["type"] == "intel":
+        super().pre_run()
 
-                        self.source = IntelCamera(
-                            config["camera"]["width"], config["camera"]["height"], config["camera"]["number"]
-                        ) if "number" in config["camera"] else IntelCamera(
-                            config["camera"]["width"], config["camera"]["height"]
-                        )
-                else:
-                    self.source = StandardCamera(1920, 1080, 0)
+        config = self.parent.config
+        if (
+            "type" in config["camera"]
+            and "width" in config["camera"]
+            and "height" in config["camera"]
+        ):
+            if config["camera"]["type"] == "standard":
+                self.source = StandardCamera(
+                    config["camera"]["width"], config["camera"]["height"], config["camera"]["number"]
+                ) if "number" in config["camera"] else StandardCamera(
+                    config["camera"]["width"], config["camera"]["height"]
+                )
+            elif config["camera"]["type"] == "intel":
+
+                self.source = IntelCamera(
+                    config["camera"]["width"], config["camera"]["height"]
+                ) if "number" in config["camera"] else IntelCamera(
+                    config["camera"]["width"], config["camera"]["height"]
+                )
         else:
             self.source = StandardCamera(1920, 1080, 0)
 
     def loop(self):
         # print(self.source)
-        color, depth = self.source.next_frame()
+        self.color, self.depth = self.source.next_frame()
 
-        if color is not None:
-            self.set_event_data("color", color)
-        if depth is not None:
-            self.set_event_data("depth", depth)
+        if self.color is not None:
+            self.set_event_data("color", self.color)
+        if self.depth is not None:
+            self.set_event_data("depth", self.depth)
 
         # time.sleep(1 / self.fps)  # Runs faster to be sure to get the current frame
 
