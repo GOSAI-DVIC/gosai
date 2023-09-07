@@ -125,7 +125,6 @@ class Server:
                     self.sio.emit(name, data)
                 except Exception:
                     self.log(f"Error while sending data: {traceback.format_exc()}", 3)
-                    pass
 
 
     def log(self, content, level=1):
