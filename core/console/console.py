@@ -198,9 +198,9 @@ def eval_command(console: Console, command: str) -> None:
             helper(console, "drivers")
             return
 
-        # elif execute == "exit":
-        #     console.log("Exiting...")
-        #     exit()
+        elif execute == "exit":
+            console.log("Exiting...")
+            os.system('/bin/bash -c "make stop &> /dev/null"')
 
         elif execute == "help":
             if len(arguments) == 0:
@@ -248,6 +248,10 @@ def eval_command(console: Console, command: str) -> None:
 
             helper(console, "password")
             return
+
+        # elif execute == "reboot":
+        #     console.log("Rebooting...")
+        #     os.system('/bin/bash -c "make stop &> /dev/null" && make boot')
 
         console.log("Unknown command: " + command, 3)
     except Exception as e:
