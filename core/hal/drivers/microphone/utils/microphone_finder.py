@@ -15,15 +15,16 @@ def find_microphone_device() -> int:
     return sd.default.device[0]
 
 
-def get_microphone_configuration(config: dict)->tuple[int, int, int]:
+def get_microphone_configuration(config: dict)->tuple[int, int, int, int]:
     """
     Get the configuration of the microphone from the config.json file.
-    return: a tuple with the device index, the samplerate and the channels
+    return: a tuple with the device index, the samplerate, the channels and the blocksize
     """
     if 'microphone' not in config.keys():
-        return find_microphone_device(), sd.query_devices(kind='input')['default_samplerate'], 1
+        return find_microphone_device(), sd.query_devices(kind='input')['default_samplerate'], 1, 1024
     else:
         device_index = config['microphone']['number'] if 'number' in config['microphone'].keys() else find_microphone_device()
         samplerate = config['microphone']['samplerate'] if 'samplerate' in config['microphone'].keys() else sd.query_devices(device_index, kind='input')['default_samplerate']
         channels = config['microphone']["channels"] if "channels" in config['microphone'].keys() else 1
-    return device_index, samplerate, channels
+        blocksize = config['microphone']["blocksize"] if "blocksize" in config['microphone'].keys() else 1024
+    return device_index, samplerate, channels, blocksize

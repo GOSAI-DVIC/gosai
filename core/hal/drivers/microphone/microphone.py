@@ -5,7 +5,7 @@ import sounddevice as sd
 import queue
 import numpy as np
 from os import path
-
+from core.hal.drivers.microphone.utils.microphone_finder import get_microphone_configuration
 
 import sounddevice as sd
 import numpy  # Make sure NumPy is loaded before it is used in the callback
@@ -20,11 +20,7 @@ class Driver(BaseDriver):
 
     def pre_run(self):
         # runs to do at the start of the driver
-        BLOCKSIZE = 1024  # TODO:read these parameters from config.json
-        sd.default.device = 11
-        device_info = sd.query_devices(kind='input')
-        SAMPLERATE = device_info['default_samplerate']
-        CHANNELS = 1
+        DEVICE, SAMPLERATE, CHANNELS, BLOCKSIZE = get_microphone_configuration(self.parent.config)
         def callback(indata, frames, time, status) -> None:
             self.set_event_data(
                 "audio_stream",
@@ -38,6 +34,7 @@ class Driver(BaseDriver):
             blocksize=BLOCKSIZE,
             callback=callback,
             channels=CHANNELS,
+            device=DEVICE,
         )
 
         stream.start()
