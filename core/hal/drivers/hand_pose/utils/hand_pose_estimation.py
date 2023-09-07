@@ -17,7 +17,7 @@ def init():
     if path.exists("home/config.json"):
             with open("home/config.json", "r") as f:
                 config = json.load(f)
-                if ("flip" in config["camera"]): 
+                if ("flip" in config["camera"]):
                     if config["camera"]["flip"] == True:
                         flip = True
                 if ("calibrate" in config):

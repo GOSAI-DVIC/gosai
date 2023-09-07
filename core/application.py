@@ -28,11 +28,12 @@ class BaseApplication(threading.Thread):
         ps.subscribe(f"{source}_{event}")
         for binary_data in ps.listen():
             try:
-                self.listener(source, event, pickle.loads(bytes(binary_data['data'])))
+                self.listener(source, event, pickle.loads(bytes(binary_data['data']))["data"])
             except pickle.UnpicklingError as e:
                 continue
             except Exception:
                 self.log(f"Error in listener: {traceback.format_exc()}", 4)
+                self.manager.stop(self.name)
             if not self.started:
                 break
 

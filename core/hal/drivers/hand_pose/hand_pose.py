@@ -13,6 +13,8 @@ class Driver(BaseDriver):
     def __init__(self, name: str, parent, max_fps: int = 60):
         super().__init__(name, parent)
 
+        self.type = "no_loop"
+
         self.register_to_driver("camera", "color")
 
         self.create_event("raw_data")
@@ -27,12 +29,14 @@ class Driver(BaseDriver):
         super().pre_run()
 
         self.hands = hpe.init()
+        self.create_callback_on_event("evaluate_pose", self.eval_on_frame, "camera", "color")
 
-    def loop(self):
-        """Main loop"""
+
+    def eval_on_frame(self, data, marker=None):
+        """Runs hand pose estimation on frame"""
         start_t = time.time()
 
-        color = self.parent.get_driver_event_data("camera", "color")
+        color = data
 
         if color is not None:
             raw_data = hpe.find_all_hands(self.hands, color, self.window)
