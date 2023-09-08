@@ -59,7 +59,12 @@ class BaseApplication(threading.Thread):
 
     def get_driver_event_data(self, driver, event):
         """Gets the data of a driver's event"""
-        return pickle.loads(self.db.get(f"{driver}_{event}"))["data"]
+        data = self.db.get(f"{driver}_{event}")
+        if data == b'':
+            return None
+        else:
+            unpickled_data = pickle.loads(data)
+            return unpickled_data["data"]
 
     def execute(self, driver, action, data):
         """
