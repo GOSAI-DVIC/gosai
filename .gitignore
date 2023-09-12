@@ -1,11 +1,10 @@
 .vscode/
 __pycache__/
-.venv/
+.venv*
 home/
 home
 venv/
 lib64/
 lib/
-.venv10/
 *.pyc
 *.log
