@@ -1,5 +1,6 @@
 import os
 import pickle
+import signal
 import sys
 import threading
 import time
@@ -19,6 +20,13 @@ class Console(threading.Thread):
         self.server = server
         self.app_manager = app_manager
         self.db = redis.Redis(host="localhost", port=6379, db=0)
+
+        def _signal_handler(sig, frame):
+            """Handler for the SIGINT signal."""
+            self.log("Exiting...")
+            os.system('/bin/bash -c "make stop &> /dev/null"')
+
+        signal.signal(signal.SIGINT, _signal_handler)
 
         @self.server.sio.on(f"{self.service}-{self.name}-execute_command")
         def _(data) -> None:
@@ -265,7 +273,7 @@ def helper(console: Console, exec_name: str = "") -> None:
         result = "\nAvailable commands:\n"
         result += "\tapplications - show / manipulate applications\n"
         result += "\tdrivers      - show / manipulate drivers\n"
-        # result += "\texit         - exit the program\n"
+        result += "\texit         - exit the program\n"
         result += "\thelp         - show this helper / the helper of a command\n"
         result += "\tlog          - show / manipulate the log level\n"
         result += "\tpassword     - show / generate a new password\n"
