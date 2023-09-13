@@ -24,13 +24,13 @@ class Driver(BaseDriver):
         self.debug_time = False
         self.debug_data = False
         self.fps = max_fps
+        self.window = 1.0
         if path.exists("home/config.json"):
             with open("home/config.json", "r") as f:
                 config = json.load(f)
-                if ("window" in config["screen"]): 
-                    self.window = config["screen"]["window"]
-                else :
-                    self.window = 0.7
+                if "screen" in config:
+                    if ("window" in config["screen"]):
+                        self.window = config["screen"]["window"]
 
     def pre_run(self):
         super().pre_run()
