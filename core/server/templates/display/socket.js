@@ -24,7 +24,12 @@ socket.on("core-app_manager-start_application", async (data) => {
         if (!modules[application_name].activated) {
             try {
                 modules[application_name].activated = true;
-                modules[application_name].selfCanvas.show();
+                if(modules[application_name].selfCanvas) {
+                    modules[application_name].selfCanvas.show();
+                }
+                if(modules[application_name].canvasElement) {
+                    modules[application_name].canvasElement.style.display = "block";
+                }
                 modules[application_name].resume();
             } catch (e) {
                 catch_error(e, application_name, "Resume error", true);
@@ -52,7 +57,12 @@ socket.on("core-app_manager-stop_application", async (data) => {
         console.log("Stopping:" + application_name);
         if(Object.keys(modules).includes(application_name)) {
             modules[application_name].activated = false;
-            modules[application_name].selfCanvas.hide();
+            if(modules[application_name].selfCanvas) {
+                modules[application_name].selfCanvas.hide();
+            }
+            if(modules[application_name].canvasElement) {
+                modules[application_name].canvasElement.style.display = "none";
+            }
             modules[application_name].pause();
         }
     } catch (e) {

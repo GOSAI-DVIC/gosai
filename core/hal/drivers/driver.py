@@ -26,6 +26,7 @@ class BaseDriver(Process):
         self.requires = {}
         self.db = redis.Redis(host="localhost", port=6379, db=0)
         self.callbacks = {}
+        self.callback_event_execution_limit = 3
 
     def execute(self, command, arguments):
         """Executes a command with the given arguments"""
