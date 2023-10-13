@@ -8,3 +8,4 @@ lib64/
 lib/
 *.pyc
 *.log
+core/hal/drivers/speech_to_text/fast_whisper/models/*
