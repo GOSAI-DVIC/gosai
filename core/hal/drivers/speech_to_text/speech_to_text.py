@@ -4,16 +4,33 @@ from scipy.signal import resample
 from core.hal.drivers.speech_to_text.fast_whisper.fast_whisper import WhisperModel
 import time
 
+from scipy.io.wavfile import write
+
+
+
+
+import gc
+import io
+import itertools
+
+from typing import BinaryIO, Union
+
+import av
+
+
+
+#core.hal.drivers.speech_to_text.fast_whisper.
 class Driver(BaseDriver):
 
     def __init__(self, name: str, parent):
         super().__init__(name, parent)
 
         #create driver event
-        self.register_to_driver("microphone", "audio_stream")
-        self.register_to_driver("speech_activity_detection", "activity")
+        # self.register_to_driver("microphone", "audio_stream")
+        # self.register_to_driver("speech_activity_detection", "activity")
 
-        self.create_event("transcription")
+        self.create_event('transcription')
+        
 
     def pre_run(self):
         """Runs once at the start of the driver"""
@@ -23,72 +40,34 @@ class Driver(BaseDriver):
 
         self.model = WhisperModel("medium.en", device="cuda", compute_type="int8")
 
-        
-        #self.create_callback_on_event("transcription", self.transcript, "microphone", "audio_stream")
-
-    def recording(self, data):
-        block = data["block"][:, 0]        
-  
-        self.blocks.extend(block)
-        print('extending')
+        self.create_callback("transcribe", self.transcribe)
 
 
     def transcribe(self, data):
         start = time.time()
 
-        audio = data["block"][:, 0]
+        audio = data["full_audio"]
+
+        save_audio(audio)
+
+        print(len(audio))
+        print(f'duration audio is {len(audio)/16000}s')
+
+        self.log("transcription",3)
         segments = self.model.transcribe(audio, beam_size = 5)
         
         for segment in segments:
             print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
 
-        
+  
         print('durée : ', time.time() - start)
-        self.blocks = []
+   
+
+def save_audio(audio):
+    audio_int16 = np.int16(audio/np.max(np.abs(audio)) * 32767)
+    write('test.wav', 16000, audio_int16)
 
 
-    # def transcript(self, data):
+# if __name__ == '__main__' :
 
-
-
-    #     """Estimates the frequency of the input data"""
-
-    #     block = data["block"][:, 0]
-        
-    #     # change the time needed depending on the Activity detection Module 
-    #     if len(self.blocks) < 50*10*len(block):
-            
-    #         self.blocks.extend(block)
-    #         print('extending')
-    #     else:
-    #         self.blocks = self.blocks[:50*10*len(block)]
-            
-    #         #self.blocks.extend(block)
-    #         samplerate = data["samplerate"]
-    #         # convert the sample rate 
-            
-        
-
-
-    #         start = time.time()
-    #         segments = self.model.transcribe(self.blocks, beam_size = 5)
-            
-    #         for segment in segments:
-    #             print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
-
-            
-    #         print('durée : ', time.time() - start)
-    #         self.blocks = []
-
-
-        
-
-        
-
-
-        # self.set_event_data("frequency", {
-        #     "max_frequency": freq[np.argmax(rfft)],
-        #     "rfft": list(rfft[freq<self.MAX_FREQUENCY]),
-        #     "amplitude": np.max(rfft),
-        #     "blocksize": len(block),
-        # })
+#     model = WhisperModel("medium.en", device="cuda", compute_type="int8")

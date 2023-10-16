@@ -1,10 +1,11 @@
 from core.hal.drivers.driver import BaseDriver
 import numpy as np
 from scipy.signal import resample
-from core.hal.drivers.speech_to_text.fast_whisper.fast_whisper import WhisperModel
-import time
 import samplerate
 import torch
+import numpy as np 
+import sys
+import os 
 # import webrtcvad
 
 class Driver(BaseDriver):
@@ -13,7 +14,7 @@ class Driver(BaseDriver):
         super().__init__(name, parent)
 
         #create driver event
-        self.register_to_driver("microphone", "audio_stream")
+        #self.register_to_driver("microphone", "audio_stream")
         
         self.create_event("activity")
 
@@ -35,29 +36,32 @@ class Driver(BaseDriver):
 
 
         
-        #self.create_callback_on_event("activity", self.activity, "microphone", "audio_stream")
+        self.create_callback("predict", self.predict)
 
 
-
-    def predict(self, audio_chunk : np.array):
+    def str_to_float(self, liste : list):
+        return [np.float(x) for x in liste]
+    
+    def predict(self, data):# : np.array):
         ## just probabilities
+        audio = torch.Tensor(data["onesec_audio"])
+        #audio = self.str_to_float(audio)
 
-        speech_prob = self.model(audio_chunk, self.sr).item()
+        # with HiddenPrints():
+        speech_prob = self.model(audio, self.sr).item()
+      
 
+ 
+        self.log("activity",3)
+        self.set_event_data(
+            "activity",
+            {
+                "confidence": speech_prob,
+            },
+        )
         return speech_prob
 
-# wav = read_audio('en_example.wav', sampling_rate=SAMPLING_RATE)
-# speech_probs = []
-# window_size_samples = 1536
-# for i in range(0, len(wav), window_size_samples):
-#     chunk = wav[i: i+ window_size_samples]
-#     if len(chunk) < window_size_samples:
-#       break
-#     speech_prob = model(chunk, SAMPLING_RATE).item()
-#     speech_probs.append(speech_prob)
-# vad_iterator.reset_states() # reset model states after each audio
 
-# print(speech_probs[:10]) # first 10 chunks predicts
     def activity(self, data):
         """Estimates the frequency of the input data"""
 
@@ -112,3 +116,15 @@ class Driver(BaseDriver):
         #     "amplitude": np.max(rfft),
         #     "blocksize": len(block),
         # })
+
+
+
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
