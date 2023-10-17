@@ -117,8 +117,9 @@ class WhisperModel:
         model_path = os.getcwd() + '/core/hal/drivers/speech_to_text/fast_whisper/models/' 
      
         if os.path.isdir(model_path + model_size_or_path):
-            print("Loading the model ...")
             model_path = model_path + model_size_or_path
+            print("Loading the model from "+model_path)
+            
 
             
         else:
@@ -272,7 +273,7 @@ class WhisperModel:
         """
         sampling_rate = self.feature_extractor.sampling_rate
 
-        audio = decode_audio(audio, sampling_rate=sampling_rate)
+        #audio = decode_audio(audio, sampling_rate=sampling_rate)
         if not isinstance(audio, np.ndarray):
             #Display error message
 

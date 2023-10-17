@@ -52,7 +52,7 @@ class Driver(BaseDriver):
       
 
  
-        self.log("activity",3)
+        #self.log("activity",3)
         self.set_event_data(
             "activity",
             {
