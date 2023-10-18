@@ -27,31 +27,44 @@ class Driver(BaseDriver):
         self.treshold = 0.5
         
         self.model = Model.from_pretrained('damo/speech_campplus_sv_en_voxceleb_16k', device='cpu')
-        self.create_callback("get_embedding", self.get_embedding)
         self.create_callback("speaker_verification", self.speaker_verification)
 
     def cosine_similarity(self, A, B):
-        
         sim = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
         return sim(A,B)
                             
-    def get_embedding(self, data):
-        return self.model(data)
     
-    def speaker_verification(self, data):
+    def speaker_verification(self, data : dict):
+        """
+        data["audio_buffer"] : audio list
+            -> float32
+            -> 16000Hz
+
+        if you want to register a new user embedding : 
+            data["new_user"] : bool = True
+            data["char_name"] : str = "name"
+        else : 
+            data["new_user"] : bool = False
+        """
 
         results = {}
 
-        embed = self.get_embedding(np.array(data["full_audio"]))
-        if not data['new_user']:
+        embed = self.get_embedding(np.array(data["audio_buffer"]))
+
+        if data["new_user"]:
             
+            self.ref_embeddings[data["char_name"]] = embed
+            print('\n')
+            self.log("User added succesfully", 3)
+            print('\n')
+
+        else : 
             for spk, ref_emb in self.ref_embeddings.items() :
                 sim = self.cosine_similarity(embed, ref_emb)
                 if sim > self.treshold :
                     results[spk] = [True, sim]
                 else : 
                     results[spk] = [False, sim]
-        
             
             self.set_event_data(
                 "speaker_emb",
@@ -60,11 +73,6 @@ class Driver(BaseDriver):
                     "comparaison":results
                 },
             )
-        else :
-            
-            self.ref_embeddings[data["speaker_name"]] = embed
-            print('\n')
-            self.log("User added succesfully", 3)
-            print('\n')
 
-        return results 
+
+       #return results 
