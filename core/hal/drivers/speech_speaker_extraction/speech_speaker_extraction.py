@@ -49,7 +49,7 @@ class Driver(BaseDriver):
 
         results = {}
 
-        embed = self.get_embedding(np.array(data["audio_buffer"]))
+        embed = self.model(np.array(data["audio_buffer"]))
 
         if data["new_user"]:
             

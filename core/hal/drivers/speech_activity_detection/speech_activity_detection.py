@@ -18,6 +18,7 @@ class Driver(BaseDriver):
         """Runs once at the start of the driver"""
         super().pre_run()
 
+        self.debug = True
 
         self.sr = 16000
         self.model, self.utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
@@ -36,9 +37,12 @@ class Driver(BaseDriver):
         
         """
         ## Outputs activity probablitily
-        audio = torch.Tensor(data["activity_buffer"])
+
+        audio = torch.Tensor(data)
         speech_prob = self.model(audio, self.sr).item()
-      
+        if self.debug : 
+            self.log(f'speech activity detection : {speech_prob}',3)
+
         #Send it back to the application
         self.set_event_data(
             "activity",
