@@ -18,7 +18,7 @@ class Driver(BaseDriver):
         """Runs once at the start of the driver"""
         super().pre_run()
 
-        self.debug = True
+        self.debug = False
 
         self.sr = 16000
         self.model, self.utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
