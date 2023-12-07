@@ -121,7 +121,7 @@ class WhisperModel:
         if download_root is not None :
       
             #'/home/hugo/Desktop/Project/gosai/core/hal/drivers/speech_to_text/models/models--Systran--faster-whisper-medium.en'
-            model_size_or_path = 'core/hal/drivers/speech_to_text/models/models--Systran--faster-whisper-medium.en/snapshots/a29b04bd15381511a9af671baec01072039215e3'
+            model_size_or_path = 'core/hal/drivers/speech_to_text/models'
         print(model_size_or_path)
         print(os.listdir())
         if os.path.isdir(model_size_or_path):
