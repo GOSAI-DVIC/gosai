@@ -5,14 +5,9 @@ from scipy.signal import resample
 import time
 from faster_whisper import WhisperModel
 
-import io 
-import av
 from typing import BinaryIO, List, NamedTuple, Optional, Tuple, Union, Iterable
-import itertools
-import gc
-
-from scipy.io.wavfile import write
-
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+import torch
 
 
 # or run on GPU with INT8
@@ -25,24 +20,41 @@ from scipy.io.wavfile import write
 #core.hal.drivers.speech_to_text.fast_whisper.
 class Driver(BaseDriver):
 
-    def __init__(self, name: str, parent):
+    def __init__(self, name: str, parent, model : bool = 'faster_whisper'):
         super().__init__(name, parent)
         self.create_event('transcription')
-        
+        self.model_str = model 
 
     def pre_run(self):
         """Runs once at the start of the driver"""
         super().pre_run()
 
         self.debug = True
-        fast_whisper = True
-        if fast_whisper :
-            model_size = "medium.en"
+        self.fast_whisper_bool = False
+
+        if self.model_str == 'faster_whisper' :
+            #model_size = "core/hal/drivers/speech_to_text/models/medium.en"
 
             # Run on GPU with FP16
-            self.model = WhisperModel(model_size, device="cuda", compute_type="int8")
+            self.pipe = WhisperModel(model_size_or_path = 'medium.en',download_root='core/hal/drivers/speech_to_text/models' , device="cuda", compute_type="int8")
         else : 
-            pass
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.log(self.device, 3)
+            torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+            model_id = "distil-whisper/distil-medium.en"
+            model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+            )
+            processor = AutoProcessor.from_pretrained(model_id)
+            self.pipe = pipeline(
+                "automatic-speech-recognition",
+                model=model,
+                tokenizer=processor.tokenizer,
+                feature_extractor=processor.feature_extractor,
+                max_new_tokens=128,
+                torch_dtype=torch_dtype,
+                device=self.device,
+            )
         #self.model = WhisperModel("medium.en", device="cuda", compute_type="int8")
         self.create_callback("transcribe", self.transcribe)
 
@@ -56,13 +68,21 @@ class Driver(BaseDriver):
         start = time.time()
         audio = data["audio_buffer"]
 
-        if self.debug :
+      
             #Save last audio buffer to file for debugging 
-            save_audio(audio)
+           
        # self.log("transcription",3)
 
+        if self.model_str=='faster_whisper' :
+            segments, info = self.pipe.transcribe(np.array(audio), beam_size = 5)
+            txt = ''
+            for segment in segments : 
+                txt = txt + segment.text 
 
-        segments = self.model.transcribe(np.array(audio), beam_size = 5)
+
+        else :
+            with torch.cuda.device(self.device):
+                txt = self.pipe(np.array(audio))['text']
 
         #self.log("self.model.transcribe",3)     
         # for segment in segments:
@@ -71,7 +91,7 @@ class Driver(BaseDriver):
         self.set_event_data(
             "transcription",
             {
-                "transcription_segments": [segment for segment in segments],
+                "transcription_segments": txt,
                 "audio_duration": len(audio)/16000,
                 "transcription_duration": time.time() - start,
             },

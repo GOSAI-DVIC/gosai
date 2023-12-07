@@ -67,3 +67,4 @@ modelscope
 torch
 fuzzywuzzy
 torchaudio
+pandas
