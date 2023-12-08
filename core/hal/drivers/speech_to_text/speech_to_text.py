@@ -1,23 +1,14 @@
 from core.hal.drivers.driver import BaseDriver
 import numpy as np
 from scipy.signal import resample
-#from core.hal.drivers.speech_to_text.fast_whisper.fast_whisper import WhisperModel
+import os 
 import time
 from faster_whisper import WhisperModel
 
-from typing import BinaryIO, List, NamedTuple, Optional, Tuple, Union, Iterable
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import torch
 
 
-# or run on GPU with INT8
-# model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
-# or run on CPU with INT8
-# model = WhisperModel(model_size, device="cpu", compute_type="int8")
-
-
-
-#core.hal.drivers.speech_to_text.fast_whisper.
 class Driver(BaseDriver):
 
     def __init__(self, name: str, parent, model : bool = 'faster_whisper'):
@@ -31,13 +22,16 @@ class Driver(BaseDriver):
 
         self.debug = True
         self.fast_whisper_bool = False
+        self.path_dir = 'core/hal/drivers/speech_to_text/models'
+        self.model_size = 'medium.en'
 
         if self.model_str == 'faster_whisper' :
-            #model_size = "core/hal/drivers/speech_to_text/models/medium.en"
-
-            # Run on GPU with FP16
-            self.pipe = WhisperModel(model_size_or_path = 'medium.en',download_root='core/hal/drivers/speech_to_text/models' , device="cuda", compute_type="int8")
+           
+            self.pipe = WhisperModel(model_size_or_path = '/home/hugo/Desktop/Project/gosai/core/hal/drivers/speech_to_text/models/models--Systran--faster-whisper-medium.en/snapshots/a29b04bd15381511a9af671baec01072039215e3', device="cuda", compute_type="int8")
+            
         else : 
+
+
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
             self.log(self.device, 3)
             torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
