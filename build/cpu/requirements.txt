@@ -64,7 +64,5 @@ transformers
 samplerate
 ctranslate2
 modelscope
-torch
 fuzzywuzzy
-torchaudio
 pandas

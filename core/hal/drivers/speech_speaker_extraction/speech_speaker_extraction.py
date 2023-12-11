@@ -8,8 +8,7 @@ from modelscope.models import Model
 import torch
 
 
-# if __name__ == '__main__':
-#     model = Model.from_pretrained('damo/speech_campplus_sv_en_voxceleb_16k', device='cuda')
+
 class Driver(BaseDriver):
 
     def __init__(self, name: str, parent):
@@ -75,4 +74,3 @@ class Driver(BaseDriver):
             )
 
 
-       #return results 
