@@ -55,6 +55,7 @@ class Driver(BaseDriver):
         )
         """
         outputs is a dict with all emotions associated with their scores
+        avalaible emotions for the actual model : [Angry, Sad, Fearful, Happy, Disgusted, Neutral]
         """
 
 
