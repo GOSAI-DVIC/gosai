@@ -1,9 +1,6 @@
 # Video driver
-import json
-import os
-import sys
-import time
-from os import path
+
+import cv2
 
 from core.hal.drivers.camera.configs import IntelCamera, StandardCamera
 from core.hal.drivers.driver import BaseDriver
@@ -31,6 +28,8 @@ class Driver(BaseDriver):
         super().pre_run()
 
         config = self.parent.config
+        camera_config = config.get("camera", {})
+        self.rotation = camera_config.get("rotation", 0)
         if (
             "type" in config["camera"]
             and "width" in config["camera"]
@@ -56,9 +55,15 @@ class Driver(BaseDriver):
         # print(self.source)
         self.color, self.depth = self.source.next_frame()
 
+
         if self.color is not None:
+            if self.rotation == 180:
+                self.color = cv2.rotate(self.color, cv2.ROTATE_180)
             self.set_event_data("color", self.color)
+
         if self.depth is not None:
+            if self.rotation == 180:
+                self.depth = cv2.rotate(self.depth, cv2.ROTATE_180)
             self.set_event_data("depth", self.depth)
 
         # time.sleep(1 / self.fps)  # Runs faster to be sure to get the current frame
