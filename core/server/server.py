@@ -231,8 +231,16 @@ def create_flask_api(server: Server):
     def platform_path(path):
         return send_from_directory("templates/display", path)
 
+    @server.app.route("/gosai/libs/<path:path>")
+    def libs_path(path):
+        return send_from_directory("templates/display/src/libs", path)
+
     @server.app.route(f"/{server.base_path}/platform/home/<path:path>")
     def platform_home_path(path):
+        return send_from_directory("../../home", path)
+
+    @server.app.route("/gosai/home/<path:path>")
+    def platform_short_home_path(path):
         return send_from_directory("../../home", path)
 
     @server.app.route(f"/{server.base_path}/core/<path:path>")
