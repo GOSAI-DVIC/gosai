@@ -18,6 +18,13 @@ def get_aruco_data(image: np.ndarray) -> dict:
     list, optional
         A list of coordinates representing the detected Aruco markers.
     """
+
+    if image is None:
+        return {
+            "ids": [],
+            "coords": []
+        }
+
     dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_250)
     parameters =  aruco.DetectorParameters()
     detector = aruco.ArucoDetector(dictionary, parameters)
@@ -78,6 +85,8 @@ def get_display_camera_projection_matrix(image: np.ndarray, aruco_display_coords
     aruco_coords_to_process = [coords[0] for i, coords in enumerate(aruco_coords)]
     aruco_display_coords = [aruco_display_coords[id] for id in aruco_ids]
     aruco_display_coords = [coords[0] for i, coords in enumerate(aruco_display_coords)]
+    # aruco_coords_to_process = [[sum([coord[0]/4.0 for coord in coords[:4]]), sum([coord[1]/4.0 for coord in coords[:4]])] for i, coords in enumerate(aruco_coords)]
+    # aruco_display_coords = [[sum([coord[0]/4.0 for coord in coords[:4]]), sum([coord[1]/4.0 for coord in coords[:4]])] for i, coords in enumerate(aruco_display_coords)]
 
     if len(aruco_coords_to_process) != 4:
         return {
@@ -87,8 +96,10 @@ def get_display_camera_projection_matrix(image: np.ndarray, aruco_display_coords
             "camera_to_display_matrix": []
         }
 
-    display_to_camera_matrix = cv2.getPerspectiveTransform(np.float32(aruco_display_coords), np.float32(aruco_coords_to_process))
-    camera_to_display_matrix = cv2.getPerspectiveTransform(np.float32(aruco_coords_to_process), np.float32(aruco_display_coords))
+    display_to_camera_matrix = cv2.findHomography(np.float32(aruco_display_coords), np.float32(aruco_coords_to_process))[0]
+    camera_to_display_matrix = cv2.findHomography(np.float32(aruco_coords_to_process), np.float32(aruco_display_coords))[0]
+
+    # print(display_to_camera_matrix)
 
     return {
         "ids": aruco_ids,

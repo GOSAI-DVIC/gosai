@@ -14,8 +14,11 @@ class Driver(BaseDriver):
     ):
         super().__init__(name, parent)
 
+        self.type = "no_loop"
+
         self.register_to_driver("camera", "color")
         self.create_event("calibration_data")
+        self.create_event("successful_calibration_data")
 
     def pre_run(self):
         super().pre_run()
@@ -35,9 +38,6 @@ class Driver(BaseDriver):
         if original_data is None:
             original_data = {}
 
-        if color is None:
-            return
-
         data = get_display_camera_projection_matrix(color, aruco_display_coords=data)
 
         if "display_to_focus_matrix" in original_data and len(original_data["display_to_focus_matrix"]) > 0 and len(data["camera_to_display_matrix"]) > 0:
@@ -47,6 +47,8 @@ class Driver(BaseDriver):
         original_data.update(data)
 
         self.set_event_data("calibration_data", original_data)
+        if len(original_data["camera_to_display_matrix"]) > 0:
+            self.set_event_data("successful_calibration_data", original_data)
 
     def calibrate_display_focus(self, data):
         """Get the matrix to transform a display point to a focus area point and vice versa"""
@@ -67,3 +69,6 @@ class Driver(BaseDriver):
         original_data.update(data)
 
         self.set_event_data("calibration_data", original_data)
+
+        if original_data["coords"] is not None and len(original_data["coords"]) >= 4:
+            self.set_event_data("successful_calibration_data", original_data)
