@@ -26,7 +26,6 @@ class BaseDriver(Process):
         self.requires = {}
         self.db = redis.Redis(host="localhost", port=6379, db=0)
         self.callbacks = {}
-        self.callback_event_execution_limit = 3
 
     def execute(self, command, arguments):
         """Executes a command with the given arguments"""
@@ -273,7 +272,7 @@ class BaseDriver(Process):
         return True
 
     def create_callback_on_event(
-        self, action: str, callback: callable, source: str, event: str
+        self, action: str, callback: callable, source: str, event: str, execution_limit: int = 2
     ) -> bool:
         """
         Creates a callback for an action that will be called when an event is triggered.
@@ -282,6 +281,8 @@ class BaseDriver(Process):
             is triggered.
         - 'source' is the name of the driver that will trigger the event.
         - 'event' is the name of the event that will trigger the action.
+        - 'execution_limit' is the maximum number of callback executions that can be
+            executed at the same time.
         """
         self.log(f"Creating callback for action '{action}' on event '{event}'", 2)
         if action in self.callbacks:
@@ -296,6 +297,7 @@ class BaseDriver(Process):
         ) -> None:
             ps = self.db.pubsub()
             ps.subscribe(f"{source}_{event}")
+            callback_executions = 0
             for binary_data in ps.listen():
                 if action not in self.callbacks:
                     self.log(f"Callback for action '{action}' not needed anymore", 3)
@@ -308,6 +310,7 @@ class BaseDriver(Process):
                         # print(f"From: {source} {event} Delta time: {delta_time}")
 
                         def _execute_callback(callback: callable, data) -> None:
+                            nonlocal callback_executions
                             start_t = time.time()
                             exec_time = callback(data)
                             if not self.paused.value:
@@ -317,10 +320,13 @@ class BaseDriver(Process):
                                     else exec_time
                                 )
                                 self.record_performance(action, exec_time)
+                            callback_executions -= 1
 
-                        threading.Thread(
-                            target=_execute_callback, args=(callback, data)
-                        ).start()
+                        if callback_executions < execution_limit:
+                            callback_executions += 1
+                            threading.Thread(
+                                target=_execute_callback, args=(callback, data)
+                            ).start()
                 except pickle.UnpicklingError:
                     continue
                 except Exception:
