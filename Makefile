@@ -7,7 +7,7 @@ TAG = ${PLATFORM}-${DEVICE}-${VERSION}
 REDIS_REPO = redis
 REDIS_IMNAME = docker.io/bitnami/redis:7.0
 
-boot:
+boot: stop
 	-docker rm $(REPO)-$(REDIS_REPO)
 	docker run -d --network="host" -e ALLOW_EMPTY_PASSWORD=yes --name=$(REPO)-$(REDIS_REPO) $(REDIS_IMNAME)
 	sleep 0.5
