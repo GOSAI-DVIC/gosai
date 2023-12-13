@@ -41,6 +41,7 @@ def init():
 
 def find_gesture(model, data: List[List]) -> List:
     """Evaluate the data using the model"""
+    data = normalize_data(data, 1.0, 1.0)
     ort_inputs = {model.get_inputs()[0].name: np.array(data, dtype=np.float32)}
     out = model.run(None, ort_inputs)[-1]
     out = np.exp(out) / np.sum(np.exp(out))
