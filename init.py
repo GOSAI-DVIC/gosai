@@ -18,7 +18,9 @@ logger = Logger(server)
 logger.log_listenner()
 
 hal = HardwareAbstractionLayer(server)
-hal.start_driver("speech_speaker_extraction")
+# hal.start_driver("speech_speaker_extraction")
+hal.start_driver("speech_to_text")
+# hal.start_driver("speech_activity_detection")
 
 monitor = Monitor(server)
 monitor.record_listenner()
@@ -26,7 +28,7 @@ monitor.record_listenner()
 app_manager = AppManager(hal, server)
 app_manager.start_up()
 
-time.sleep(0.5)
+time.sleep(5)
 
 console = Console(hal, server, app_manager)
 start_chrome(server.path)
