@@ -28,7 +28,7 @@ class Driver(BaseDriver):
 
         if self.model_str == 'faster_whisper' :
            
-            self.pipe = WhisperModel(model_size_or_path = '/home/hugo/Desktop/Project/gosai/core/hal/drivers/speech_to_text/models/models--Systran--faster-whisper-medium.en/snapshots/a29b04bd15381511a9af671baec01072039215e3', device=self.device, compute_type="int8")
+            self.pipe = WhisperModel(model_size_or_path = '/home/arcadia/createch/gosai/core/hal/drivers/speech_to_text/models/models--Systran--faster-whisper-medium.en/snapshots/a29b04bd15381511a9af671baec01072039215e3', device=self.device, compute_type="int8")
             
         else : 
 
