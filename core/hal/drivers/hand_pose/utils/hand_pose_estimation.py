@@ -8,10 +8,12 @@ import numpy as np
 import time
 
 flip = False
+rotation = 0
 poolFocus_matrix = None
 
 def init():
     global flip
+    global rotation
     global poolFocus_matrix
     mp_hands = mp.solutions.hands
     if path.exists("home/config.json"):
@@ -20,6 +22,9 @@ def init():
                 if ("flip" in config["camera"]):
                     if config["camera"]["flip"] == True:
                         flip = True
+                if ("rotation" in config["camera"]):
+                    if config["camera"]["rotation"] %90 == 0:
+                        rotation = config["camera"]["rotation"]
                 if ("calibrate" in config):
                     if config["calibrate"] == True:
                         # Search for calibration file and load poolFocus_matrix :
@@ -52,6 +57,13 @@ def find_all_hands(hands, frame, window):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     if flip:
         image = cv2.flip(image, 1)
+    if rotation == 90:
+        image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+    elif rotation == 180:
+        image = cv2.rotate(image, cv2.ROTATE_180)
+    elif rotation == 270:
+        image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+
 
     # e1 = time.time()
     # print(f"    Convert image: {(e1 - start)*1000} ms")
