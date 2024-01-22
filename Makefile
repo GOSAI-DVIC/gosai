@@ -1,3 +1,5 @@
+SHELL := /bin/zsh
+
 .PHONY: build
 
 include home/.env
@@ -7,11 +9,15 @@ TAG = ${PLATFORM}-${DEVICE}-${VERSION}
 REDIS_REPO = redis
 REDIS_IMNAME = docker.io/bitnami/redis:7.0
 
-boot:
+boot:DeepfakeScript
 	-docker rm $(REPO)-$(REDIS_REPO)
 	docker run -d --network="host" -e ALLOW_EMPTY_PASSWORD=yes --name=$(REPO)-$(REDIS_REPO) $(REDIS_IMNAME)
 	sleep 0.5
-	python3 init.py
+	python3 init.py 
+
+DeepfakeScript:
+	# conda activate first-order
+	source ~/anaconda3/bin/activate first-order && python home/scripts/app.py &
 
 install:
 	pip3 install -r build/cpu/requirements.txt
