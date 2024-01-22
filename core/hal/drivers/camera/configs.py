@@ -15,6 +15,8 @@ class StandardCamera:
         assert self.cap is not None and self.cap.isOpened(), "CV2 error: Camera not found"
         self.cap.set(3, self.width)
         self.cap.set(4, self.height)
+        #  set fps
+        self.cap.set(cv.CAP_PROP_FPS, 30)
 
     def next_frame(self):
         """Collects color frames"""

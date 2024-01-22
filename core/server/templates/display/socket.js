@@ -20,6 +20,7 @@ socket_link = socket;
 socket.on("core-app_manager-start_application", async (data) => {
     const application_name = data["application_name"];
 
+    console.log(modules)
     if (Object.keys(modules).includes(application_name)) {
         if (!modules[application_name].activated) {
             try {
@@ -30,21 +31,22 @@ socket.on("core-app_manager-start_application", async (data) => {
                 if(modules[application_name].canvasElement) {
                     modules[application_name].canvasElement.style.display = "block";
                 }
+                console.log("Resuming:" + application_name);
                 modules[application_name].resume();
             } catch (e) {
                 catch_error(e, application_name, "Resume error", true);
             }
         }
     } else {
-        try {
-            const module = await import("./home/apps/" + application_name + "/display.js")
-            const application = module[application_name]
-            console.log("Starting:" + application_name);
-            application.set(window.innerWidth, window.innerHeight, socket);
-            modules[application_name] = application;
-        } catch (e) {
-            catch_error(e, application_name, "Start error", true);
-        }
+        // try {
+        const module = await import("./home/apps/" + application_name + "/display.js")
+        const application = module[application_name]
+        console.log("Starting:" + application_name, application);
+        application.set(window.innerWidth, window.innerHeight, socket);
+        modules[application_name] = application;
+        // } catch (e) {
+        //     catch_error(e, application_name, "Start error", true);
+        // }
     }
 
     socket.emit("application-" + application_name + "-started");
