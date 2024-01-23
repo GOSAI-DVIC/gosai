@@ -18,9 +18,10 @@ logger = Logger(server)
 logger.log_listenner()
 
 hal = HardwareAbstractionLayer(server)
-# hal.start_driver("speech_speaker_extraction")
+
+#model can't be loaded while multithreading
 hal.start_driver("speech_to_text")
-# hal.start_driver("speech_activity_detection")
+
 
 monitor = Monitor(server)
 monitor.record_listenner()
