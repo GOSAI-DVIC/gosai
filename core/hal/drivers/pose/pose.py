@@ -46,6 +46,7 @@ class Driver(BaseDriver):
             raw_data = pe.find_all_poses(self.holistic, color, self.window)
 
             flag_1 = time.time()
+        
             self.set_event_data("raw_data", raw_data)
 
             if self.debug_data:

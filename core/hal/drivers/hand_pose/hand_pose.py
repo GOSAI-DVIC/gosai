@@ -42,6 +42,8 @@ class Driver(BaseDriver):
             raw_data = hpe.find_all_hands(self.hands, color, self.window)
 
             flag_1 = time.time()
+
+            self.log(raw_data, 3)
             self.set_event_data("raw_data", raw_data)
 
             if self.debug_data:

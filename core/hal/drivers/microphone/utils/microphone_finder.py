@@ -1,5 +1,6 @@
 import sounddevice as sd
 
+
 def find_microphone_device() -> int:
     """
     Find the index of the microphone device to use.
@@ -15,7 +16,7 @@ def find_microphone_device() -> int:
     return sd.default.device[0]
 
 
-def get_microphone_configuration(config: dict)->tuple[int, int, int, int]:
+def get_microphone_configuration(config: dict):#->tuple[int, int, int, int]:
     """
     Get the configuration of the microphone from the config.json file.
     return: a tuple with the device index, the samplerate, the channels and the blocksize
