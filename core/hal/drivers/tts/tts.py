@@ -19,19 +19,17 @@ class Driver(BaseDriver):
         super().pre_run()
         # load tts model
         self.tts = TTS("tts_models/en/ljspeech/tacotron2-DDC").to("cuda")
-        # create a list of path with all the speaker wav
-        self.speaker_wav = [file for file in os.listdir(os.path.join("core", "hal", "drivers", "tts", "speakers"))]
 
         self.create_callback("run", self.generate_audio)
 
     def generate_audio(self, data):
         """
         Generate audio from text with a speaker id
-        entry: dict["prompt": str, "speaker_idx": int]
+        entry: dict["prompt": str, "speaker" str]
         return audio: np.array
         """
         audio = self.tts.tts_with_vc(
                     data["prompt"],
-                    speaker_wav= os.path.join("core", "hal", "drivers", "tts", "speakers",self.speaker_wav[data["speaker_idx"]])
+                    speaker_wav= os.path.join("core", "hal", "drivers", "tts", "speakers",data["speaker"])
                 )
         self.set_event_data("generate_audio", audio)
