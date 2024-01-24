@@ -19,6 +19,7 @@ class Driver(BaseDriver):
         super().pre_run()
         # load tts model
         self.tts = TTS("tts_models/en/ljspeech/tacotron2-DDC").to("cuda")
+        self.vc = TTS("voice_conversion_models/multilingual/vctk/freevc24").to("cuda")
 
         self.create_callback("run", self.generate_audio)
 
