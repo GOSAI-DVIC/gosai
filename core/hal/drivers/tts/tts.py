@@ -18,8 +18,8 @@ class Driver(BaseDriver):
         # runs to do at the start of the driver
         super().pre_run()
         # load tts model
-        self.tts = TTS("tts_models/en/ljspeech/tacotron2-DDC").to("cuda")
-        self.vc = TTS("voice_conversion_models/multilingual/vctk/freevc24").to("cuda")
+        self.tts = TTS("tts_models/en/ljspeech/fast_pitch").to("cuda")
+        # self.vc = TTS("voice_conversion_models/multilingual/vctk/freevc24").to("cuda")
 
         self.create_callback("run", self.generate_audio)
 
@@ -29,7 +29,7 @@ class Driver(BaseDriver):
         entry: dict["prompt": str, "speaker" str]
         return audio: np.array
         """
-        audio = self.tts.tts_with_vc(
+        audio = self.tts.tts(
                     data["prompt"],
                     speaker_wav= os.path.join("core", "hal", "drivers", "tts", "speakers",data["speaker"])
                 )

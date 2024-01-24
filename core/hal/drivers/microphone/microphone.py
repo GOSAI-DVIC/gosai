@@ -1,5 +1,6 @@
 import numpy  # Make sure NumPy is loaded before it is used in the callback
 import sounddevice as sd
+import time as tm 
 
 from core.hal.drivers.driver import BaseDriver
 from core.hal.drivers.microphone.utils.microphone_finder import get_microphone_configuration
@@ -17,11 +18,13 @@ class Driver(BaseDriver):
         # runs to do at the start of the driver
         DEVICE, SAMPLERATE, CHANNELS, BLOCKSIZE = get_microphone_configuration(self.parent.config)
         def callback(indata, frames, time, status) -> None:
+            
             self.set_event_data(
                 "audio_stream",
                 {
                     "block": indata[:],
                     "samplerate": SAMPLERATE,
+                    "timestamp": tm.time(),
                 },
             )
         stream = sd.InputStream(
